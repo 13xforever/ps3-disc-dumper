@@ -8,4 +8,8 @@
     <PackageReference Include="EndianBitConverter" Version="1.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\IrdLibraryClient\IrdLibraryClient.csproj" />
+  </ItemGroup>
+
 </Project>

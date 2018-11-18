@@ -10,12 +10,12 @@ namespace Ps3DiscDumper
         public short VersionMajor;
         public short VersionMinor;
         public byte[] Unknown1; // 0x18
-        public List<SfbKeyEntry> KeyEntries;
+        public List<SfbKeyEntry> KeyEntries = new List<SfbKeyEntry>();
     }
 
     public class SfbKeyEntry
     {
-        public string Key; // 0xf
+        public string Key; // 0x10
         public int ValueOffset;
         public int ValueLength;
         public long Unknown;

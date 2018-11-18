@@ -29,7 +29,7 @@ namespace Ps3DiscDumper
                 do
                 {
                     var keyEntry = new SfbKeyEntry();
-                    keyEntry.Key = Encoding.ASCII.GetString(reader.ReadBytes(0xf)).TrimEnd('\0');
+                    keyEntry.Key = Encoding.ASCII.GetString(reader.ReadBytes(0x10)).TrimEnd('\0');
                     if (string.IsNullOrEmpty(keyEntry.Key))
                         break;
 
