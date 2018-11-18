@@ -55,8 +55,9 @@ namespace Ps3DiscDumper
             ApiConfig.Log.Debug($"App version: {appVer}");
             ApiConfig.Log.Debug($"Update version: {updateVer}");
             var outputDir = new string($"[{titleIdSfo}] {title}".ToCharArray().Where(c => !InvalidChars.Contains(c)).ToArray());
-            ApiConfig.Log.Info(outputDir);
-            if (!StringComparer.InvariantCultureIgnoreCase.Equals(titleId, titleIdSfo))
+            ApiConfig.Log.Debug($"Output: {outputDir}");
+            ApiConfig.Log.Info($"Game title: {title}");
+            if (titleId != titleIdSfo)
                 ApiConfig.Log.Warn($"Product codes in ps3_disc.sfb ({titleId}) and in param.sfo ({titleIdSfo}) do not match");
 
             var irdInfoList = await Client.SearchAsync(titleIdSfo, cancellationToken).ConfigureAwait(false);
@@ -82,6 +83,8 @@ namespace Ps3DiscDumper
                 ApiConfig.Log.Error("No valid matching IRD file could be loaded");
                 return;
             }
+
+            ApiConfig.Log.Info($"Matching IRD: {irdList[0].Filename}");
 
             output = Path.Combine(output, outputDir);
             //if (!Directory.Exists(output))
