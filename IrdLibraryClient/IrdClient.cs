@@ -100,96 +100,43 @@ namespace IrdLibraryClient
             }
         }
 
-        public async Task<List<Ird>> DownloadAsync(string productCode, string localCachePath, CancellationToken cancellationToken)
+        public async Task<Ird> DownloadAsync(SearchResultItem irdInfo, string localCachePath, CancellationToken cancellationToken)
         {
-            var result = new List<Ird>();
+            Ird result = null;
             try
             {
+                var localCacheFilename = Path.Combine(localCachePath, irdInfo.Filename);
                 // first we search local cache and try to load whatever data we can
-                var localCacheItems = new List<string>();
                 try
                 {
-                    var tmpCacheItemList = Directory.GetFiles(localCachePath, productCode + "*.ird", SearchOption.TopDirectoryOnly).Select(Path.GetFileName).ToList();
-                    foreach (var item in tmpCacheItemList)
-                    {
-                        try
-                        {
-                            result.Add(IrdParser.Parse(File.ReadAllBytes(Path.Combine(localCachePath, item))));
-                            localCacheItems.Add(item);
-                        }
-                        catch (Exception ex)
-                        {
-                            ApiConfig.Log.Warn(ex, "Error reading local IRD file: " + ex.Message);
-                        }
-                    }
+                    if (File.Exists(localCacheFilename))
+                        return IrdParser.Parse(File.ReadAllBytes(localCacheFilename));
                 }
                 catch (Exception e)
                 {
                     ApiConfig.Log.Warn(e, "Error accessing local IRD cache: " + e.Message);
                 }
-                ApiConfig.Log.Debug($"Found {localCacheItems.Count} cached items for {productCode}");
-                SearchResult searchResult = null;
+                // download the remaining .ird files
 
-                // then try to do IRD Library search
                 try
                 {
-                    searchResult = await SearchAsync(productCode, cancellationToken).ConfigureAwait(false);
-                }
-                catch (Exception e)
-                {
-                    ApiConfig.Log.Error(e);
-                }
-                var tmpFilesToGet = searchResult?.Data.Select(i => i.Filename).Except(localCacheItems, StringComparer.InvariantCultureIgnoreCase).ToList();
-                if ((tmpFilesToGet?.Count ?? 0) == 0)
-                    return result;
-
-                // as IRD Library could return more data than we found, try to check for all the items locally
-                var filesToDownload = new List<string>();
-                foreach (var item in tmpFilesToGet)
-                {
+                    var resultBytes = await client.GetByteArrayAsync(GetDownloadLink(irdInfo.Filename)).ConfigureAwait(false);
+                    result = IrdParser.Parse(resultBytes);
                     try
                     {
-                        var localItemPath = Path.Combine(localCachePath, item);
-                        if (File.Exists(localItemPath))
-                        {
-                            result.Add(IrdParser.Parse(File.ReadAllBytes(localItemPath)));
-                            localCacheItems.Add(item);
-                        }
-                        else
-                            filesToDownload.Add(item);
+                        if (!Directory.Exists(localCachePath))
+                            Directory.CreateDirectory(localCachePath);
+                        File.WriteAllBytes(localCacheFilename, resultBytes);
                     }
                     catch (Exception ex)
                     {
-                        ApiConfig.Log.Warn(ex, "Error reading local IRD file: " + ex.Message);
-                        filesToDownload.Add(item);
+                        ApiConfig.Log.Warn(ex, $"Failed to write {irdInfo.Filename} to local cache: {ex.Message}");
                     }
                 }
-                ApiConfig.Log.Debug($"Found {tmpFilesToGet.Count} total matches for {productCode}, {result.Count} already cached");
-                if (filesToDownload.Count == 0)
-                    return result;
-
-                // download the remaining .ird files
-                foreach (var item in filesToDownload)
+                catch (Exception e)
                 {
-                        try
-                        {
-                            var resultBytes = await client.GetByteArrayAsync(GetDownloadLink(item)).ConfigureAwait(false);
-                            result.Add(IrdParser.Parse(resultBytes));
-                            try
-                            {
-                                File.WriteAllBytes(Path.Combine(localCachePath, item), resultBytes);
-                            }
-                            catch (Exception ex)
-                            {
-                                ApiConfig.Log.Warn(ex, $"Failed to write {item} to local cache: {ex.Message}");
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            ApiConfig.Log.Warn(e, $"Failed to download {item}: {e.Message}");
-                        }
+                    ApiConfig.Log.Warn(e, $"Failed to download {irdInfo.Filename}: {e.Message}");
                 }
-                ApiConfig.Log.Debug($"Returning {result.Count} .ird files for {productCode}");
                 return result;
             }
             catch (Exception e)

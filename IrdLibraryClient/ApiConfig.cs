@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using System.Threading;
+using NLog;
 using NLog.Targets;
 using NLog.Targets.Wrappers;
 
@@ -6,6 +7,9 @@ namespace IrdLibraryClient
 {
     public static class ApiConfig
     {
+        public static readonly CancellationTokenSource Cts = new CancellationTokenSource();
+        public static readonly string IrdCachePath = "./ird/";
+
         public static readonly ILogger Log;
 
         static ApiConfig()

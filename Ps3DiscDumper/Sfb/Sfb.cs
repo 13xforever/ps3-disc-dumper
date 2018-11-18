@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Text;
-using static BitConverter.EndianBitConverter;
+using BitConverter;
 
-namespace Ps3DiscDumper
+namespace Ps3DiscDumper.Sfb
 {
     public class Sfb
     {
-        public static int Magic = BigEndian.ToInt32(Encoding.ASCII.GetBytes(".SFB"), 0);
+        public static int Magic = EndianBitConverter.BigEndian.ToInt32(Encoding.ASCII.GetBytes(".SFB"), 0);
         public short VersionMajor;
         public short VersionMinor;
         public byte[] Unknown1; // 0x18

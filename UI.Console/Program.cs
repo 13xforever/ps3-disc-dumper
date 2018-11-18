@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Threading.Tasks;
+using IrdLibraryClient;
 using Ps3DiscDumper;
 
 namespace UIConsole
 {
     internal static class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.Title = "PS3 Disc Dumper";
             if (args.Length != 2)
@@ -14,7 +16,7 @@ namespace UIConsole
                 return;
             }
 
-            new Dumper().Dump(args[0], args[1]);
+            await new Dumper().DumpAsync(args[0], args[1], ApiConfig.Cts.Token);
         }
     }
 }
