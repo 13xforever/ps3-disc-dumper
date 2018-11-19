@@ -91,6 +91,20 @@ namespace IrdLibraryClient.IrdFormat
                 return decompressedStream.ToArray();
             }
         }
+
+        public static long GetTotalSectors(this Ird ird)
+        {
+            using (var decompressedStream = new MemoryStream())
+            {
+                using (var compressedStream = new MemoryStream(ird.Header, false))
+                using (var gzip = new GZipStream(compressedStream, CompressionMode.Decompress))
+                    gzip.CopyTo(decompressedStream);
+
+                decompressedStream.Seek(0, SeekOrigin.Begin);
+                var reader = new CDReader(decompressedStream, true, true);
+                return reader.TotalClusters;
+            }
+        }
     }
 
     public class FileRecord

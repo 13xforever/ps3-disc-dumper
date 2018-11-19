@@ -21,12 +21,28 @@ namespace Ps3DiscDumper
         private readonly string output;
         private string input;
         private readonly CancellationToken cancellationToken;
+        private long currentSector;
 
         public string ProductCode { get; private set; }
         public string Title { get; private set; }
         public string OutputDir { get; private set; }
-        public SearchResultItem IrdInfo { get; private set; }
-        public Ird Ird { get; private set; }
+        private SearchResultItem IrdInfo { get; set; }
+        private Ird Ird { get; set; }
+        private Decrypter Decrypter { get; set; }
+        public int TotalFileCount { get; private set; }
+        public int CurrentFileNumber { get; private set; }
+        public long TotalSectors { get; private set; }
+
+        public long CurrentSector
+        {
+            get
+            {
+                var tmp = Decrypter?.SectorPosition;
+                if (tmp == null)
+                    return currentSector;
+                return currentSector = tmp.Value;
+            }
+        }
 
         public Dumper(string output, CancellationToken cancellationToken)
         {
@@ -160,6 +176,8 @@ namespace Ps3DiscDumper
             if (!Directory.Exists(outputPathBase))
                 Directory.CreateDirectory(outputPathBase);
 
+            TotalFileCount = fileInfo.Count;
+            TotalSectors = Ird.GetTotalSectors();
             var decryptionKey = Decrypter.GetDecryptionKey(Ird);
             var sectorSize = Ird.GetSectorSize();
             var unprotectedRegions = Ird.GetUnprotectedRegions();
@@ -169,7 +187,8 @@ namespace Ps3DiscDumper
             var brokenFiles = new List<(string filename, string error)>();
             foreach (var file in fileInfo)
             {
-                ApiConfig.Log.Debug($"Extracting {file.Filename}");
+                ApiConfig.Log.Info($"Extracting {file.Filename}");
+                CurrentFileNumber++;
                 var inputFilename = Path.Combine(input, file.Filename);
                 if (!File.Exists(inputFilename))
                 {
@@ -192,20 +211,20 @@ namespace Ps3DiscDumper
                     {
                         using (var outputStream = File.Open(outputFilename, FileMode.Create, FileAccess.Write, FileShare.Read))
                         using (var inputStream = File.Open(inputFilename, FileMode.Open, FileAccess.Read, FileShare.Read))
-                        using (var decrypter = new Decrypter(inputStream, physicalDevice, decryptionKey, file.StartSector, sectorSize, unprotectedRegions))
+                        using (Decrypter = new Decrypter(inputStream, physicalDevice, decryptionKey, file.StartSector, sectorSize, unprotectedRegions))
                         {
-                            decrypter.CopyTo(outputStream);
+                            Decrypter.CopyTo(outputStream);
                             outputStream.Flush();
-                            resultMd5 = decrypter.GetMd5().ToHexString();
-                            if (decrypter.WasEncrypted && decrypter.WasUnprotected)
+                            resultMd5 = Decrypter.GetMd5().ToHexString();
+                            if (Decrypter.WasEncrypted && Decrypter.WasUnprotected)
                                 ApiConfig.Log.Debug("Partially decrypted");
-                            else if (decrypter.WasEncrypted)
+                            else if (Decrypter.WasEncrypted)
                                 ApiConfig.Log.Debug("Decrypted");
                             if (expectedMd5 != resultMd5)
                             {
                                 error = true;
                                 var msg = $"Expected {expectedMd5}, but was {resultMd5}";
-                                if (lastMd5 == resultMd5 || decrypter.LastBlockCorrupted)
+                                if (lastMd5 == resultMd5 || Decrypter.LastBlockCorrupted)
                                 {
                                     ApiConfig.Log.Error(msg);
                                     brokenFiles.Add((file.Filename, "corrupted"));

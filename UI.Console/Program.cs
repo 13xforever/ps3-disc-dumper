@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using IrdLibraryClient;
 using Ps3DiscDumper;
@@ -9,7 +10,8 @@ namespace UIConsole
     {
         static async Task Main(string[] args)
         {
-            Console.Title = "PS3 Disc Dumper";
+            var title = "PS3 Disc Dumper";
+            Console.Title = title;
             if (args.Length > 1)
             {
                 Console.WriteLine("Expected one arguments: output folder");
@@ -25,7 +27,22 @@ namespace UIConsole
                 return;
             }
 
+            var monitor = new Thread(() =>
+                                     {
+                                         do
+                                         {
+                                             if (dumper.CurrentSector > 0)
+                                                 Console.Title = $"{title} - File {dumper.CurrentFileNumber} of {dumper.TotalFileCount} - {dumper.CurrentSector * 100.0 / dumper.TotalSectors:0.00}%";
+                                             Task.Delay(1000, ApiConfig.Cts.Token).GetAwaiter().GetResult();
+                                         } while (!ApiConfig.Cts.Token.IsCancellationRequested);
+                                         Console.Title = title;
+                                     });
+            monitor.Start();
+
             await dumper.DumpAsync().ConfigureAwait(false);
+
+            ApiConfig.Cts.Cancel(false);
+            monitor.Join(100);
         }
     }
 }
