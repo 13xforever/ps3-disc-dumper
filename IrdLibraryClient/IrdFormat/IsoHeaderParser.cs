@@ -49,7 +49,7 @@ namespace IrdLibraryClient.IrdFormat
             }
         }
 
-        public static List<(int start, int end)> GetEncryptedRegions(this Ird ird)
+        public static List<(int start, int end)> GetUnprotectedRegions(this Ird ird)
         {
             var result = new List<(int start, int end)>();
             using (var decompressedStream = new MemoryStream())
@@ -63,7 +63,7 @@ namespace IrdLibraryClient.IrdFormat
                 var regionCount = reader.ReadInt32();
                 ApiConfig.Log.Trace($"Found {regionCount} encrypted regions");
 
-                var unk = reader.ReadUInt64(); // 0?
+                var unk = reader.ReadUInt32(); // 0?
                 if (unk != 0)
                     ApiConfig.Log.Debug($"Unk in sector description was {unk:x16}");
 
@@ -71,6 +71,7 @@ namespace IrdLibraryClient.IrdFormat
                 {
                     var start = reader.ReadInt32();
                     var end = reader.ReadInt32();
+                    ApiConfig.Log.Trace($"Unprotected region: {start:x8}-{end:x8}");
                     result.Add((start, end));
                 }
             }

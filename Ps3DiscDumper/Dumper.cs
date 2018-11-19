@@ -17,7 +17,7 @@ namespace Ps3DiscDumper
     {
         private static readonly IrdClient Client = new IrdClient();
         private static readonly HashSet<char> InvalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
-        private string input, output;
+        private readonly string input, output;
         private readonly CancellationToken cancellationToken;
 
         public string ProductCode { get; private set; }
@@ -117,7 +117,7 @@ namespace Ps3DiscDumper
 
             var decryptionKey = Decrypter.GetDecryptionKey(Ird);
             var sectorSize = Ird.GetSectorSize();
-            var encryptedRegions = Ird.GetEncryptedRegions();
+            var unprotectedRegions = Ird.GetUnprotectedRegions();
             var brokenFiles = new List<(string filename, string error)>();
             foreach (var file in fileInfo)
             {
@@ -144,7 +144,7 @@ namespace Ps3DiscDumper
                     {
                         using (var outputStream = File.Open(outputFilename, FileMode.Create, FileAccess.Write, FileShare.Read))
                         using (var inputStream = File.Open(inputFilename, FileMode.Open, FileAccess.Read, FileShare.Read))
-                        using (var decrypter = new Decrypter(inputStream, decryptionKey, file.StartSector, sectorSize, encryptedRegions))
+                        using (var decrypter = new Decrypter(inputStream, decryptionKey, file.StartSector, sectorSize, unprotectedRegions))
                         {
                             decrypter.CopyTo(outputStream);
                             outputStream.Flush();

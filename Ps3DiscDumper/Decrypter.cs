@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using IrdLibraryClient;
 using IrdLibraryClient.IrdFormat;
 using Ps3DiscDumper.Utils;
 
@@ -19,7 +20,7 @@ namespace Ps3DiscDumper
         private readonly MD5 md5;
         private readonly Aes aes;
         private byte[] bufferedSector, tmpSector, hash = null;
-        private readonly List<(int start, int end)> encryptedSectorRanges;
+        private readonly List<(int start, int end)> unprotectedSectorRanges;
 
         public static byte[] GetDecryptionKey(Ird ird)
         {
@@ -44,7 +45,7 @@ namespace Ps3DiscDumper
             return result;
         }
 
-        public Decrypter(Stream input, byte[] decryptionKey, long startSector, int sectorSize, List<(int start, int end)> encryptedSectorRanges)
+        public Decrypter(Stream input, byte[] decryptionKey, long startSector, int sectorSize, List<(int start, int end)> unprotectedSectorRanges)
         {
             if (input == null)
                 throw new ArgumentNullException(nameof(input));
@@ -70,7 +71,7 @@ namespace Ps3DiscDumper
             this.sectorSize = sectorSize;
             bufferedSector = new byte[sectorSize];
             tmpSector = new byte[sectorSize];
-            this.encryptedSectorRanges = encryptedSectorRanges;
+            this.unprotectedSectorRanges = unprotectedSectorRanges;
             SectorPosition = startSector;
         }
 
@@ -102,7 +103,7 @@ namespace Ps3DiscDumper
                 if (readCount < sectorSize)
                     Array.Clear(tmpSector, readCount, sectorSize - readCount);
                 var decryptedSector = tmpSector;
-                if (IsSectorEncrypted(SectorPosition))
+                if (IsEncrypted(SectorPosition))
                     using (var aesTransform = aes.CreateDecryptor(decryptionKey, GetSectorIV(SectorPosition)))
                         decryptedSector = aesTransform.TransformFinalBlock(tmpSector, 0, sectorSize);
                 if (count >= readCount)
@@ -137,7 +138,12 @@ namespace Ps3DiscDumper
             return hash;
         }
 
-        private bool IsSectorEncrypted(long sector) => encryptedSectorRanges.Any(r => r.start <= sector && sector <= r.end);
+        private bool IsEncrypted(long sector)
+        {
+            var result = !unprotectedSectorRanges.Any(r => r.start <= sector && sector <= r.end);
+            ApiConfig.Log.Trace($"{sector:x8}: {(result ? "encrypted" : "")}");
+            return result;
+        }
 
         void IDisposable.Dispose() { md5?.Dispose(); }
 

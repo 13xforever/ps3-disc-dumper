@@ -24,7 +24,7 @@ namespace IrdLibraryClient
             var config = new NLog.Config.LoggingConfiguration();
             var fileTarget = new FileTarget("logfile")
             {
-                FileName = "../../../logs/bot.log",
+                FileName = "../../../logs/disc_dump.log",
                 ArchiveEvery = FileArchivePeriod.Day,
                 ArchiveNumbering = ArchiveNumberingMode.DateAndSequence,
                 KeepFileOpen = true,
@@ -46,11 +46,11 @@ namespace IrdLibraryClient
             consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression($"level == LogLevel.{nameof(Log.Error)}"), ConsoleOutputColor.Red, ConsoleOutputColor.NoChange));
             consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression($"level == LogLevel.{nameof(Log.Fatal)}"), ConsoleOutputColor.White, ConsoleOutputColor.Red));
 #if DEBUG
-            config.AddRule(LogLevel.Trace, LogLevel.Fatal, consoleTarget, "default"); // only echo messages from default logger to the console
+            config.AddRule(LogLevel.Debug, LogLevel.Fatal, consoleTarget, "default"); // only echo messages from default logger to the console
 #else
             config.AddRule(LogLevel.Info, LogLevel.Fatal, consoleTarget, "default");
 #endif
-            config.AddRule(LogLevel.Debug, LogLevel.Fatal, asyncFileTarget);
+            config.AddRule(LogLevel.Trace, LogLevel.Fatal, asyncFileTarget);
             LogManager.Configuration = config;
             return LogManager.GetLogger("default");
         }
