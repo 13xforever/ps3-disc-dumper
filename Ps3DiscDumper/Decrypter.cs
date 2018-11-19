@@ -104,8 +104,13 @@ namespace Ps3DiscDumper
                     Array.Clear(tmpSector, readCount, sectorSize - readCount);
                 var decryptedSector = tmpSector;
                 if (IsEncrypted(SectorPosition))
+                {
+                    WasEncrypted = true;
                     using (var aesTransform = aes.CreateDecryptor(decryptionKey, GetSectorIV(SectorPosition)))
                         decryptedSector = aesTransform.TransformFinalBlock(tmpSector, 0, sectorSize);
+                }
+                else
+                    WasUnprotected = true;
                 if (count >= readCount)
                 {
                     md5.TransformBlock(decryptedSector, 0, readCount, buffer, offset);
@@ -141,7 +146,8 @@ namespace Ps3DiscDumper
         private bool IsEncrypted(long sector)
         {
             var result = !unprotectedSectorRanges.Any(r => r.start <= sector && sector <= r.end);
-            ApiConfig.Log.Trace($"{sector:x8}: {(result ? "encrypted" : "")}");
+            if (TraceSectors)
+                ApiConfig.Log.Trace($"{sector:x8}: {(result ? "e" : "")}");
             return result;
         }
 
@@ -158,5 +164,8 @@ namespace Ps3DiscDumper
         public override long Length => inputStream.Length;
         public override long Position { get; set; }
         public long SectorPosition { get; private set; }
+        public bool WasEncrypted { get; private set; }
+        public bool WasUnprotected { get; private set; }
+        public bool TraceSectors { get; set; }
     }
 }

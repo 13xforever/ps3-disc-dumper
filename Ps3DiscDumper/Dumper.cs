@@ -149,6 +149,10 @@ namespace Ps3DiscDumper
                             decrypter.CopyTo(outputStream);
                             outputStream.Flush();
                             resultMd5 = decrypter.GetMd5().ToHexString();
+                            if (decrypter.WasEncrypted && decrypter.WasUnprotected)
+                                ApiConfig.Log.Debug("Partially decrypted");
+                            else if (decrypter.WasEncrypted)
+                                ApiConfig.Log.Debug("Decrypted");
                             if (expectedMd5 != resultMd5)
                             {
                                 error = true;
