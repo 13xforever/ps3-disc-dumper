@@ -15,6 +15,7 @@ namespace Ps3DiscDumper
         private static readonly byte[] IV = "69474772af6fdab342743aefaa186287".ToByteArray();
 
         private Stream inputStream;
+        private readonly string physicalDevice;
         private byte[] decryptionKey;
         private readonly int sectorSize;
         private readonly MD5 md5;
@@ -45,7 +46,7 @@ namespace Ps3DiscDumper
             return result;
         }
 
-        public Decrypter(Stream input, byte[] decryptionKey, long startSector, int sectorSize, List<(int start, int end)> unprotectedSectorRanges)
+        public Decrypter(Stream input, string physicalDevice, byte[] decryptionKey, long startSector, int sectorSize, List<(int start, int end)> unprotectedSectorRanges)
         {
             if (input == null)
                 throw new ArgumentNullException(nameof(input));
@@ -59,10 +60,14 @@ namespace Ps3DiscDumper
             if (!input.CanRead)
                 throw new ArgumentException("Input stream should be readable", nameof(input));
 
+            if (string.IsNullOrEmpty(physicalDevice))
+                throw new ArgumentException("Physical device is needed for proper decryption");
+
             if (sectorSize == 0)
                 throw new ArgumentException("Sector size cannot be 0", nameof(sectorSize));
 
             inputStream = input;
+            this.physicalDevice = physicalDevice;
             this.decryptionKey = decryptionKey;
             md5 = MD5.Create();
             aes = Aes.Create();
@@ -108,8 +113,16 @@ namespace Ps3DiscDumper
                     WasEncrypted = true;
                     if (readCount % 16 != 0)
                     {
-                        ApiConfig.Log.Error($"Block has only {(readCount % 16) * 8} bits of data");
-                        LastBlockCorrupted = true;
+                        ApiConfig.Log.Debug($"Block has only {(readCount % 16) * 8} bits of data, reading raw sector...");
+                        using (var deviceStream = File.Open(physicalDevice, FileMode.Open, FileAccess.Read, FileShare.Read))
+                        {
+                            deviceStream.Seek(SectorPosition * sectorSize, SeekOrigin.Begin);
+                            var newTmpSector = new byte[sectorSize];
+                            deviceStream.ReadExact(newTmpSector, 0, sectorSize);
+                            if (!newTmpSector.Take(readCount).SequenceEqual(tmpSector.Take(readCount)))
+                                ApiConfig.Log.Warn($"Filesystem data and raw data do not match for sector 0x{SectorPosition:x8}");
+                            tmpSector = newTmpSector;
+                        }
                     }
                     using (var aesTransform = aes.CreateDecryptor(decryptionKey, GetSectorIV(SectorPosition)))
                         decryptedSector = aesTransform.TransformFinalBlock(tmpSector, 0, sectorSize);

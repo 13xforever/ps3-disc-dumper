@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Management;
 using System.Threading;
 using System.Threading.Tasks;
 using IrdLibraryClient;
@@ -17,7 +18,8 @@ namespace Ps3DiscDumper
     {
         private static readonly IrdClient Client = new IrdClient();
         private static readonly HashSet<char> InvalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
-        private readonly string input, output;
+        private readonly string output;
+        private string input;
         private readonly CancellationToken cancellationToken;
 
         public string ProductCode { get; private set; }
@@ -26,22 +28,65 @@ namespace Ps3DiscDumper
         public SearchResultItem IrdInfo { get; private set; }
         public Ird Ird { get; private set; }
 
-        public Dumper(string input, string output, CancellationToken cancellationToken)
+        public Dumper(string output, CancellationToken cancellationToken)
         {
-            this.input = input;
             this.output = output;
             this.cancellationToken = cancellationToken;
         }
 
+        private string GetMatchingPhysicalDevice(byte[] firstSector)
+        {
+            var physicalDrives = new List<string>();
+            using (var mgmtObjSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMedia"))
+            {
+                var drives = mgmtObjSearcher.Get();
+                foreach (var drive in drives)
+                {
+                    var tag = drive.Properties["Tag"].Value as string;
+                    if (tag?.StartsWith(@"\\.\CDROM") ?? false)
+                        physicalDrives.Add(tag);
+                }
+            }
+            if (physicalDrives.Count == 0)
+                throw new InvalidOperationException("No optical drives were found");
+
+            foreach (var drive in physicalDrives)
+            {
+                try
+                {
+                    using (var discStream = File.Open(drive, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (var reader = new BinaryReader(discStream))
+                    {
+                        var bytes = reader.ReadBytes(firstSector.Length);
+                        if (bytes.SequenceEqual(firstSector))
+                            return drive;
+                    }
+                }
+                catch (Exception e)
+                {
+                    ApiConfig.Log.Debug(e, e.Message);
+                }
+            }
+            throw new InvalidOperationException("No matching physical device was found");
+        }
+
         public async Task DetectDiscAsync()
         {
-            if (!Directory.Exists(input))
-                throw new ArgumentException($"Directory not found: {input}", nameof(input));
+            var drives = DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.CDRom && d.IsReady);
 
-            var discSfbPath = Path.Combine(input, "PS3_DISC.SFB");
-            if (!File.Exists(discSfbPath))
-                throw new InvalidOperationException($"Specified folder is not a PS3 disc root (ps3_disc.sfb is missing): {input}");
+            string discSfbPath = null;
+            foreach (var drive in drives)
+            {
+                discSfbPath = Path.Combine(drive.Name, "PS3_DISC.SFB");
+                if (!File.Exists(discSfbPath))
+                    continue;
 
+                input = drive.Name;
+            }
+            if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(discSfbPath))
+                throw new InvalidOperationException("No valid PS3 disc was detected");
+
+            ApiConfig.Log.Info("Selected disc " + input);
             var discSfbData = File.ReadAllBytes(discSfbPath);
             var sfb = SfbReader.Parse(discSfbData);
 
@@ -118,6 +163,9 @@ namespace Ps3DiscDumper
             var decryptionKey = Decrypter.GetDecryptionKey(Ird);
             var sectorSize = Ird.GetSectorSize();
             var unprotectedRegions = Ird.GetUnprotectedRegions();
+            var firstSector = Ird.GetFirstSector(sectorSize);
+            var physicalDevice = GetMatchingPhysicalDevice(firstSector);
+
             var brokenFiles = new List<(string filename, string error)>();
             foreach (var file in fileInfo)
             {
@@ -144,7 +192,7 @@ namespace Ps3DiscDumper
                     {
                         using (var outputStream = File.Open(outputFilename, FileMode.Create, FileAccess.Write, FileShare.Read))
                         using (var inputStream = File.Open(inputFilename, FileMode.Open, FileAccess.Read, FileShare.Read))
-                        using (var decrypter = new Decrypter(inputStream, decryptionKey, file.StartSector, sectorSize, unprotectedRegions))
+                        using (var decrypter = new Decrypter(inputStream, physicalDevice, decryptionKey, file.StartSector, sectorSize, unprotectedRegions))
                         {
                             decrypter.CopyTo(outputStream);
                             outputStream.Flush();

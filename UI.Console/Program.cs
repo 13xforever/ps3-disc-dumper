@@ -10,18 +10,21 @@ namespace UIConsole
         static async Task Main(string[] args)
         {
             Console.Title = "PS3 Disc Dumper";
-            if (args.Length != 2)
+            if (args.Length > 1)
             {
-                Console.WriteLine("Expected two arguments: input and output folders");
+                Console.WriteLine("Expected one arguments: output folder");
                 return;
             }
 
-            var dumper = new Dumper(args[0], args[1], ApiConfig.Cts.Token);
+            var output = args.Length == 1 ? args[0] : @".\";
+            var dumper = new Dumper(output, ApiConfig.Cts.Token);
             await dumper.DetectDiscAsync().ConfigureAwait(false);
-            if (!string.IsNullOrEmpty(dumper.OutputDir))
+            if (string.IsNullOrEmpty(dumper.OutputDir))
             {
-                ApiConfig.Log.Info("Dumping disc from " + args[0]);
+                ApiConfig.Log.Info("No compatible disc was found, exiting");
+                return;
             }
+
             await dumper.DumpAsync().ConfigureAwait(false);
         }
     }
