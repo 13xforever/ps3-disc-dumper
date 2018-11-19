@@ -29,6 +29,7 @@ namespace UIConsole
                     return;
                 }
 
+                title += " - " + dumper.Title;
                 var monitor = new Thread(() =>
                                          {
                                              try

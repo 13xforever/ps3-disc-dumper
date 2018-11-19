@@ -32,6 +32,7 @@ namespace IrdLibraryClient
                 ConcurrentWrites = false,
                 AutoFlush = false,
                 OpenFileFlushTimeout = 1,
+                Layout = "${longdate} ${sequenceid} ${level:uppercase=true} ${message}",
             };
             var asyncFileTarget = new AsyncTargetWrapper(fileTarget)
             {
@@ -47,6 +48,7 @@ namespace IrdLibraryClient
             consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression($"level == LogLevel.{nameof(Log.Error)}"), ConsoleOutputColor.Red, ConsoleOutputColor.NoChange));
             consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression($"level == LogLevel.{nameof(Log.Fatal)}"), ConsoleOutputColor.White, ConsoleOutputColor.Red));
             consoleTarget.Encoding = new UTF8Encoding(false);
+            consoleTarget.Layout = "${time} ${message}";
 #if DEBUG
             config.AddRule(LogLevel.Debug, LogLevel.Fatal, consoleTarget, "default"); // only echo messages from default logger to the console
 #else

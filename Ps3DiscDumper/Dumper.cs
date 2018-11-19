@@ -18,6 +18,7 @@ namespace Ps3DiscDumper
     {
         private static readonly IrdClient Client = new IrdClient();
         private static readonly HashSet<char> InvalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
+        private static readonly char[] MultilineSplit = {'\r', '\n'};
         private readonly string output;
         private string input;
         private readonly CancellationToken cancellationToken;
@@ -128,6 +129,9 @@ namespace Ps3DiscDumper
             var gameVer = sfo.Items.FirstOrDefault(i => i.Key == "VERSION")?.StringValue?.Substring(0, 5).Trim();
             var appVer = sfo.Items.FirstOrDefault(i => i.Key == "APP_VER")?.StringValue?.Substring(0, 5).Trim();
             Title = sfo.Items.FirstOrDefault(i => i.Key == "TITLE")?.StringValue?.Trim(' ', '\0');
+            var titleParts = Title.Split(MultilineSplit, StringSplitOptions.RemoveEmptyEntries);
+            if (titleParts.Length > 1)
+                Title = string.Join(" ", titleParts);
             ProductCode = sfo.Items.FirstOrDefault(i => i.Key == "TITLE_ID")?.StringValue?.Trim(' ', '\0');
 
             ApiConfig.Log.Debug($"Game version: {gameVer}");
@@ -187,7 +191,7 @@ namespace Ps3DiscDumper
 
             foreach (var file in fileInfo)
             {
-                ApiConfig.Log.Info($"Extracting {file.Filename}");
+                ApiConfig.Log.Info($"Reading {file.Filename} ({file.Length.AsStorageUnit()})");
                 CurrentFileNumber++;
                 var inputFilename = Path.Combine(input, file.Filename);
                 if (!File.Exists(inputFilename))
