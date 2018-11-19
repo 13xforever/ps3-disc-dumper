@@ -157,7 +157,7 @@ namespace Ps3DiscDumper
                             {
                                 error = true;
                                 var msg = $"Expected {expectedMd5}, but was {resultMd5}";
-                                if (lastMd5 == resultMd5)
+                                if (lastMd5 == resultMd5 || decrypter.LastBlockCorrupted)
                                 {
                                     ApiConfig.Log.Error(msg);
                                     brokenFiles.Add((file.Filename, "corrupted"));

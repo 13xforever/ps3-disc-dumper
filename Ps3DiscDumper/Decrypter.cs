@@ -106,6 +106,11 @@ namespace Ps3DiscDumper
                 if (IsEncrypted(SectorPosition))
                 {
                     WasEncrypted = true;
+                    if (readCount % 16 != 0)
+                    {
+                        ApiConfig.Log.Error($"Block has only {(readCount % 16) * 8} bits of data");
+                        LastBlockCorrupted = true;
+                    }
                     using (var aesTransform = aes.CreateDecryptor(decryptionKey, GetSectorIV(SectorPosition)))
                         decryptedSector = aesTransform.TransformFinalBlock(tmpSector, 0, sectorSize);
                 }
@@ -166,6 +171,7 @@ namespace Ps3DiscDumper
         public long SectorPosition { get; private set; }
         public bool WasEncrypted { get; private set; }
         public bool WasUnprotected { get; private set; }
+        public bool LastBlockCorrupted { get; private set; }
         public bool TraceSectors { get; set; }
     }
 }
