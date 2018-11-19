@@ -1,0 +1,156 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using IrdLibraryClient.IrdFormat;
+using Ps3DiscDumper.Utils;
+
+namespace Ps3DiscDumper
+{
+    public class Decrypter : Stream, IDisposable
+    {
+        private static readonly byte[] Secret = "380bcf0b53455b3c7817ab4fa3ba90ed".ToByteArray();
+        private static readonly byte[] IV = "69474772af6fdab342743aefaa186287".ToByteArray();
+
+        private Stream inputStream;
+        private byte[] decryptionKey;
+        private readonly int sectorSize;
+        private readonly MD5 md5;
+        private readonly Aes aes;
+        private byte[] bufferedSector, tmpSector, hash = null;
+        private readonly List<(int start, int end)> encryptedSectorRanges;
+
+        public static byte[] GetDecryptionKey(Ird ird)
+        {
+            using (var aes = Aes.Create())
+            {
+                aes.BlockSize = ird.Data1.Length * 8;
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.None;
+                using (var transform = aes.CreateEncryptor(Secret, IV))
+                    return transform.TransformFinalBlock(ird.Data1, 0, ird.Data1.Length);
+            }
+        }
+
+        public static byte[] GetSectorIV(long sectorNumber)
+        {
+            var result = new byte[16];
+            for (var i = 15; i > 7; i--)
+            {
+                result[i] = (byte)(sectorNumber & 0xFF);
+                sectorNumber >>= 8;
+            }
+            return result;
+        }
+
+        public Decrypter(Stream input, byte[] decryptionKey, long startSector, int sectorSize, List<(int start, int end)> encryptedSectorRanges)
+        {
+            if (input == null)
+                throw new ArgumentNullException(nameof(input));
+
+            if (decryptionKey == null)
+                throw new ArgumentNullException(nameof(decryptionKey));
+
+            if (decryptionKey.Length != 128 / 8 && decryptionKey.Length != 256 / 8)
+                throw new ArgumentException($"Unsupported decryption key size of {decryptionKey.Length * 8} bits. Expected 128 or 256 bit key");
+
+            if (!input.CanRead)
+                throw new ArgumentException("Input stream should be readable", nameof(input));
+
+            if (sectorSize == 0)
+                throw new ArgumentException("Sector size cannot be 0", nameof(sectorSize));
+
+            inputStream = input;
+            this.decryptionKey = decryptionKey;
+            md5 = MD5.Create();
+            aes = Aes.Create();
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.None;
+            this.sectorSize = sectorSize;
+            bufferedSector = new byte[sectorSize];
+            tmpSector = new byte[sectorSize];
+            this.encryptedSectorRanges = encryptedSectorRanges;
+            SectorPosition = startSector;
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            if (Position == inputStream.Length)
+                return 0;
+
+            var positionInSector = Position % sectorSize;
+            var resultCount = 0;
+            if (positionInSector > 0)
+            {
+                var len = (int)Math.Min(Math.Min(count, sectorSize - positionInSector), inputStream.Position - Position);
+                md5.TransformBlock(bufferedSector, (int)positionInSector, len, buffer, offset);
+                offset += len;
+                count -= len;
+                resultCount += len;
+                Position += len;
+                if (Position % sectorSize == 0)
+                    SectorPosition++;
+            }
+            if (Position == inputStream.Length)
+                return resultCount;
+
+            int readCount;
+            do
+            {
+                readCount = inputStream.ReadExact(tmpSector, 0, sectorSize);
+                if (readCount < sectorSize)
+                    Array.Clear(tmpSector, readCount, sectorSize - readCount);
+                var decryptedSector = tmpSector;
+                if (IsSectorEncrypted(SectorPosition))
+                    using (var aesTransform = aes.CreateDecryptor(decryptionKey, GetSectorIV(SectorPosition)))
+                        decryptedSector = aesTransform.TransformFinalBlock(tmpSector, 0, sectorSize);
+                if (count >= readCount)
+                {
+                    md5.TransformBlock(decryptedSector, 0, readCount, buffer, offset);
+                    offset += readCount;
+                    count -= readCount;
+                    resultCount += readCount;
+                    Position += readCount;
+                    SectorPosition++;
+                }
+                else // partial sector read
+                {
+                    Buffer.BlockCopy(decryptedSector, 0, bufferedSector, 0, sectorSize);
+                    md5.TransformBlock(decryptedSector, 0, count, buffer, offset);
+                    offset += count;
+                    count = 0;
+                    resultCount += count;
+                    Position += count;
+                }
+            } while (count > 0 && readCount == sectorSize);
+            return resultCount;
+        }
+
+        public byte[] GetMd5()
+        {
+            if (hash == null)
+            {
+                md5.TransformFinalBlock(tmpSector, 0, 0);
+                hash = md5.Hash;
+            }
+            return hash;
+        }
+
+        private bool IsSectorEncrypted(long sector) => encryptedSectorRanges.Any(r => r.start <= sector && sector <= r.end);
+
+        void IDisposable.Dispose() { md5?.Dispose(); }
+
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotImplementedException();
+        public override void Flush() => throw new NotImplementedException();
+        public override void SetLength(long value) => throw new NotImplementedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotImplementedException();
+
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => inputStream.Length;
+        public override long Position { get; set; }
+        public long SectorPosition { get; private set; }
+    }
+}

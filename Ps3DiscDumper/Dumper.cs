@@ -5,9 +5,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using IrdLibraryClient;
+using IrdLibraryClient.IrdFormat;
 using IrdLibraryClient.POCOs;
 using Ps3DiscDumper.Sfb;
 using Ps3DiscDumper.Sfo;
+using Ps3DiscDumper.Utils;
 
 namespace Ps3DiscDumper
 {
@@ -15,8 +17,23 @@ namespace Ps3DiscDumper
     {
         private static readonly IrdClient Client = new IrdClient();
         private static readonly HashSet<char> InvalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
+        private string input, output;
+        private readonly CancellationToken cancellationToken;
 
-        public async Task DumpAsync(string input, string output, CancellationToken cancellationToken)
+        public string ProductCode { get; private set; }
+        public string Title { get; private set; }
+        public string OutputDir { get; private set; }
+        public SearchResultItem IrdInfo { get; private set; }
+        public Ird Ird { get; private set; }
+
+        public Dumper(string input, string output, CancellationToken cancellationToken)
+        {
+            this.input = input;
+            this.output = output;
+            this.cancellationToken = cancellationToken;
+        }
+
+        public async Task DetectDiscAsync()
         {
             if (!Directory.Exists(input))
                 throw new ArgumentException($"Directory not found: {input}", nameof(input));
@@ -29,11 +46,11 @@ namespace Ps3DiscDumper
             var sfb = SfbReader.Parse(discSfbData);
 
             var flags = new HashSet<char>(sfb.KeyEntries.FirstOrDefault(e => e.Key == "HYBRID_FLAG")?.Value?.ToCharArray() ?? new char[0]);
-            ApiConfig.Log.Debug($"Disc flags are {string.Concat(flags)}");
+            ApiConfig.Log.Debug($"Disc flags: {string.Concat(flags)}");
             if (!flags.Contains('g'))
                 ApiConfig.Log.Warn("Disc is not a game disc");
             var titleId = sfb.KeyEntries.FirstOrDefault(e => e.Key == "TITLE_ID")?.Value;
-            ApiConfig.Log.Debug($"Disc product code is {titleId}");
+            ApiConfig.Log.Debug($"Disc product code: {titleId}");
             if (string.IsNullOrEmpty(titleId))
                 ApiConfig.Log.Warn("Disc product code is empty");
             else if (titleId.Length > 9)
@@ -48,23 +65,24 @@ namespace Ps3DiscDumper
             var updateVer = sfo.Items.FirstOrDefault(i => i.Key == "PS3_SYSTEM_VER")?.StringValue?.Substring(0, 5).TrimStart('0').Trim();
             var gameVer = sfo.Items.FirstOrDefault(i => i.Key == "VERSION")?.StringValue?.Substring(0, 5).Trim();
             var appVer = sfo.Items.FirstOrDefault(i => i.Key == "APP_VER")?.StringValue?.Substring(0, 5).Trim();
-            var title = sfo.Items.FirstOrDefault(i => i.Key == "TITLE")?.StringValue?.Trim(' ', '\0');
-            var titleIdSfo = sfo.Items.FirstOrDefault(i => i.Key == "TITLE_ID")?.StringValue?.Trim(' ', '\0');
+            Title = sfo.Items.FirstOrDefault(i => i.Key == "TITLE")?.StringValue?.Trim(' ', '\0');
+            ProductCode = sfo.Items.FirstOrDefault(i => i.Key == "TITLE_ID")?.StringValue?.Trim(' ', '\0');
 
             ApiConfig.Log.Debug($"Game version: {gameVer}");
             ApiConfig.Log.Debug($"App version: {appVer}");
             ApiConfig.Log.Debug($"Update version: {updateVer}");
-            var outputDir = new string($"[{titleIdSfo}] {title}".ToCharArray().Where(c => !InvalidChars.Contains(c)).ToArray());
-            ApiConfig.Log.Debug($"Output: {outputDir}");
-            ApiConfig.Log.Info($"Game title: {title}");
-            if (titleId != titleIdSfo)
-                ApiConfig.Log.Warn($"Product codes in ps3_disc.sfb ({titleId}) and in param.sfo ({titleIdSfo}) do not match");
+            OutputDir = new string($"[{ProductCode}] {Title}".ToCharArray().Where(c => !InvalidChars.Contains(c)).ToArray());
+            ApiConfig.Log.Debug($"Output: {OutputDir}");
+            ApiConfig.Log.Info($"Game title: {Title}");
+            if (titleId != ProductCode)
+                ApiConfig.Log.Warn($"Product codes in ps3_disc.sfb ({titleId}) and in param.sfo ({ProductCode}) do not match");
 
-            var irdInfoList = await Client.SearchAsync(titleIdSfo, cancellationToken).ConfigureAwait(false);
-            var irdList = irdInfoList.Data?.Where(i => i.Filename.Substring(0, 9).ToUpperInvariant() == titleIdSfo?.ToUpperInvariant()
-                                                       && i.AppVersion == appVer
-                                                       && i.UpdateVersion == updateVer
-                                                       && i.GameVersion == gameVer
+            var irdInfoList = await Client.SearchAsync(ProductCode, cancellationToken).ConfigureAwait(false);
+            var irdList = irdInfoList.Data?.Where(
+                              i => i.Filename.Substring(0, 9).ToUpperInvariant() == ProductCode?.ToUpperInvariant()
+                                   && i.AppVersion == appVer
+                                   && i.UpdateVersion == updateVer
+                                   && i.GameVersion == gameVer
                           ).ToList() ?? new List<SearchResultItem>(0);
             if (irdList.Count == 0)
             {
@@ -77,18 +95,93 @@ namespace Ps3DiscDumper
                 ApiConfig.Log.Warn($"{irdList.Count} matching IRD files were found???");
                 return;
             }
-            var ird = await Client.DownloadAsync(irdList[0], "ird/", cancellationToken).ConfigureAwait(false);
-            if (ird == null)
+            IrdInfo = irdList[0];
+            Ird = await Client.DownloadAsync(IrdInfo, "ird/", cancellationToken).ConfigureAwait(false);
+            if (Ird == null)
             {
                 ApiConfig.Log.Error("No valid matching IRD file could be loaded");
                 return;
             }
 
-            ApiConfig.Log.Info($"Matching IRD: {irdList[0].Filename}");
+            ApiConfig.Log.Info($"Matching IRD: {IrdInfo.Filename}");
+        }
 
-            output = Path.Combine(output, outputDir);
-            //if (!Directory.Exists(output))
-            //    Directory.CreateDirectory(output);
+        public async Task DumpAsync()
+        {
+            var fileInfo = Ird.GetFilesystemStructure();
+            foreach (var file in fileInfo)
+                ApiConfig.Log.Trace($"0x{file.StartSector:x8}: {file.Filename} ({file.Length})");
+            var outputPathBase = Path.Combine(output, OutputDir);
+            if (!Directory.Exists(outputPathBase))
+                Directory.CreateDirectory(outputPathBase);
+
+            var decryptionKey = Decrypter.GetDecryptionKey(Ird);
+            var sectorSize = Ird.GetSectorSize();
+            var encryptedRegions = Ird.GetEncryptedRegions();
+            var brokenFiles = new List<(string filename, string error)>();
+            foreach (var file in fileInfo)
+            {
+                ApiConfig.Log.Debug($"Extracting {file.Filename}");
+                var inputFilename = Path.Combine(input, file.Filename);
+                if (!File.Exists(inputFilename))
+                {
+                    ApiConfig.Log.Error($"Missing {file.Filename}");
+                    brokenFiles.Add((file.Filename, "missing"));
+                    continue;
+                }
+                var outputFilename = Path.Combine(outputPathBase, file.Filename);
+                var fileDir = Path.GetDirectoryName(outputFilename);
+                if (!Directory.Exists(fileDir))
+                    Directory.CreateDirectory(fileDir);
+
+                var error = false;
+                var expectedMd5 = Ird.Files.First(f => f.Offset == file.StartSector).Md5Checksum.ToHexString();
+                var lastMd5 = expectedMd5;
+                string resultMd5 = null;
+                do
+                {
+                    try
+                    {
+                        using (var outputStream = File.Open(outputFilename, FileMode.Create, FileAccess.Write, FileShare.Read))
+                        using (var inputStream = File.Open(inputFilename, FileMode.Open, FileAccess.Read, FileShare.Read))
+                        using (var decrypter = new Decrypter(inputStream, decryptionKey, file.StartSector, sectorSize, encryptedRegions))
+                        {
+                            decrypter.CopyTo(outputStream);
+                            outputStream.Flush();
+                            resultMd5 = decrypter.GetMd5().ToHexString();
+                            if (expectedMd5 != resultMd5)
+                            {
+                                error = true;
+                                var msg = $"Expected {expectedMd5}, but was {resultMd5}";
+                                if (lastMd5 == resultMd5)
+                                {
+                                    ApiConfig.Log.Error(msg);
+                                    brokenFiles.Add((file.Filename, "corrupted"));
+                                    break;
+                                }
+                                ApiConfig.Log.Warn(msg + ", retrying");
+                            }
+                        }
+                        lastMd5 = resultMd5;
+                    }
+                    catch (Exception e)
+                    {
+                        ApiConfig.Log.Error(e, e.Message);
+                        error = true;
+                    }
+                } while (error);
+            }
+            ApiConfig.Log.Info("Completed.");
+            if (brokenFiles.Count > 0)
+            {
+                ApiConfig.Log.Error("Dump is not valid:");
+                foreach (var file in brokenFiles)
+                    ApiConfig.Log.Error($"{file.error}: {file.filename}");
+            }
+            else
+            {
+                ApiConfig.Log.Info("Dump is valid");
+            }
         }
     }
 }

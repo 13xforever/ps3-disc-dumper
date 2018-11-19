@@ -1,5 +1,7 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using NLog;
+using NLog.Conditions;
 using NLog.Targets;
 using NLog.Targets.Wrappers;
 
@@ -36,11 +38,17 @@ namespace IrdLibraryClient
                 OverflowAction = AsyncTargetWrapperOverflowAction.Block,
                 BatchSize = 500,
             };
-            var logTarget = new ColoredConsoleTarget("logconsole");
+            var consoleTarget = new ColoredConsoleTarget("logconsole");
+            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression($"level == LogLevel.{nameof(Log.Trace)}"), ConsoleOutputColor.DarkGray, ConsoleOutputColor.NoChange));
+            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression($"level == LogLevel.{nameof(Log.Debug)}"), ConsoleOutputColor.Gray, ConsoleOutputColor.NoChange));
+            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression($"level == LogLevel.{nameof(Log.Info)}"), ConsoleOutputColor.White, ConsoleOutputColor.NoChange));
+            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression($"level == LogLevel.{nameof(Log.Warn)}"), ConsoleOutputColor.Yellow, ConsoleOutputColor.NoChange));
+            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression($"level == LogLevel.{nameof(Log.Error)}"), ConsoleOutputColor.Red, ConsoleOutputColor.NoChange));
+            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression($"level == LogLevel.{nameof(Log.Fatal)}"), ConsoleOutputColor.White, ConsoleOutputColor.Red));
 #if DEBUG
-            config.AddRule(LogLevel.Trace, LogLevel.Fatal, logTarget, "default"); // only echo messages from default logger to the console
+            config.AddRule(LogLevel.Trace, LogLevel.Fatal, consoleTarget, "default"); // only echo messages from default logger to the console
 #else
-            config.AddRule(LogLevel.Info, LogLevel.Fatal, logTarget, "default");
+            config.AddRule(LogLevel.Info, LogLevel.Fatal, consoleTarget, "default");
 #endif
             config.AddRule(LogLevel.Debug, LogLevel.Fatal, asyncFileTarget);
             LogManager.Configuration = config;

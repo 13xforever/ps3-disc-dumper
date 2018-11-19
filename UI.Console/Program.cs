@@ -16,7 +16,13 @@ namespace UIConsole
                 return;
             }
 
-            await new Dumper().DumpAsync(args[0], args[1], ApiConfig.Cts.Token);
+            var dumper = new Dumper(args[0], args[1], ApiConfig.Cts.Token);
+            await dumper.DetectDiscAsync().ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(dumper.OutputDir))
+            {
+                ApiConfig.Log.Info("Dumping disc from " + args[0]);
+            }
+            await dumper.DumpAsync().ConfigureAwait(false);
         }
     }
 }
