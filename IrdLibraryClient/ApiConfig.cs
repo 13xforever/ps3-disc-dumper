@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using NLog;
 using NLog.Conditions;
@@ -45,6 +46,7 @@ namespace IrdLibraryClient
             consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression($"level == LogLevel.{nameof(Log.Warn)}"), ConsoleOutputColor.Yellow, ConsoleOutputColor.NoChange));
             consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression($"level == LogLevel.{nameof(Log.Error)}"), ConsoleOutputColor.Red, ConsoleOutputColor.NoChange));
             consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(ConditionParser.ParseExpression($"level == LogLevel.{nameof(Log.Fatal)}"), ConsoleOutputColor.White, ConsoleOutputColor.Red));
+            consoleTarget.Encoding = new UTF8Encoding(false);
 #if DEBUG
             config.AddRule(LogLevel.Debug, LogLevel.Fatal, consoleTarget, "default"); // only echo messages from default logger to the console
 #else

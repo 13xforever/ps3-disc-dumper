@@ -12,37 +12,64 @@ namespace UIConsole
         {
             var title = "PS3 Disc Dumper";
             Console.Title = title;
-            if (args.Length > 1)
+            try
             {
-                Console.WriteLine("Expected one arguments: output folder");
-                return;
-            }
+                if (args.Length > 1)
+                {
+                    Console.WriteLine("Expected one arguments: output folder");
+                    return;
+                }
 
-            var output = args.Length == 1 ? args[0] : @".\";
-            var dumper = new Dumper(output, ApiConfig.Cts.Token);
-            await dumper.DetectDiscAsync().ConfigureAwait(false);
-            if (string.IsNullOrEmpty(dumper.OutputDir))
-            {
-                ApiConfig.Log.Info("No compatible disc was found, exiting");
-                return;
-            }
+                var output = args.Length == 1 ? args[0] : @".\";
+                var dumper = new Dumper(output, ApiConfig.Cts.Token);
+                await dumper.DetectDiscAsync().ConfigureAwait(false);
+                if (string.IsNullOrEmpty(dumper.OutputDir))
+                {
+                    ApiConfig.Log.Info("No compatible disc was found, exiting");
+                    return;
+                }
 
-            var monitor = new Thread(() =>
-                                     {
-                                         do
+                var monitor = new Thread(() =>
                                          {
-                                             if (dumper.CurrentSector > 0)
-                                                 Console.Title = $"{title} - File {dumper.CurrentFileNumber} of {dumper.TotalFileCount} - {dumper.CurrentSector * 100.0 / dumper.TotalSectors:0.00}%";
-                                             Task.Delay(1000, ApiConfig.Cts.Token).GetAwaiter().GetResult();
-                                         } while (!ApiConfig.Cts.Token.IsCancellationRequested);
-                                         Console.Title = title;
-                                     });
-            monitor.Start();
+                                             try
+                                             {
+                                                 do
+                                                 {
+                                                     if (dumper.CurrentSector > 0)
+                                                         Console.Title = $"{title} - File {dumper.CurrentFileNumber} of {dumper.TotalFileCount} - {dumper.CurrentSector * 100.0 / dumper.TotalSectors:0.00}%";
+                                                     Task.Delay(1000, ApiConfig.Cts.Token).GetAwaiter().GetResult();
+                                                 } while (!ApiConfig.Cts.Token.IsCancellationRequested);
+                                             }
+                                             catch (TaskCanceledException)
+                                             {
+                                             }
+                                             Console.Title = title;
+                                         });
+                monitor.Start();
 
-            await dumper.DumpAsync().ConfigureAwait(false);
+                await dumper.DumpAsync().ConfigureAwait(false);
 
-            ApiConfig.Cts.Cancel(false);
-            monitor.Join(100);
+                ApiConfig.Cts.Cancel(false);
+                monitor.Join(100);
+
+                if (dumper.BrokenFiles.Count > 0)
+                {
+                    ApiConfig.Log.Fatal("Dump is not valid");
+                    foreach (var file in dumper.BrokenFiles)
+                        ApiConfig.Log.Error($"{file.error}: {file.filename}");
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Dump is valid");
+                    Console.ResetColor();
+                }
+            }
+            finally
+            {
+                Console.WriteLine("Press any key to exit...");
+                Console.ReadKey(true);
+            }
         }
     }
 }

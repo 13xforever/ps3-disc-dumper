@@ -32,6 +32,7 @@ namespace Ps3DiscDumper
         public int TotalFileCount { get; private set; }
         public int CurrentFileNumber { get; private set; }
         public long TotalSectors { get; private set; }
+        public List<(string filename, string error)> BrokenFiles { get; } = new List<(string filename, string error)>();
 
         public long CurrentSector
         {
@@ -184,7 +185,6 @@ namespace Ps3DiscDumper
             var firstSector = Ird.GetFirstSector(sectorSize);
             var physicalDevice = GetMatchingPhysicalDevice(firstSector);
 
-            var brokenFiles = new List<(string filename, string error)>();
             foreach (var file in fileInfo)
             {
                 ApiConfig.Log.Info($"Extracting {file.Filename}");
@@ -193,7 +193,7 @@ namespace Ps3DiscDumper
                 if (!File.Exists(inputFilename))
                 {
                     ApiConfig.Log.Error($"Missing {file.Filename}");
-                    brokenFiles.Add((file.Filename, "missing"));
+                    BrokenFiles.Add((file.Filename, "missing"));
                     continue;
                 }
                 var outputFilename = Path.Combine(outputPathBase, file.Filename);
@@ -227,7 +227,7 @@ namespace Ps3DiscDumper
                                 if (lastMd5 == resultMd5 || Decrypter.LastBlockCorrupted)
                                 {
                                     ApiConfig.Log.Error(msg);
-                                    brokenFiles.Add((file.Filename, "corrupted"));
+                                    BrokenFiles.Add((file.Filename, "corrupted"));
                                     break;
                                 }
                                 ApiConfig.Log.Warn(msg + ", retrying");
@@ -242,17 +242,7 @@ namespace Ps3DiscDumper
                     }
                 } while (error);
             }
-            ApiConfig.Log.Info("Completed.");
-            if (brokenFiles.Count > 0)
-            {
-                ApiConfig.Log.Error("Dump is not valid:");
-                foreach (var file in brokenFiles)
-                    ApiConfig.Log.Error($"{file.error}: {file.filename}");
-            }
-            else
-            {
-                ApiConfig.Log.Info("Dump is valid");
-            }
+            ApiConfig.Log.Info("Completed");
         }
     }
 }
