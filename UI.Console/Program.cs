@@ -10,7 +10,9 @@ namespace UIConsole
     {
         static async Task Main(string[] args)
         {
-            var title = "PS3 Disc Dumper";
+start:
+            const string titleBase = "PS3 Disc Dumper";
+            var title = titleBase;
             Console.Title = title;
             try
             {
@@ -31,21 +33,21 @@ namespace UIConsole
 
                 title += " - " + dumper.Title;
                 var monitor = new Thread(() =>
-                                         {
-                                             try
-                                             {
-                                                 do
-                                                 {
-                                                     if (dumper.CurrentSector > 0)
-                                                         Console.Title = $"{title} - File {dumper.CurrentFileNumber} of {dumper.TotalFileCount} - {dumper.CurrentSector * 100.0 / dumper.TotalSectors:0.00}%";
-                                                     Task.Delay(1000, ApiConfig.Cts.Token).GetAwaiter().GetResult();
-                                                 } while (!ApiConfig.Cts.Token.IsCancellationRequested);
-                                             }
-                                             catch (TaskCanceledException)
-                                             {
-                                             }
-                                             Console.Title = title;
-                                         });
+                {
+                    try
+                    {
+                        do
+                        {
+                            if (dumper.CurrentSector > 0)
+                                Console.Title = $"{title} - File {dumper.CurrentFileNumber} of {dumper.TotalFileCount} - {dumper.CurrentSector * 100.0 / dumper.TotalSectors:0.00}%";
+                            Task.Delay(1000, ApiConfig.Cts.Token).GetAwaiter().GetResult();
+                        } while (!ApiConfig.Cts.Token.IsCancellationRequested);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                    }
+                    Console.Title = title;
+                });
                 monitor.Start();
 
                 await dumper.DumpAsync().ConfigureAwait(false);
@@ -66,10 +68,18 @@ namespace UIConsole
                     Console.ResetColor();
                 }
             }
-            finally
+            catch (Exception e)
             {
-                Console.WriteLine("Press any key to exit...");
-                Console.ReadKey(true);
+                ApiConfig.Log.Error(e, e.Message);
+            }
+            Console.WriteLine("Press X or Ctrl-C to exit, any other key to start again...");
+            var key = Console.ReadKey(true);
+            switch (key.Key)
+            {
+                case ConsoleKey.X:
+                    return;
+                default:
+                    goto start;
             }
         }
     }

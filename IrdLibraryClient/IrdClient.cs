@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
@@ -44,8 +43,7 @@ namespace IrdLibraryClient
         {
             try
             {
-                var requestUri = new Uri(BaseUrl + "/data.php")
-                    .SetQueryParameters(new Dictionary<string, string>
+                var requestUri = new Uri(BaseUrl + "/data.php").SetQueryParameters(new Dictionary<string, string>
                     {
                         ["draw"] = query.Length.ToString(),
 
@@ -116,8 +114,6 @@ namespace IrdLibraryClient
                 {
                     ApiConfig.Log.Warn(e, "Error accessing local IRD cache: " + e.Message);
                 }
-                // download the remaining .ird files
-
                 try
                 {
                     var resultBytes = await client.GetByteArrayAsync(GetDownloadLink(irdInfo.Filename)).ConfigureAwait(false);

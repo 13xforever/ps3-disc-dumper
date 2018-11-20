@@ -27,7 +27,7 @@ namespace Ps3DiscDumper
         public string ProductCode { get; private set; }
         public string Title { get; private set; }
         public string OutputDir { get; private set; }
-        private SearchResultItem IrdInfo { get; set; }
+        private string IrdFilename { get; set; }
         private Ird Ird { get; set; }
         private Decrypter Decrypter { get; set; }
         public int TotalFileCount { get; private set; }
@@ -61,7 +61,7 @@ namespace Ps3DiscDumper
                 foreach (var drive in drives)
                 {
                     var tag = drive.Properties["Tag"].Value as string;
-                    if (tag?.StartsWith(@"\\.\CDROM") ?? false)
+                    if (tag?.IndexOf("CDROM", StringComparison.InvariantCultureIgnoreCase) > -1)
                         physicalDrives.Add(tag);
                 }
             }
@@ -143,33 +143,61 @@ namespace Ps3DiscDumper
             if (titleId != ProductCode)
                 ApiConfig.Log.Warn($"Product codes in ps3_disc.sfb ({titleId}) and in param.sfo ({ProductCode}) do not match");
 
-            var irdInfoList = await Client.SearchAsync(ProductCode, cancellationToken).ConfigureAwait(false);
-            var irdList = irdInfoList.Data?.Where(
-                              i => i.Filename.Substring(0, 9).ToUpperInvariant() == ProductCode?.ToUpperInvariant()
-                                   && i.AppVersion == appVer
-                                   && i.UpdateVersion == updateVer
-                                   && i.GameVersion == gameVer
-                          ).ToList() ?? new List<SearchResultItem>(0);
-            if (irdList.Count == 0)
+            ApiConfig.Log.Trace("Searching local cache for match...");
+            if (Directory.Exists(ApiConfig.IrdCachePath))
             {
-                ApiConfig.Log.Error("No matching IRD file was found");
-                return;
+                var matchingIrdFiles = Directory.GetFiles(ApiConfig.IrdCachePath, "*.ird", SearchOption.TopDirectoryOnly);
+                foreach (var irdFile in matchingIrdFiles)
+                {
+                    try
+                    {
+                        var ird = IrdParser.Parse(File.ReadAllBytes(irdFile));
+                        if (ird.ProductCode == ProductCode
+                            && ird.AppVersion == appVer
+                            && ird.UpdateVersion == updateVer
+                            && ird.GameVersion == gameVer)
+                        {
+                            Ird = ird;
+                            IrdFilename = Path.GetFileName(irdFile);
+                            ApiConfig.Log.Info("Using local IRD cache");
+                            break;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        ApiConfig.Log.Warn(e, e.Message);
+                    }
+                }
             }
-
-            if (irdList.Count > 1)
-            {
-                ApiConfig.Log.Warn($"{irdList.Count} matching IRD files were found???");
-                return;
-            }
-            IrdInfo = irdList[0];
-            Ird = await Client.DownloadAsync(IrdInfo, "ird/", cancellationToken).ConfigureAwait(false);
             if (Ird == null)
             {
-                ApiConfig.Log.Error("No valid matching IRD file could be loaded");
+                ApiConfig.Log.Trace("Searching IRD Library for match...");
+                var irdInfoList = await Client.SearchAsync(ProductCode, cancellationToken).ConfigureAwait(false);
+                var irdList = irdInfoList?.Data?.Where(
+                                  i => i.Filename.Substring(0, 9).ToUpperInvariant() == ProductCode?.ToUpperInvariant()
+                                       && i.AppVersion == appVer
+                                       && i.UpdateVersion == updateVer
+                                       && i.GameVersion == gameVer
+                              ).ToList() ?? new List<SearchResultItem>(0);
+                if (irdList.Count == 0)
+                    ApiConfig.Log.Error("No matching IRD file was found in the Library");
+                else if (irdList.Count > 1)
+                    ApiConfig.Log.Warn($"{irdList.Count} matching IRD files were found???");
+                else
+                {
+                    Ird = await Client.DownloadAsync(irdList[0], ApiConfig.IrdCachePath, cancellationToken).ConfigureAwait(false);
+                    IrdFilename = irdList[0].Filename;
+                    ApiConfig.Log.Info("Using IRD Library");
+                }
+            }
+            if (Ird == null)
+            {
+                ApiConfig.Log.Error("No valid matching IRD file could be found");
+                ApiConfig.Log.Info($"If you have matching IRD file, you can put it in '{ApiConfig.IrdCachePath}' and try dumping the disc again");
                 return;
             }
 
-            ApiConfig.Log.Info($"Matching IRD: {IrdInfo.Filename}");
+            ApiConfig.Log.Info($"Matching IRD: {IrdFilename}");
         }
 
         public async Task DumpAsync()
@@ -208,7 +236,6 @@ namespace Ps3DiscDumper
                 var error = false;
                 var expectedMd5 = Ird.Files.First(f => f.Offset == file.StartSector).Md5Checksum.ToHexString();
                 var lastMd5 = expectedMd5;
-                string resultMd5 = null;
                 do
                 {
                     try
@@ -219,7 +246,7 @@ namespace Ps3DiscDumper
                         {
                             Decrypter.CopyTo(outputStream);
                             outputStream.Flush();
-                            resultMd5 = Decrypter.GetMd5().ToHexString();
+                            var resultMd5 = Decrypter.GetMd5().ToHexString();
                             if (Decrypter.WasEncrypted && Decrypter.WasUnprotected)
                                 ApiConfig.Log.Debug("Partially decrypted");
                             else if (Decrypter.WasEncrypted)
@@ -236,8 +263,8 @@ namespace Ps3DiscDumper
                                 }
                                 ApiConfig.Log.Warn(msg + ", retrying");
                             }
+                            lastMd5 = resultMd5;
                         }
-                        lastMd5 = resultMd5;
                     }
                     catch (Exception e)
                     {
