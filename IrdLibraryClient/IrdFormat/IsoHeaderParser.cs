@@ -11,13 +11,8 @@ namespace IrdLibraryClient.IrdFormat
     {
         public static List<FileRecord> GetFilesystemStructure(this Ird ird)
         {
-            using (var decompressedStream = new MemoryStream())
+            using (var decompressedStream = ird.DecompressHeader())
             {
-                using (var compressedStream = new MemoryStream(ird.Header, false))
-                using (var gzip = new GZipStream(compressedStream, CompressionMode.Decompress))
-                    gzip.CopyTo(decompressedStream);
-
-                decompressedStream.Seek(0, SeekOrigin.Begin);
                 var reader = new CDReader(decompressedStream, true, true);
                 var filenames = reader.GetFiles(reader.Root.FullName, "*.*", SearchOption.AllDirectories).Distinct().Select(n => n.TrimStart('\\')).ToList();
                 var result = new List<FileRecord>();
@@ -36,13 +31,8 @@ namespace IrdLibraryClient.IrdFormat
 
         public static int GetSectorSize(this Ird ird)
         {
-            using (var decompressedStream = new MemoryStream())
+            using (var decompressedStream = ird.DecompressHeader())
             {
-                using (var compressedStream = new MemoryStream(ird.Header, false))
-                using (var gzip = new GZipStream(compressedStream, CompressionMode.Decompress))
-                    gzip.CopyTo(decompressedStream);
-
-                decompressedStream.Seek(0, SeekOrigin.Begin);
                 var reader = new CDReader(decompressedStream, true, true);
                 ApiConfig.Log.Trace($"Sector size: {reader.ClusterSize}");
                 return (int)reader.ClusterSize;
@@ -52,13 +42,8 @@ namespace IrdLibraryClient.IrdFormat
         public static List<(int start, int end)> GetUnprotectedRegions(this Ird ird)
         {
             var result = new List<(int start, int end)>();
-            using (var decompressedStream = new MemoryStream())
+            using (var decompressedStream = ird.DecompressHeader())
             {
-                using (var compressedStream = new MemoryStream(ird.Header, false))
-                using (var gzip = new GZipStream(compressedStream, CompressionMode.Decompress))
-                    gzip.CopyTo(decompressedStream);
-
-                decompressedStream.Seek(0, SeekOrigin.Begin);
                 var reader = new BigEndianDataReader(decompressedStream);
                 var regionCount = reader.ReadInt32();
                 ApiConfig.Log.Trace($"Found {regionCount} encrypted regions");
@@ -80,13 +65,8 @@ namespace IrdLibraryClient.IrdFormat
 
         public static byte[] GetFirstSector(this Ird ird, int sectorSize)
         {
-            using (var decompressedStream = new MemoryStream())
+            using (var decompressedStream = ird.DecompressHeader())
             {
-                using (var compressedStream = new MemoryStream(ird.Header, false))
-                using (var gzip = new GZipStream(compressedStream, CompressionMode.Decompress))
-                    gzip.CopyTo(decompressedStream);
-
-                decompressedStream.Seek(0, SeekOrigin.Begin);
                 decompressedStream.SetLength(sectorSize);
                 return decompressedStream.ToArray();
             }
@@ -94,16 +74,21 @@ namespace IrdLibraryClient.IrdFormat
 
         public static long GetTotalSectors(this Ird ird)
         {
-            using (var decompressedStream = new MemoryStream())
+            using (var decompressedStream = ird.DecompressHeader())
             {
-                using (var compressedStream = new MemoryStream(ird.Header, false))
-                using (var gzip = new GZipStream(compressedStream, CompressionMode.Decompress))
-                    gzip.CopyTo(decompressedStream);
-
-                decompressedStream.Seek(0, SeekOrigin.Begin);
                 var reader = new CDReader(decompressedStream, true, true);
                 return reader.TotalClusters;
             }
+        }
+
+        private static MemoryStream DecompressHeader(this Ird ird)
+        {
+            var decompressedStream = new MemoryStream();
+            using (var compressedStream = new MemoryStream(ird.Header, false))
+            using (var gzip = new GZipStream(compressedStream, CompressionMode.Decompress))
+                gzip.CopyTo(decompressedStream);
+            decompressedStream.Seek(0, SeekOrigin.Begin);
+            return decompressedStream;
         }
     }
 

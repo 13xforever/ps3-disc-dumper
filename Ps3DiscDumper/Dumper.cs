@@ -198,6 +198,29 @@ namespace Ps3DiscDumper
             }
 
             ApiConfig.Log.Info($"Matching IRD: {IrdFilename}");
+
+            var dumpPath = output;
+            while (!string.IsNullOrEmpty(dumpPath) && !Directory.Exists(dumpPath))
+            {
+                var parent = Path.GetDirectoryName(dumpPath);
+                if (parent == null || parent == dumpPath)
+                    dumpPath = null;
+                else
+                    dumpPath = parent;
+            }
+            if (!string.IsNullOrEmpty(dumpPath))
+            {
+                var root = Path.GetPathRoot(Path.GetFullPath(output));
+                var drive = DriveInfo.GetDrives().FirstOrDefault(d => d?.RootDirectory.FullName.StartsWith(root) ?? false);
+                if (drive != null)
+                {
+                    var spaceAvailable = drive.AvailableFreeSpace;
+                    var spaceRequired = Ird.GetFilesystemStructure().Sum(f => f.Length);
+                    var diff = spaceRequired + 100 * 1024 - spaceAvailable;
+                    if (diff > 0)
+                        ApiConfig.Log.Warn($"Target drive might require {diff.AsStorageUnit()} of additional free space");
+                }
+            }
         }
 
         public async Task DumpAsync()
