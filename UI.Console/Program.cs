@@ -50,7 +50,7 @@ start:
                 });
                 monitor.Start();
 
-                await dumper.DumpAsync().ConfigureAwait(false);
+                dumper.Dump();
 
                 ApiConfig.Cts.Cancel(false);
                 monitor.Join(100);

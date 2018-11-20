@@ -223,7 +223,7 @@ namespace Ps3DiscDumper
             }
         }
 
-        public async Task DumpAsync()
+        public void Dump()
         {
             var fileInfo = Ird.GetFilesystemStructure();
             foreach (var file in fileInfo)
