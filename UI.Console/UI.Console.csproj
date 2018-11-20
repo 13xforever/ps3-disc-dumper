@@ -5,6 +5,7 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>UIConsole</RootNamespace>
     <LangVersion>latest</LangVersion>
+    <AssemblyName>ps3-disc-dumper</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

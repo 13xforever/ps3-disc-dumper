@@ -10,6 +10,7 @@ namespace UIConsole
     {
         static async Task Main(string[] args)
         {
+            ApiConfig.Log.Info("PS3 Disc Dumper v1.0.0");
 start:
             const string titleBase = "PS3 Disc Dumper";
             var title = titleBase;
