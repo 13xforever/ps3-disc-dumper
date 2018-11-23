@@ -2,19 +2,19 @@
 {
     public static class StorageUnits
     {
-        private const long UnderKB = 1000;
-        private const long UnderMB = 1000 * 1024;
-        private const long UnderGB = 1000 * 1024 * 1024;
+        private const long UnderKiB = 1024;
+        private const long UnderMiB = 1024 * 1024;
+        private const long UnderGiB = 1024 * 1024 * 1024;
 
         public static string AsStorageUnit(this long bytes)
         {
-            if (bytes < UnderKB)
+            if (bytes < UnderKiB)
                 return $"{bytes} byte{(bytes == 1 ? "" : "s")}";
-            if (bytes < UnderMB)
-                return $"{bytes / 1024.0:0.##} KB";
-            if (bytes < UnderGB)
-                return $"{bytes / 1024.0 / 1024:0.##} MB";
-            return $"{bytes / 1024.0 / 1024 / 1024:0.##} GB";
+            if (bytes < UnderMiB)
+                return $"{bytes / 1024.0:0.##} KiB";
+            if (bytes < UnderGiB)
+                return $"{bytes / 1024.0 / 1024:0.##} MiB";
+            return $"{bytes / 1024.0 / 1024 / 1024:0.##} GiB";
         }
     }
 }
