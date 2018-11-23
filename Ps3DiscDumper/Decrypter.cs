@@ -113,14 +113,14 @@ namespace Ps3DiscDumper
                     WasEncrypted = true;
                     if (readCount % 16 != 0)
                     {
-                        ApiConfig.Log.Debug($"Block has only {(readCount % 16) * 8} bits of data, reading raw sector...");
+                        Log.Debug($"Block has only {(readCount % 16) * 8} bits of data, reading raw sector...");
                         using (var deviceStream = File.Open(physicalDevice, FileMode.Open, FileAccess.Read, FileShare.Read))
                         {
                             deviceStream.Seek(SectorPosition * sectorSize, SeekOrigin.Begin);
                             var newTmpSector = new byte[sectorSize];
                             deviceStream.ReadExact(newTmpSector, 0, sectorSize);
                             if (!newTmpSector.Take(readCount).SequenceEqual(tmpSector.Take(readCount)))
-                                ApiConfig.Log.Warn($"Filesystem data and raw data do not match for sector 0x{SectorPosition:x8}");
+                                Log.Warn($"Filesystem data and raw data do not match for sector 0x{SectorPosition:x8}");
                             tmpSector = newTmpSector;
                         }
                     }
@@ -165,7 +165,7 @@ namespace Ps3DiscDumper
         {
             var result = !unprotectedSectorRanges.Any(r => r.start <= sector && sector <= r.end);
             if (TraceSectors)
-                ApiConfig.Log.Trace($"{sector:x8}: {(result ? "e" : "")}");
+                Log.Trace($"{sector:x8}: {(result ? "e" : "")}");
             return result;
         }
 

@@ -1,0 +1,24 @@
+﻿<Directives xmlns="http://schemas.microsoft.com/netfx/2013/01/metadata">
+  <Application>
+    <Namespace Name="IrdLibraryClient.POCOs" Dynamic="Required All" />
+    <Assembly Name="System.Linq.Expressions">
+      <Type Name="System.Linq.Expressions.ExpressionCreator`1[[Newtonsoft.Json.Serialization.ObjectConstructor`1[[System.Object,System.Private.CoreLib]],Newtonsoft.Json]]" Dynamic="Required All" />
+      <Type Name="System.Linq.Expressions.ExpressionCreator`1[[System.Func`2[[System.Object,System.Private.CoreLib],[System.Object,System.Private.CoreLib]],System.Private.CoreLib]]" Dynamic="Required All" />
+      <Type Name="System.Linq.Expressions.ExpressionCreator`1[[System.Action`2[[System.Object,System.Private.CoreLib],[System.Object,System.Private.CoreLib]],System.Private.CoreLib]]" Dynamic="Required All"/>
+    </Assembly>
+    <Assembly Name="Microsoft.Extensions.ObjectPool">
+      <Type Name="Microsoft.Extensions.ObjectPool.DefaultObjectPoolProvider" Dynamic="Required All" />
+    </Assembly>
+    <Assembly Name="Newtonsoft.Json">
+      <Type Name="Newtonsoft.Json.Serialization.ObjectConstructor`1[[System.Object,System.Private.CoreLib]]" Dynamic="Required All" />
+    </Assembly>
+    <Assembly Name="System.ComponentModel.TypeConverter">
+      <Type Name="System.ComponentModel.TypeConverter" Dynamic="Required All" />
+      <Type Name="System.ComponentModel.StringConverter" Dynamic="Required All" />
+      <Type Name="System.ComponentModel.Int32Converter" Dynamic="Required All" />
+    </Assembly>
+    <Assembly Name="Microsoft.Extensions.Configuration.Json">
+      <Type Name="Microsoft.Extensions.Configuration.Json.JsonConfigurationSource" Dynamic="Required All" />
+    </Assembly>
+  </Application>
+</Directives>

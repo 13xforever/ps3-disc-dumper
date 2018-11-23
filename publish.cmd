@@ -1,2 +1,2 @@
 @echo off
-dotnet publish -r win-x64 -c Release /p:Platform="Any CPU"
+dotnet publish -r win-x64 -c Release-Core /p:Platform="Any CPU" /p:DefineConstants="NATIVE"

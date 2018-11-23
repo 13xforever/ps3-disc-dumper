@@ -9,6 +9,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="logs\**" />
+    <Compile Remove="ird\**" />
+    <EmbeddedResource Remove="logs\**" />
+    <EmbeddedResource Remove="ird\**" />
+    <None Remove="logs\**" />
+    <None Remove="ird\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Properties\rd.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\rd.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Ps3DiscDumper\Ps3DiscDumper.csproj" />
   </ItemGroup>
 

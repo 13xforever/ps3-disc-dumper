@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using DiscUtils.Iso9660;
 using DiscUtils.Streams;
+using Ionic.Zlib;
 
 namespace IrdLibraryClient.IrdFormat
 {
@@ -20,9 +20,7 @@ namespace IrdLibraryClient.IrdFormat
                 {
                     var clusterRange = reader.PathToClusters(filename);
                     if (clusterRange.Length != 1)
-                    {
-                        ApiConfig.Log.Warn($"{filename} is split in {clusterRange.Length} ranges");
-                    }
+                        Log.Warn($"{filename} is split in {clusterRange.Length} ranges");
                     result.Add(new FileRecord(filename, clusterRange.Min(r => r.Offset), reader.GetFileLength(filename)));
                 }
                 return result.OrderBy(r => r.StartSector).ToList();
@@ -34,7 +32,7 @@ namespace IrdLibraryClient.IrdFormat
             using (var decompressedStream = ird.DecompressHeader())
             {
                 var reader = new CDReader(decompressedStream, true, true);
-                ApiConfig.Log.Trace($"Sector size: {reader.ClusterSize}");
+                Log.Trace($"Sector size: {reader.ClusterSize}");
                 return (int)reader.ClusterSize;
             }
         }
@@ -46,17 +44,17 @@ namespace IrdLibraryClient.IrdFormat
             {
                 var reader = new BigEndianDataReader(decompressedStream);
                 var regionCount = reader.ReadInt32();
-                ApiConfig.Log.Trace($"Found {regionCount} encrypted regions");
+                Log.Trace($"Found {regionCount} encrypted regions");
 
                 var unk = reader.ReadUInt32(); // 0?
                 if (unk != 0)
-                    ApiConfig.Log.Debug($"Unk in sector description was {unk:x16}");
+                    Log.Debug($"Unk in sector description was {unk:x16}");
 
                 for (var i = 0; i < regionCount; i++)
                 {
                     var start = reader.ReadInt32();
                     var end = reader.ReadInt32();
-                    ApiConfig.Log.Trace($"Unprotected region: {start:x8}-{end:x8}");
+                    Log.Trace($"Unprotected region: {start:x8}-{end:x8}");
                     result.Add((start, end));
                 }
             }

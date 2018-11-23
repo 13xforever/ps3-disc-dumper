@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Management;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using IrdLibraryClient;
@@ -20,13 +21,13 @@ namespace Ps3DiscDumper
         private static readonly HashSet<char> InvalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
         private static readonly char[] MultilineSplit = {'\r', '\n'};
         private readonly string output;
-        private string input;
         private readonly CancellationToken cancellationToken;
         private long currentSector;
 
         public string ProductCode { get; private set; }
         public string Title { get; private set; }
         public string OutputDir { get; private set; }
+        private string input;
         private string IrdFilename { get; set; }
         private Ird Ird { get; set; }
         private Decrypter Decrypter { get; set; }
@@ -52,9 +53,10 @@ namespace Ps3DiscDumper
             this.cancellationToken = cancellationToken;
         }
 
-        private string GetMatchingPhysicalDevice(byte[] firstSector)
+        private List<string> EnumeratePhysicalDrivesWindows()
         {
             var physicalDrives = new List<string>();
+#if !NATIVE
             using (var mgmtObjSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMedia"))
             {
                 var drives = mgmtObjSearcher.Get();
@@ -65,66 +67,52 @@ namespace Ps3DiscDumper
                         physicalDrives.Add(tag);
                 }
             }
-            if (physicalDrives.Count == 0)
-                throw new InvalidOperationException("No optical drives were found");
-
-            foreach (var drive in physicalDrives)
+#else
+            for (var i = 0; i < 32; i++)
             {
-                try
-                {
-                    using (var discStream = File.Open(drive, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    using (var reader = new BinaryReader(discStream))
-                    {
-                        var bytes = reader.ReadBytes(firstSector.Length);
-                        if (bytes.SequenceEqual(firstSector))
-                            return drive;
-                    }
-                }
-                catch (Exception e)
-                {
-                    ApiConfig.Log.Debug(e, e.Message);
-                }
+                physicalDrives.Add($@"\\.\CDROM{i}");
             }
-            throw new InvalidOperationException("No matching physical device was found");
+#endif
+            return physicalDrives;
         }
 
-        public async Task DetectDiscAsync()
+        private List<string> EnumeratePhysicalDrivesLinux()
         {
-            var drives = DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.CDRom && d.IsReady);
-
-            string discSfbPath = null;
-            foreach (var drive in drives)
+            string cdInfo = "";
+            try
             {
-                discSfbPath = Path.Combine(drive.Name, "PS3_DISC.SFB");
-                if (!File.Exists(discSfbPath))
-                    continue;
-
-                input = drive.Name;
+                cdInfo = File.ReadAllText("/proc/sys/dev/cdrom/info");
             }
-            if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(discSfbPath))
-                throw new InvalidOperationException("No valid PS3 disc was detected");
+            catch (Exception e)
+            {
+                Log.Debug(e, e.Message);
+            }
+            var lines = cdInfo.Split(MultilineSplit, StringSplitOptions.RemoveEmptyEntries);
+            return lines.Where(s => s.StartsWith("drive name:")).Select(l => Path.Combine("/dev", l.Split(':').Last().Trim())).Where(File.Exists)
+                    .Concat(IOEx.GetFilepaths("/dev", "sr*", SearchOption.TopDirectoryOnly))
+                    .Distinct()
+                    .ToList();
 
-            ApiConfig.Log.Info("Selected disc " + input);
-            var discSfbData = File.ReadAllBytes(discSfbPath);
+        }
+
+        private string CheckDiscSfb(byte[] discSfbData)
+        {
             var sfb = SfbReader.Parse(discSfbData);
-
             var flags = new HashSet<char>(sfb.KeyEntries.FirstOrDefault(e => e.Key == "HYBRID_FLAG")?.Value?.ToCharArray() ?? new char[0]);
-            ApiConfig.Log.Debug($"Disc flags: {string.Concat(flags)}");
+            Log.Debug($"Disc flags: {string.Concat(flags)}");
             if (!flags.Contains('g'))
-                ApiConfig.Log.Warn("Disc is not a game disc");
+                Log.Warn("Disc is not a game disc");
             var titleId = sfb.KeyEntries.FirstOrDefault(e => e.Key == "TITLE_ID")?.Value;
-            ApiConfig.Log.Debug($"Disc product code: {titleId}");
+            Log.Debug($"Disc product code: {titleId}");
             if (string.IsNullOrEmpty(titleId))
-                ApiConfig.Log.Warn("Disc product code is empty");
+                Log.Warn("Disc product code is empty");
             else if (titleId.Length > 9)
                 titleId = titleId.Substring(0, 4) + titleId.Substring(titleId.Length - 5, 5);
-            var paramSfoPath = Path.Combine(input, "PS3_GAME", "PARAM.SFO");
-            if (!File.Exists(paramSfoPath))
-                throw new InvalidOperationException($"Specified folder is not a valid PS3 disc root (param.sfo is missing): {input}");
+            return titleId;
+        }
 
-            ParamSfo sfo;
-            using (var stream = File.Open(paramSfoPath, FileMode.Open, FileAccess.Read, FileShare.Read))
-                sfo = ParamSfo.ReadFrom(stream);
+        private (string appVer, string updateVer, string gameVer) CheckParamSfo(ParamSfo sfo)
+        {
             var updateVer = sfo.Items.FirstOrDefault(i => i.Key == "PS3_SYSTEM_VER")?.StringValue?.Substring(0, 5).TrimStart('0').Trim();
             var gameVer = sfo.Items.FirstOrDefault(i => i.Key == "VERSION")?.StringValue?.Substring(0, 5).Trim();
             var appVer = sfo.Items.FirstOrDefault(i => i.Key == "APP_VER")?.StringValue?.Substring(0, 5).Trim();
@@ -134,16 +122,56 @@ namespace Ps3DiscDumper
                 Title = string.Join(" ", titleParts);
             ProductCode = sfo.Items.FirstOrDefault(i => i.Key == "TITLE_ID")?.StringValue?.Trim(' ', '\0');
 
-            ApiConfig.Log.Debug($"Game version: {gameVer}");
-            ApiConfig.Log.Debug($"App version: {appVer}");
-            ApiConfig.Log.Debug($"Update version: {updateVer}");
-            OutputDir = new string($"[{ProductCode}] {Title}".ToCharArray().Where(c => !InvalidChars.Contains(c)).ToArray());
-            ApiConfig.Log.Debug($"Output: {OutputDir}");
-            ApiConfig.Log.Info($"Game title: {Title}");
-            if (titleId != ProductCode)
-                ApiConfig.Log.Warn($"Product codes in ps3_disc.sfb ({titleId}) and in param.sfo ({ProductCode}) do not match");
+            Log.Debug($"Game version: {gameVer}");
+            Log.Debug($"App version: {appVer}");
+            Log.Debug($"Update version: {updateVer}");
+            Log.Info($"Game title: {Title}");
+            return (appVer, updateVer, gameVer);
+        }
 
-            ApiConfig.Log.Trace("Searching local cache for match...");
+        public async Task DetectDiscAsync()
+        {
+            string discSfbPath = null;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var drives = DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.CDRom && d.IsReady);
+                foreach (var drive in drives)
+                {
+                    discSfbPath = Path.Combine(drive.Name, "PS3_DISC.SFB");
+                    if (!File.Exists(discSfbPath))
+                        continue;
+
+                    input = drive.Name;
+                }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                discSfbPath = IOEx.GetFilepaths("/media", "PS3_DISC.SFB", SearchOption.AllDirectories).FirstOrDefault();
+                if (!string.IsNullOrEmpty(discSfbPath))
+                    input = Path.GetDirectoryName(discSfbPath);
+            }
+            else
+                throw new NotImplementedException("Current OS is not supported");
+            if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(discSfbPath))
+                throw new DriveNotFoundException("No valid PS3 disc was detected. Disc must be detected and mounted.");
+
+            Log.Info("Selected disc: " + input);
+            var discSfbData = File.ReadAllBytes(discSfbPath);
+            var titleId = CheckDiscSfb(discSfbData);
+            var paramSfoPath = Path.Combine(input, "PS3_GAME", "PARAM.SFO");
+            if (!File.Exists(paramSfoPath))
+                throw new InvalidOperationException($"Specified folder is not a valid PS3 disc root (param.sfo is missing): {input}");
+
+            ParamSfo sfo;
+            using (var stream = File.Open(paramSfoPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                sfo = ParamSfo.ReadFrom(stream);
+            var (appVer, updateVer, gameVer) = CheckParamSfo(sfo);
+            if (titleId != ProductCode)
+                Log.Warn($"Product codes in ps3_disc.sfb ({titleId}) and in param.sfo ({ProductCode}) do not match");
+
+            OutputDir = new string($"[{ProductCode}] {Title}".ToCharArray().Where(c => !InvalidChars.Contains(c)).ToArray());
+            Log.Debug($"Output: {OutputDir}");
+            Log.Trace("Searching local cache for match...");
             if (Directory.Exists(ApiConfig.IrdCachePath))
             {
                 var matchingIrdFiles = Directory.GetFiles(ApiConfig.IrdCachePath, "*.ird", SearchOption.TopDirectoryOnly);
@@ -159,19 +187,19 @@ namespace Ps3DiscDumper
                         {
                             Ird = ird;
                             IrdFilename = Path.GetFileName(irdFile);
-                            ApiConfig.Log.Info("Using local IRD cache");
+                            Log.Info("Using local IRD cache");
                             break;
                         }
                     }
                     catch (Exception e)
                     {
-                        ApiConfig.Log.Warn(e, e.Message);
+                        Log.Warn(e, e.Message);
                     }
                 }
             }
             if (Ird == null)
             {
-                ApiConfig.Log.Trace("Searching IRD Library for match...");
+                Log.Trace("Searching IRD Library for match...");
                 var irdInfoList = await Client.SearchAsync(ProductCode, cancellationToken).ConfigureAwait(false);
                 var irdList = irdInfoList?.Data?.Where(
                                   i => i.Filename.Substring(0, 9).ToUpperInvariant() == ProductCode?.ToUpperInvariant()
@@ -180,24 +208,24 @@ namespace Ps3DiscDumper
                                        && i.GameVersion == gameVer
                               ).ToList() ?? new List<SearchResultItem>(0);
                 if (irdList.Count == 0)
-                    ApiConfig.Log.Error("No matching IRD file was found in the Library");
+                    Log.Error("No matching IRD file was found in the Library");
                 else if (irdList.Count > 1)
-                    ApiConfig.Log.Warn($"{irdList.Count} matching IRD files were found???");
+                    Log.Warn($"{irdList.Count} matching IRD files were found???");
                 else
                 {
                     Ird = await Client.DownloadAsync(irdList[0], ApiConfig.IrdCachePath, cancellationToken).ConfigureAwait(false);
                     IrdFilename = irdList[0].Filename;
-                    ApiConfig.Log.Info("Using IRD Library");
+                    Log.Info("Using IRD Library");
                 }
             }
             if (Ird == null)
             {
-                ApiConfig.Log.Error("No valid matching IRD file could be found");
-                ApiConfig.Log.Info($"If you have matching IRD file, you can put it in '{ApiConfig.IrdCachePath}' and try dumping the disc again");
+                Log.Error("No valid matching IRD file could be found");
+                Log.Info($"If you have matching IRD file, you can put it in '{ApiConfig.IrdCachePath}' and try dumping the disc again");
                 return;
             }
 
-            ApiConfig.Log.Info($"Matching IRD: {IrdFilename}");
+            Log.Info($"Matching IRD: {IrdFilename}");
 
             var dumpPath = output;
             while (!string.IsNullOrEmpty(dumpPath) && !Directory.Exists(dumpPath))
@@ -218,7 +246,7 @@ namespace Ps3DiscDumper
                     var spaceRequired = Ird.GetFilesystemStructure().Sum(f => f.Length);
                     var diff = spaceRequired + 100 * 1024 - spaceAvailable;
                     if (diff > 0)
-                        ApiConfig.Log.Warn($"Target drive might require {diff.AsStorageUnit()} of additional free space");
+                        Log.Warn($"Target drive might require {diff.AsStorageUnit()} of additional free space");
                 }
             }
         }
@@ -227,7 +255,7 @@ namespace Ps3DiscDumper
         {
             var fileInfo = Ird.GetFilesystemStructure();
             foreach (var file in fileInfo)
-                ApiConfig.Log.Trace($"0x{file.StartSector:x8}: {file.Filename} ({file.Length})");
+                Log.Trace($"0x{file.StartSector:x8}: {file.Filename} ({file.Length})");
             var outputPathBase = Path.Combine(output, OutputDir);
             if (!Directory.Exists(outputPathBase))
                 Directory.CreateDirectory(outputPathBase);
@@ -237,21 +265,56 @@ namespace Ps3DiscDumper
             var decryptionKey = Decrypter.GetDecryptionKey(Ird);
             var sectorSize = Ird.GetSectorSize();
             var unprotectedRegions = Ird.GetUnprotectedRegions();
+            string physicalDevice = null;
+            List<string> physicalDrives;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                physicalDrives = EnumeratePhysicalDrivesWindows();
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                physicalDrives = EnumeratePhysicalDrivesLinux();
+            else
+                throw new NotImplementedException("Current OS is not supported");
+
+            if (physicalDrives.Count == 0)
+                throw new InvalidOperationException("No optical drives were found");
+
             var firstSector = Ird.GetFirstSector(sectorSize);
-            var physicalDevice = GetMatchingPhysicalDevice(firstSector);
+            foreach (var drive in physicalDrives)
+            {
+                try
+                {
+                    using (var discStream = File.Open(drive, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (var reader = new BinaryReader(discStream))
+                    {
+                        var bytes = reader.ReadBytes(firstSector.Length);
+                        if (bytes.SequenceEqual(firstSector))
+                        {
+                            physicalDevice = drive;
+                            break;
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.Debug($"Skipping drive {drive}: {e.Message}");
+                }
+            }
+            if (string.IsNullOrEmpty(physicalDevice))
+                throw new DriveNotFoundException("No matching physical device was found");
 
             foreach (var file in fileInfo)
             {
-                ApiConfig.Log.Info($"Reading {file.Filename} ({file.Length.AsStorageUnit()})");
+                Log.Info($"Reading {file.Filename} ({file.Length.AsStorageUnit()})");
                 CurrentFileNumber++;
-                var inputFilename = Path.Combine(input, file.Filename);
+                var convertedFilename = Path.DirectorySeparatorChar == '\\' ? file.Filename : file.Filename.Replace('\\', Path.DirectorySeparatorChar);
+                var inputFilename = Path.Combine(input, convertedFilename);
+
                 if (!File.Exists(inputFilename))
                 {
-                    ApiConfig.Log.Error($"Missing {file.Filename}");
+                    Log.Error($"Missing {file.Filename}");
                     BrokenFiles.Add((file.Filename, "missing"));
                     continue;
                 }
-                var outputFilename = Path.Combine(outputPathBase, file.Filename);
+                var outputFilename = Path.Combine(outputPathBase, convertedFilename);
                 var fileDir = Path.GetDirectoryName(outputFilename);
                 if (!Directory.Exists(fileDir))
                     Directory.CreateDirectory(fileDir);
@@ -271,32 +334,32 @@ namespace Ps3DiscDumper
                             outputStream.Flush();
                             var resultMd5 = Decrypter.GetMd5().ToHexString();
                             if (Decrypter.WasEncrypted && Decrypter.WasUnprotected)
-                                ApiConfig.Log.Debug("Partially decrypted");
+                                Log.Debug("Partially decrypted");
                             else if (Decrypter.WasEncrypted)
-                                ApiConfig.Log.Debug("Decrypted");
+                                Log.Debug("Decrypted");
                             if (expectedMd5 != resultMd5)
                             {
                                 error = true;
                                 var msg = $"Expected {expectedMd5}, but was {resultMd5}";
                                 if (lastMd5 == resultMd5 || Decrypter.LastBlockCorrupted)
                                 {
-                                    ApiConfig.Log.Error(msg);
+                                    Log.Error(msg);
                                     BrokenFiles.Add((file.Filename, "corrupted"));
                                     break;
                                 }
-                                ApiConfig.Log.Warn(msg + ", retrying");
+                                Log.Warn(msg + ", retrying");
                             }
                             lastMd5 = resultMd5;
                         }
                     }
                     catch (Exception e)
                     {
-                        ApiConfig.Log.Error(e, e.Message);
+                        Log.Error(e, e.Message);
                         error = true;
                     }
                 } while (error);
             }
-            ApiConfig.Log.Info("Completed");
+            Log.Info("Completed");
         }
     }
 }

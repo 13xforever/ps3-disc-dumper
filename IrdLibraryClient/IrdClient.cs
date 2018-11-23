@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using IrdLibraryClient.Utils;
 using IrdLibraryClient.IrdFormat;
 using IrdLibraryClient.POCOs;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace IrdLibraryClient
 {
@@ -71,12 +73,10 @@ namespace IrdLibraryClient
 
                         ["_"] = DateTime.UtcNow.Ticks.ToString(),
                     });
-                using (var getMessage = new HttpRequestMessage(HttpMethod.Get, requestUri))
-                using (var response = await client.SendAsync(getMessage, cancellationToken).ConfigureAwait(false))
                     try
                     {
-                        await response.Content.LoadIntoBufferAsync().ConfigureAwait(false);
-                        var result = await response.Content.ReadAsAsync<SearchResult>(underscoreFormatters, cancellationToken).ConfigureAwait(false);
+                        var responseBytes = await client.GetByteArrayAsync(requestUri).ConfigureAwait(false);
+                        var result = Deserialize(responseBytes);
                         result.Data = result.Data ?? new List<SearchResultItem>(0);
                         foreach (var item in result.Data)
                         {
@@ -87,13 +87,13 @@ namespace IrdLibraryClient
                     }
                     catch (Exception e)
                     {
-                        ConsoleLogger.PrintError(e, response);
+                        Log.Error(e, "Failed to make API call to IRD Library");
                         return null;
                     }
             }
             catch (Exception e)
             {
-                ApiConfig.Log.Error(e);
+                Log.Error(e);
                 return null;
             }
         }
@@ -112,7 +112,7 @@ namespace IrdLibraryClient
                 }
                 catch (Exception e)
                 {
-                    ApiConfig.Log.Warn(e, "Error accessing local IRD cache: " + e.Message);
+                    Log.Warn(e, "Error accessing local IRD cache: " + e.Message);
                 }
                 try
                 {
@@ -126,18 +126,18 @@ namespace IrdLibraryClient
                     }
                     catch (Exception ex)
                     {
-                        ApiConfig.Log.Warn(ex, $"Failed to write {irdInfo.Filename} to local cache: {ex.Message}");
+                        Log.Warn(ex, $"Failed to write {irdInfo.Filename} to local cache: {ex.Message}");
                     }
                 }
                 catch (Exception e)
                 {
-                    ApiConfig.Log.Warn(e, $"Failed to download {irdInfo.Filename}: {e.Message}");
+                    Log.Warn(e, $"Failed to download {irdInfo.Filename}: {e.Message}");
                 }
                 return result;
             }
             catch (Exception e)
             {
-                ApiConfig.Log.Error(e);
+                Log.Error(e);
                 return result;
             }
         }
@@ -150,7 +150,7 @@ namespace IrdLibraryClient
             var matches = IrdFilename.Matches(html);
             if (matches.Count == 0)
             {
-                ApiConfig.Log.Warn("Couldn't parse IRD filename from " + html);
+                Log.Warn("Couldn't parse IRD filename from " + html);
                 return null;
             }
 
@@ -167,6 +167,33 @@ namespace IrdLibraryClient
             if (string.IsNullOrEmpty(result))
                 return null;
 
+            return result;
+        }
+
+        private static SearchResult Deserialize(byte[] content)
+        {
+            var result = new SearchResult();
+            using (var stream = new MemoryStream(content))
+            using (var reader = new StreamReader(stream, Encoding.UTF8))
+            using (var jsonReader = new JsonTextReader(reader))
+            {
+                var json = JObject.Load(jsonReader);
+                result.RecordsFiltered = (int?)json["recordsFiltered"] ?? 0;
+                result.RecordsTotal = (int?)json["recordsTotal"] ?? 0;
+                result.Data = new List<SearchResultItem>();
+                foreach (JObject obj in json["data"])
+                {
+                    result.Data.Add(new SearchResultItem
+                    {
+                        Id = (string)obj["id"],
+                        AppVersion = (string)obj["app_version"],
+                        UpdateVersion = (string)obj["update_version"],
+                        GameVersion = (string)obj["game_version"],
+                        Title = (string)obj["title"],
+                        Filename = (string)obj["filename"],
+                    });
+                }
+            }
             return result;
         }
    }

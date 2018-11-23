@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/UI.Console/bin/Debug/netcoreapp2.1/UI.Console.dll",
+            "program": "${workspaceFolder}/UI.Console/bin/Debug/netcoreapp2.1/ps3-disc-dumper.dll",
             "args": [],
             "cwd": "${workspaceFolder}/UI.Console",
             // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window

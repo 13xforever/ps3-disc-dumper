@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using System.IO.Compression;
+using Ionic.Zlib;
 
 namespace IrdLibraryClient.Compression
 {
