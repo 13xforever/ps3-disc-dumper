@@ -26,7 +26,9 @@ namespace IrdLibraryClient.IrdFormat
                     var clusterRange = reader.PathToClusters(filename);
                     if (clusterRange.Length != 1)
                         Log.Warn($"{filename} is split in {clusterRange.Length} ranges");
-                    result.Add(new FileRecord(filename, clusterRange.Min(r => r.Offset), reader.GetFileLength(filename)));
+                    if (filename.EndsWith("."))
+                        Log.Warn($"Fixing potential mastering error in {filename}");
+                    result.Add(new FileRecord(filename.TrimEnd('.'), clusterRange.Min(r => r.Offset), reader.GetFileLength(filename)));
                 }
                 return result.OrderBy(r => r.StartSector).ToList();
             }
