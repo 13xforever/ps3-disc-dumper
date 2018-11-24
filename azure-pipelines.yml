@@ -1,0 +1,50 @@
+# ASP.NET Core
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+jobs:
+- job: Linux
+  displayName: Native Linux binary
+  continueOnError: true
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - script: dotnet restore
+    displayName: 'dotnet restore'
+  - script: dotnet build -c Release
+    displayName: 'dotnet build Release'
+  - script: dotnet build -c Release
+    displayName: 'dotnet build Release'
+  - script: env CppCompilerAndLinker="clang-6.0" dotnet publish -r linux-x64 -c Release-Core /p:DefineConstants="NATIVE"
+    displayName: 'buld native binary'
+
+- job: Windows
+  displayName: Native Windows binary
+  continueOnError: true
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - script: dotnet restore
+    displayName: 'dotnet restore'
+  - script: dotnet build -c Release
+    displayName: 'dotnet build Release'
+  - script: dotnet build -c Release
+    displayName: 'dotnet build Release'
+  - script: dotnet publish -r win-x64 -c Release-Core /p:Platform="Any CPU" /p:DefineConstants="NATIVE"
+    displayName: 'buld native binary'
+
+- job: NET
+  displayName: .NET Framework 4.7.2+ binary
+  continueOnError: true
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - script: dotnet restore
+    displayName: 'dotnet restore'
+  - script: dotnet build -c Release
+    displayName: 'dotnet build Release'
+  - script: dotnet build -c Release
+    displayName: 'dotnet build Release'
+  - script: dotnet publish -r win-x64 -c Release-Core /p:Platform="Any CPU" /p:DefineConstants="NATIVE"
+    displayName: 'buld native binary'
