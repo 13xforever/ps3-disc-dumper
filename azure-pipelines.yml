@@ -40,11 +40,5 @@ jobs:
   pool:
     vmImage: 'vs2017-win2016'
   steps:
-  - script: dotnet restore
-    displayName: 'dotnet restore'
   - script: dotnet build -c Release
-    displayName: 'dotnet build Release'
-  - script: dotnet build -c Release
-    displayName: 'dotnet build Release'
-  - script: dotnet publish -r win-x64 -c Release-Core /p:Platform="Any CPU" /p:DefineConstants="NATIVE"
-    displayName: 'buld native binary'
+    displayName: 'msbuild /p:Configuration=Release'
