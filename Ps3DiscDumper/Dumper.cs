@@ -307,13 +307,14 @@ namespace Ps3DiscDumper
                 CurrentFileNumber++;
                 var convertedFilename = Path.DirectorySeparatorChar == '\\' ? file.Filename : file.Filename.Replace('\\', Path.DirectorySeparatorChar);
                 var inputFilename = Path.Combine(input, convertedFilename);
-
+ 
                 if (!File.Exists(inputFilename))
                 {
                     Log.Error($"Missing {file.Filename}");
                     BrokenFiles.Add((file.Filename, "missing"));
                     continue;
                 }
+
                 var outputFilename = Path.Combine(outputPathBase, convertedFilename);
                 var fileDir = Path.GetDirectoryName(outputFilename);
                 if (!Directory.Exists(fileDir))
