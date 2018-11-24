@@ -23,7 +23,7 @@ How to use
 3. On Linux open terminal in the folder where you put the binary
     1. `$ gzip -d ps3-disc-dumper.gz` to unpack the binary if needed
     2. `$ chmod +x ps3-disc-dumper` make it executable
-    3. Mount the disc (either through file manager or manual `$ mount` to `/media/...`)
+    3. Mount the disc (either through file manager or manually `$ mount` it to `/media/...`)
 3. Start the dumper
 4. Wait for it to complete
 
@@ -33,7 +33,7 @@ You can pass an optional parameter with the path if you want to dump in a custom
 
 If you have custom IRD file that is not available in the IRD Library, you can put it in local cache (`.\ird\` on Windows, `~/.config/ps3-disc-dumper/ird/` on Linux).
 
-Logs can be found in `/logs/` on Windows or in `/var/log/ps3-disc-dumper` on Linux.
+Logs can be found in `/logs/` on Windows or in `~/.config/ps3-disc-dumper/logs/` on Linux.
 
 Requirements
 ============
