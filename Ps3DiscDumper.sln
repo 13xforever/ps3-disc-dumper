@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ps3DiscDumper", "Ps3DiscDum
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI.Console.Msil", "UI.Console.Msil\UI.Console.Msil.csproj", "{372F0CA7-A7EB-4F7E-841B-72D6D0C18F98}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,12 @@ Global
 		{372F0CA7-A7EB-4F7E-841B-72D6D0C18F98}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{372F0CA7-A7EB-4F7E-841B-72D6D0C18F98}.Release|Any CPU.Build.0 = Release|Any CPU
 		{372F0CA7-A7EB-4F7E-841B-72D6D0C18F98}.Release-Core|Any CPU.ActiveCfg = Release|Any CPU
+		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.Release-Core|Any CPU.ActiveCfg = Release|Any CPU
+		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.Release-Core|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

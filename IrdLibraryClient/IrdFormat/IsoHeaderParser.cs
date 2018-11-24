@@ -3,7 +3,12 @@ using System.IO;
 using System.Linq;
 using DiscUtils.Iso9660;
 using DiscUtils.Streams;
+#if NATIVE
 using Ionic.Zlib;
+#else
+using System.IO.Compression;
+#endif
+
 
 namespace IrdLibraryClient.IrdFormat
 {

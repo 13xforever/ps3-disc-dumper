@@ -3,7 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Force.Crc32;
+#if NATIVE
 using Ionic.Zlib;
+#else
+using System.IO.Compression;
+#endif
+
 
 namespace IrdLibraryClient.IrdFormat
 {

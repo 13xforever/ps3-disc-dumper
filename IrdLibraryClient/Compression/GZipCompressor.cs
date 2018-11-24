@@ -1,5 +1,10 @@
 ﻿using System.IO;
+#if NATIVE
 using Ionic.Zlib;
+#else
+using System.IO.Compression;
+#endif
+
 
 namespace IrdLibraryClient.Compression
 {
