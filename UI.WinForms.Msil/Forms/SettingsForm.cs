@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.IO;
 using System.Windows.Forms;
 
 namespace UI.WinForms.Msil
@@ -54,6 +55,36 @@ namespace UI.WinForms.Msil
         private void namePatternTextBox_TextChanged(object sender = null, EventArgs e = null)
         {
             namePatternExampleLabel.Text = PatternFormatter.Format(namePatternTextBox.Text.Trim(), TestItems);
+        }
+
+        private void outputBrowseButton_Click(object sender, EventArgs e)
+        {
+            var fullPath = Path.GetFullPath(outputTextBox.Text);
+            var dialog = new FolderBrowserDialog
+            {
+                Description = "Select output folder",
+                SelectedPath = fullPath,
+            };
+            var dialogResult = dialog.ShowDialog();
+            if (dialogResult != DialogResult.OK || string.IsNullOrEmpty(dialog.SelectedPath) || !Directory.Exists(dialog.SelectedPath))
+                return;
+
+            outputTextBox.Text = dialog.SelectedPath;
+        }
+
+        private void irdButton_Click(object sender, EventArgs e)
+        {
+            var fullPath = Path.GetFullPath(irdTextBox.Text);
+            var dialog = new FolderBrowserDialog
+            {
+                Description = "Select IRD cache folder",
+                SelectedPath = fullPath,
+            };
+            var dialogResult = dialog.ShowDialog();
+            if (dialogResult != DialogResult.OK || string.IsNullOrEmpty(dialog.SelectedPath) || !Directory.Exists(dialog.SelectedPath))
+                return;
+
+            irdTextBox.Text = dialog.SelectedPath;
         }
     }
 }

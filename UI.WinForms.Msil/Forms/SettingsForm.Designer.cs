@@ -87,6 +87,7 @@
             this.outputBrowseButton.TabIndex = 2;
             this.outputBrowseButton.Text = "Browse...";
             this.outputBrowseButton.UseVisualStyleBackColor = true;
+            this.outputBrowseButton.Click += new System.EventHandler(this.outputBrowseButton_Click);
             // 
             // outputTooltip
             // 
@@ -132,6 +133,7 @@
             this.irdButton.TabIndex = 5;
             this.irdButton.Text = "Browse...";
             this.irdButton.UseVisualStyleBackColor = true;
+            this.irdButton.Click += new System.EventHandler(this.irdButton_Click);
             // 
             // namePatternLabel
             // 
@@ -174,7 +176,7 @@
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(12, 108);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(511, 96);
+            this.groupBox1.Size = new System.Drawing.Size(511, 97);
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Available patterns:";
@@ -271,20 +273,22 @@
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(530, 176);
+            this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.cancelButton.Location = new System.Drawing.Point(530, 182);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(74, 23);
-            this.cancelButton.TabIndex = 10;
+            this.cancelButton.TabIndex = 11;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
             // 
             // saveButton
             // 
-            this.saveButton.Location = new System.Drawing.Point(530, 143);
+            this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.saveButton.Location = new System.Drawing.Point(530, 153);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(75, 23);
-            this.saveButton.TabIndex = 11;
+            this.saveButton.TabIndex = 10;
             this.saveButton.Text = "Save";
             this.saveButton.UseVisualStyleBackColor = true;
             this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
@@ -301,7 +305,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(616, 211);
+            this.ClientSize = new System.Drawing.Size(616, 217);
             this.Controls.Add(this.saveButton);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.groupBox1);
