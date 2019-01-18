@@ -12,5 +12,8 @@ namespace UI.WinForms.Msil
 
         [UserScopedSetting, DefaultSettingValue("[%product_code_letters% %product_code_numbers%] %title%")]
         public string DumpNameTemplate { get => (string)this[nameof(DumpNameTemplate)]; set => this[nameof(DumpNameTemplate)] = value; }
+
+        [UserScopedSetting, DefaultSettingValue("false")]
+        public bool Configured { get => (bool)this[nameof(Configured)]; set => this[nameof(Configured)] = value; }
     }
 }
