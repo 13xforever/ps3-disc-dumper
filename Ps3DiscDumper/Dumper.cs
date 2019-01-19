@@ -20,16 +20,14 @@ namespace Ps3DiscDumper
         private static readonly IrdClient Client = new IrdClient();
         private static readonly HashSet<char> InvalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
         private static readonly char[] MultilineSplit = {'\r', '\n'};
-        private readonly string output;
-        private readonly CancellationToken cancellationToken;
         private long currentSector;
 
         public string ProductCode { get; private set; }
         public string Title { get; private set; }
         public string OutputDir { get; private set; }
         private string input;
-        private string IrdFilename { get; set; }
-        private Ird Ird { get; set; }
+        public string IrdFilename { get; private set; }
+        public Ird Ird { get; private set; }
         private Decrypter Decrypter { get; set; }
         public int TotalFileCount { get; private set; }
         public int CurrentFileNumber { get; private set; }
@@ -45,12 +43,6 @@ namespace Ps3DiscDumper
                     return currentSector;
                 return currentSector = tmp.Value;
             }
-        }
-
-        public Dumper(string output, CancellationToken cancellationToken)
-        {
-            this.output = output;
-            this.cancellationToken = cancellationToken;
         }
 
         private List<string> EnumeratePhysicalDrivesWindows()
@@ -129,7 +121,7 @@ namespace Ps3DiscDumper
             return (appVer, updateVer, gameVer);
         }
 
-        public async Task DetectDiscAsync()
+        public async Task DetectDiscAsync(string output, string irdCachePath, CancellationToken cancellationToken)
         {
             string discSfbPath = null;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -172,9 +164,9 @@ namespace Ps3DiscDumper
             OutputDir = new string($"[{ProductCode}] {Title}".ToCharArray().Where(c => !InvalidChars.Contains(c)).ToArray());
             Log.Debug($"Output: {OutputDir}");
             Log.Trace("Searching local cache for match...");
-            if (Directory.Exists(ApiConfig.IrdCachePath))
+            if (Directory.Exists(irdCachePath))
             {
-                var matchingIrdFiles = Directory.GetFiles(ApiConfig.IrdCachePath, "*.ird", SearchOption.TopDirectoryOnly);
+                var matchingIrdFiles = Directory.GetFiles(irdCachePath, "*.ird", SearchOption.TopDirectoryOnly);
                 foreach (var irdFile in matchingIrdFiles)
                 {
                     try
@@ -213,7 +205,7 @@ namespace Ps3DiscDumper
                     Log.Warn($"{irdList.Count} matching IRD files were found???");
                 else
                 {
-                    Ird = await Client.DownloadAsync(irdList[0], ApiConfig.IrdCachePath, cancellationToken).ConfigureAwait(false);
+                    Ird = await Client.DownloadAsync(irdList[0], irdCachePath, cancellationToken).ConfigureAwait(false);
                     IrdFilename = irdList[0].Filename;
                     Log.Info("Using IRD Library");
                 }
@@ -221,7 +213,7 @@ namespace Ps3DiscDumper
             if (Ird == null)
             {
                 Log.Error("No valid matching IRD file could be found");
-                Log.Info($"If you have matching IRD file, you can put it in '{ApiConfig.IrdCachePath}' and try dumping the disc again");
+                Log.Info($"If you have matching IRD file, you can put it in '{irdCachePath}' and try dumping the disc again");
                 return;
             }
 
@@ -251,7 +243,7 @@ namespace Ps3DiscDumper
             }
         }
 
-        public void Dump()
+        public void Dump(string output, CancellationToken cancellationToken)
         {
             var fileInfo = Ird.GetFilesystemStructure();
             foreach (var file in fileInfo)
