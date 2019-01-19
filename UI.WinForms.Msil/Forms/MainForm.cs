@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
+using IrdLibraryClient.IrdFormat;
 using Ps3DiscDumper;
 using Ps3DiscDumper.Utils;
 using UI.WinForms.Msil.Utils;
@@ -99,6 +100,61 @@ namespace UI.WinForms.Msil
                 DetectPhysicalDiscStatus();
         }
 
+        private void selectIrdButton_Click(object sender, EventArgs e)
+        {
+            var dialog = new OpenFileDialog
+            {
+                CheckFileExists = true,
+                DefaultExt = ".ird",
+                Filter = "IRD file (*.ird)|*.ird|All files|*",
+                Title = "Select an IRD file",
+                SupportMultiDottedExtensions = true,
+                InitialDirectory = settings.IrdDir,
+            };
+            var dialogResult = dialog.ShowDialog();
+            if (dialogResult != DialogResult.OK || string.IsNullOrEmpty(dialog.FileName) || !File.Exists(dialog.FileName))
+                return;
+
+            var irdPath = dialog.FileName;
+            try
+            {
+                var ird = IrdParser.Parse(File.ReadAllBytes(irdPath));
+                var irdFilename = Path.GetFileName(irdPath);
+                var cacheFilename = Path.Combine(settings.IrdDir, irdFilename);
+                if (!File.Exists(cacheFilename))
+                    File.Copy(irdPath, cacheFilename);
+
+                if (!currentDumper.IsFullMatch(ird))
+                {
+                    if (currentDumper.IsFilenameSetMatch(ird))
+                    {
+                        var msgResult = MessageBox.Show("Selected IRD file does not fully match with the selected PS3 game disc.\n" +
+                                                        "Successful decryption cannot be guaranteed.\n" +
+                                                        "Do you want to use this IRD file anyway?",
+                            "IRD file check",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Warning);
+                        if (msgResult == DialogResult.No)
+                            return;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Selected IRD file contains incompatible file set, and cannot be used with the selected PS3 game disc.", "IRD file check", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                }
+                currentDumper.Ird = ird;
+                currentDumper.IrdFilename = irdFilename;
+                selectIrdButton.Visible = false;
+                selectIrdButton.Enabled = false;
+                FindMatchingIrdFinished(sender, new RunWorkerCompletedEventArgs(currentDumper, null, currentDumper?.Cts.IsCancellationRequested ?? true));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "IRD Check Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         private void ResetForm()
         {
             productCodeLabel.Text = "";
@@ -128,6 +184,8 @@ namespace UI.WinForms.Msil
 
             rescanDiscsButton.Enabled = true;
             rescanDiscsButton.Visible = true;
+            selectIrdButton.Visible = false;
+            selectIrdButton.Enabled = false;
         }
 
         private void DetectPhysicalDiscStatus()
@@ -200,11 +258,13 @@ namespace UI.WinForms.Msil
             if (e.Cancelled || dumper.Cts.IsCancellationRequested)
                 return;
 
-            if (string.IsNullOrEmpty(dumper.IrdFilename))
+            if (dumper.Ird == null)
             {
                 irdMatchLabel.Text = "No match found";
                 step2StatusLabel.Text = "❌";
                 step2Label.Text = "Select matching IRD file...";
+                selectIrdButton.Enabled = true;
+                selectIrdButton.Visible = true;
             }
             else
             {

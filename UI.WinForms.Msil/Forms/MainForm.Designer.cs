@@ -48,6 +48,7 @@
             this.step2StatusLabel = new System.Windows.Forms.Label();
             this.step1StatusLabel = new System.Windows.Forms.Label();
             this.rescanDiscsButton = new System.Windows.Forms.Button();
+            this.selectIrdButton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -143,6 +144,7 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.selectIrdButton);
             this.groupBox2.Controls.Add(this.step4Label);
             this.groupBox2.Controls.Add(this.step3Label);
             this.groupBox2.Controls.Add(this.step2Label);
@@ -249,6 +251,16 @@
             this.rescanDiscsButton.UseVisualStyleBackColor = true;
             this.rescanDiscsButton.Click += new System.EventHandler(this.rescanDiscsButton_Click);
             // 
+            // selectIrdButton
+            // 
+            this.selectIrdButton.Location = new System.Drawing.Point(332, 58);
+            this.selectIrdButton.Name = "selectIrdButton";
+            this.selectIrdButton.Size = new System.Drawing.Size(26, 26);
+            this.selectIrdButton.TabIndex = 3;
+            this.selectIrdButton.Text = "...";
+            this.selectIrdButton.UseVisualStyleBackColor = true;
+            this.selectIrdButton.Click += new System.EventHandler(this.selectIrdButton_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -293,6 +305,7 @@
         private System.Windows.Forms.Label discSizeLabel;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button rescanDiscsButton;
+        private System.Windows.Forms.Button selectIrdButton;
     }
 }
 

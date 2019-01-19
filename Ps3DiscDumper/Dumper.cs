@@ -28,13 +28,14 @@ namespace Ps3DiscDumper
         public string OutputDir { get; private set; }
         public char Drive { get; set; }
         private string input;
-        public string IrdFilename { get; private set; }
-        public Ird Ird { get; private set; }
+        public string IrdFilename { get; set; }
+        public Ird Ird { get; set; }
         private Decrypter Decrypter { get; set; }
         public int TotalFileCount { get; private set; }
         public int CurrentFileNumber { get; private set; }
         public long TotalSectors { get; private set; }
         public long TotalFileSize { get; private set; }
+        private List<string> DiscFilenames { get; set; }
         public List<(string filename, string error)> BrokenFiles { get; } = new List<(string filename, string error)>();
         public CancellationTokenSource Cts { get; private set; }
 
@@ -135,6 +136,31 @@ namespace Ps3DiscDumper
             return (appVer, updateVer, gameVer);
         }
 
+        public bool IsFullMatch(Ird ird)
+        {
+            var (appVer, updateVer, gameVer) = GetVersions(ParamSfo);
+            return ird.ProductCode == ProductCode
+                   && ird.AppVersion == appVer
+                   && ird.UpdateVersion == updateVer
+                   && ird.GameVersion == gameVer;
+        }
+
+        public bool IsFilenameSetMatch(Ird ird)
+        {
+            var expectedSet = new HashSet<string>(DiscFilenames, StringComparer.InvariantCultureIgnoreCase);
+            var irdSet = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+            var fileInfo = ird.GetFilesystemStructure();
+            foreach (var file in fileInfo)
+            {
+                if (Cts.IsCancellationRequested)
+                    return false;
+
+                var convertedFilename = Path.DirectorySeparatorChar == '\\' ? file.Filename : file.Filename.Replace('\\', Path.DirectorySeparatorChar);
+                irdSet.Add(convertedFilename);
+            }
+            return expectedSet.SetEquals(irdSet);
+        }
+
         public void DetectDisc(Func<Dumper, string> outputDirFormatter = null)
         {
             outputDirFormatter = outputDirFormatter ?? (d => $"[{d.ProductCode}] {d.Title}");
@@ -178,9 +204,14 @@ namespace Ps3DiscDumper
                 Log.Warn($"Product codes in ps3_disc.sfb ({titleId}) and in param.sfo ({ProductCode}) do not match");
 
             var files = IOEx.GetFilepaths(input, "*", SearchOption.AllDirectories);
+            DiscFilenames = new List<string>();
             var totalFilesize = 0L;
+            var rootLength = input.Length;
             foreach (var f in files)
+            {
                 try { totalFilesize += new FileInfo(f).Length; } catch { }
+                DiscFilenames.Add(f.Substring(rootLength));
+            }
             TotalFileSize = totalFilesize;
 
             OutputDir = new string(outputDirFormatter(this).ToCharArray().Where(c => !InvalidChars.Contains(c)).ToArray());
@@ -198,11 +229,23 @@ namespace Ps3DiscDumper
                 {
                     try
                     {
-                        var ird = IrdParser.Parse(File.ReadAllBytes(irdFile));
-                        if (ird.ProductCode == ProductCode
-                            && ird.AppVersion == appVer
-                            && ird.UpdateVersion == updateVer
-                            && ird.GameVersion == gameVer)
+                        Ird ird;
+                        try
+                        {
+                            ird = IrdParser.Parse(File.ReadAllBytes(irdFile));
+                        }
+                        catch (InvalidDataException)
+                        {
+                            File.Delete(irdFile);
+                            continue;
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Warn(e);
+                            continue;
+                        }
+
+                        if (IsFullMatch(ird))
                         {
                             Ird = ird;
                             IrdFilename = Path.GetFileName(irdFile);
