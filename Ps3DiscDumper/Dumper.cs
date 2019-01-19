@@ -32,6 +32,7 @@ namespace Ps3DiscDumper
         public int TotalFileCount { get; private set; }
         public int CurrentFileNumber { get; private set; }
         public long TotalSectors { get; private set; }
+        public long TotalFileSize { get; private set; }
         public List<(string filename, string error)> BrokenFiles { get; } = new List<(string filename, string error)>();
 
         public long CurrentSector
@@ -235,8 +236,8 @@ namespace Ps3DiscDumper
                 if (drive != null)
                 {
                     var spaceAvailable = drive.AvailableFreeSpace;
-                    var spaceRequired = Ird.GetFilesystemStructure().Sum(f => f.Length);
-                    var diff = spaceRequired + 100 * 1024 - spaceAvailable;
+                    TotalFileSize = Ird.GetFilesystemStructure().Sum(f => f.Length);
+                    var diff = TotalFileSize + 100 * 1024 - spaceAvailable;
                     if (diff > 0)
                         Log.Warn($"Target drive might require {diff.AsStorageUnit()} of additional free space");
                 }

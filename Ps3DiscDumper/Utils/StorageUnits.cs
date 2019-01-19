@@ -2,9 +2,10 @@
 {
     public static class StorageUnits
     {
-        private const long UnderKB = 1000;
-        private const long UnderMB = 1000 * 1024;
-        private const long UnderGB = 1000 * 1024 * 1024;
+        private const long UnderKB = 1000L;
+        private const long UnderMB = 1000L * 1024;
+        private const long UnderGB = 1000L * 1024 * 1024;
+        private const long UnderTB = 1000L * 1024 * 1024 * 1024;
 
         public static string AsStorageUnit(this long bytes)
         {
@@ -14,7 +15,9 @@
                 return $"{bytes / 1024.0:0.##} KB";
             if (bytes < UnderGB)
                 return $"{bytes / 1024.0 / 1024:0.##} MB";
-            return $"{bytes / 1024.0 / 1024 / 1024:0.##} GB";
+            if (bytes < UnderTB)
+                return $"{bytes / 1024.0 / 1024 / 1024:0.##} GB";
+            return $"{bytes / 1024.0 / 1024 / 1024:0.##} TB";
         }
     }
 }

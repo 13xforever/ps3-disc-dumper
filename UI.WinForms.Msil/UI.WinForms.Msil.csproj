@@ -95,6 +95,8 @@
     <Compile Include="Forms\SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Utils\DEV_BROADCAST_HDR.cs" />
+    <Compile Include="Utils\DEV_BROADCAST_VOLUME.cs" />
     <EmbeddedResource Include="Forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -124,9 +126,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Utils\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\IrdLibraryClient\IrdLibraryClient.csproj">
       <Project>{ec25c188-51bb-4665-b79b-2ae17cabb01e}</Project>

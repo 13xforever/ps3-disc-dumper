@@ -45,21 +45,25 @@
             this.step2Label = new System.Windows.Forms.Label();
             this.step3Label = new System.Windows.Forms.Label();
             this.step4Label = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.discSizeLabel = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.discSizeLabel);
+            this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.irdMatchLabel);
             this.groupBox1.Controls.Add(this.gameTitleLabel);
             this.groupBox1.Controls.Add(this.productCodeLabel);
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Location = new System.Drawing.Point(181, 12);
+            this.groupBox1.Location = new System.Drawing.Point(347, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(391, 70);
+            this.groupBox1.Size = new System.Drawing.Size(394, 109);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Disc Information";
@@ -67,7 +71,7 @@
             // irdMatchLabel
             // 
             this.irdMatchLabel.AutoSize = true;
-            this.irdMatchLabel.Location = new System.Drawing.Point(97, 46);
+            this.irdMatchLabel.Location = new System.Drawing.Point(87, 89);
             this.irdMatchLabel.Name = "irdMatchLabel";
             this.irdMatchLabel.Size = new System.Drawing.Size(291, 13);
             this.irdMatchLabel.TabIndex = 5;
@@ -76,7 +80,7 @@
             // gameTitleLabel
             // 
             this.gameTitleLabel.AutoSize = true;
-            this.gameTitleLabel.Location = new System.Drawing.Point(97, 33);
+            this.gameTitleLabel.Location = new System.Drawing.Point(87, 43);
             this.gameTitleLabel.Name = "gameTitleLabel";
             this.gameTitleLabel.Size = new System.Drawing.Size(86, 13);
             this.gameTitleLabel.TabIndex = 4;
@@ -85,7 +89,7 @@
             // productCodeLabel
             // 
             this.productCodeLabel.AutoSize = true;
-            this.productCodeLabel.Location = new System.Drawing.Point(97, 20);
+            this.productCodeLabel.Location = new System.Drawing.Point(87, 20);
             this.productCodeLabel.Name = "productCodeLabel";
             this.productCodeLabel.Size = new System.Drawing.Size(65, 13);
             this.productCodeLabel.TabIndex = 3;
@@ -94,7 +98,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 46);
+            this.label3.Location = new System.Drawing.Point(6, 89);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(76, 13);
             this.label3.TabIndex = 2;
@@ -103,7 +107,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 33);
+            this.label2.Location = new System.Drawing.Point(6, 43);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(61, 13);
             this.label2.TabIndex = 1;
@@ -112,7 +116,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 20);
+            this.label1.Location = new System.Drawing.Point(6, 20);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(75, 13);
             this.label1.TabIndex = 0;
@@ -130,7 +134,7 @@
             this.groupBox2.Controls.Add(this.step1StatusLabel);
             this.groupBox2.Location = new System.Drawing.Point(12, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(163, 86);
+            this.groupBox2.Size = new System.Drawing.Size(329, 170);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Steps";
@@ -138,80 +142,106 @@
             // step1StatusLabel
             // 
             this.step1StatusLabel.AutoSize = true;
-            this.step1StatusLabel.Location = new System.Drawing.Point(7, 20);
+            this.step1StatusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.step1StatusLabel.Location = new System.Drawing.Point(6, 22);
             this.step1StatusLabel.Name = "step1StatusLabel";
-            this.step1StatusLabel.Size = new System.Drawing.Size(16, 13);
+            this.step1StatusLabel.Size = new System.Drawing.Size(30, 26);
             this.step1StatusLabel.TabIndex = 0;
             this.step1StatusLabel.Text = "⏳";
             // 
             // step2StatusLabel
             // 
             this.step2StatusLabel.AutoSize = true;
-            this.step2StatusLabel.Location = new System.Drawing.Point(7, 33);
+            this.step2StatusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.step2StatusLabel.Location = new System.Drawing.Point(6, 58);
             this.step2StatusLabel.Name = "step2StatusLabel";
-            this.step2StatusLabel.Size = new System.Drawing.Size(16, 13);
+            this.step2StatusLabel.Size = new System.Drawing.Size(30, 26);
             this.step2StatusLabel.TabIndex = 1;
             this.step2StatusLabel.Text = "⏳";
             // 
             // step3StatusLabel
             // 
             this.step3StatusLabel.AutoSize = true;
-            this.step3StatusLabel.Location = new System.Drawing.Point(7, 46);
+            this.step3StatusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.step3StatusLabel.Location = new System.Drawing.Point(6, 94);
             this.step3StatusLabel.Name = "step3StatusLabel";
-            this.step3StatusLabel.Size = new System.Drawing.Size(16, 13);
+            this.step3StatusLabel.Size = new System.Drawing.Size(30, 26);
             this.step3StatusLabel.TabIndex = 2;
             this.step3StatusLabel.Text = "⏳";
             // 
             // step4StatusLabel
             // 
             this.step4StatusLabel.AutoSize = true;
-            this.step4StatusLabel.Location = new System.Drawing.Point(7, 59);
+            this.step4StatusLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.step4StatusLabel.Location = new System.Drawing.Point(6, 130);
             this.step4StatusLabel.Name = "step4StatusLabel";
-            this.step4StatusLabel.Size = new System.Drawing.Size(16, 13);
+            this.step4StatusLabel.Size = new System.Drawing.Size(30, 26);
             this.step4StatusLabel.TabIndex = 3;
             this.step4StatusLabel.Text = "⏳";
             // 
             // step1Label
             // 
             this.step1Label.AutoSize = true;
-            this.step1Label.Location = new System.Drawing.Point(29, 20);
+            this.step1Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.step1Label.Location = new System.Drawing.Point(42, 22);
             this.step1Label.Name = "step1Label";
-            this.step1Label.Size = new System.Drawing.Size(107, 13);
+            this.step1Label.Size = new System.Drawing.Size(220, 26);
             this.step1Label.TabIndex = 4;
             this.step1Label.Text = "Insert PS3 game disc";
             // 
             // step2Label
             // 
             this.step2Label.AutoSize = true;
-            this.step2Label.Location = new System.Drawing.Point(29, 33);
+            this.step2Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.step2Label.Location = new System.Drawing.Point(42, 58);
             this.step2Label.Name = "step2Label";
-            this.step2Label.Size = new System.Drawing.Size(121, 13);
+            this.step2Label.Size = new System.Drawing.Size(246, 26);
             this.step2Label.TabIndex = 5;
             this.step2Label.Text = "Select matching IRD file";
             // 
             // step3Label
             // 
             this.step3Label.AutoSize = true;
-            this.step3Label.Location = new System.Drawing.Point(29, 46);
+            this.step3Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.step3Label.Location = new System.Drawing.Point(42, 94);
             this.step3Label.Name = "step3Label";
-            this.step3Label.Size = new System.Drawing.Size(112, 13);
+            this.step3Label.Size = new System.Drawing.Size(226, 26);
             this.step3Label.TabIndex = 6;
             this.step3Label.Text = "Decrypt and copy files";
             // 
             // step4Label
             // 
             this.step4Label.AutoSize = true;
-            this.step4Label.Location = new System.Drawing.Point(29, 59);
+            this.step4Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.step4Label.Location = new System.Drawing.Point(42, 130);
             this.step4Label.Name = "step4Label";
-            this.step4Label.Size = new System.Drawing.Size(84, 13);
+            this.step4Label.Size = new System.Drawing.Size(173, 26);
             this.step4Label.TabIndex = 7;
             this.step4Label.Text = "Validate integrity";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(6, 66);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(54, 13);
+            this.label4.TabIndex = 8;
+            this.label4.Text = "Disc Size:";
+            // 
+            // discSizeLabel
+            // 
+            this.discSizeLabel.AutoSize = true;
+            this.discSizeLabel.Location = new System.Drawing.Point(87, 66);
+            this.discSizeLabel.Name = "discSizeLabel";
+            this.discSizeLabel.Size = new System.Drawing.Size(46, 13);
+            this.discSizeLabel.TabIndex = 9;
+            this.discSizeLabel.Text = "45.7 GB";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(584, 304);
+            this.ClientSize = new System.Drawing.Size(753, 197);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -247,6 +277,8 @@
         private System.Windows.Forms.Label step3StatusLabel;
         private System.Windows.Forms.Label step2StatusLabel;
         private System.Windows.Forms.Label step1StatusLabel;
+        private System.Windows.Forms.Label discSizeLabel;
+        private System.Windows.Forms.Label label4;
     }
 }
 
