@@ -4,10 +4,10 @@ namespace UI.WinForms.Msil
 {
     internal sealed class Settings : ApplicationSettingsBase
     {
-        [UserScopedSetting, DefaultSettingValue("./")]
+        [UserScopedSetting, DefaultSettingValue(@".\")]
         public string OutputDir { get => (string)this[nameof(OutputDir)]; set => this[nameof(OutputDir)] = value; }
 
-        [UserScopedSetting, DefaultSettingValue("./ird")]
+        [UserScopedSetting, DefaultSettingValue(@".\ird")]
         public string IrdDir { get => (string)this[nameof(IrdDir)]; set => this[nameof(IrdDir)] = value; }
 
         [UserScopedSetting, DefaultSettingValue("[%product_code_letters% %product_code_numbers%] %title%")]
