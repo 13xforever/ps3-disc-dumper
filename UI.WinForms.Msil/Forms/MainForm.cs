@@ -14,9 +14,7 @@ namespace UI.WinForms.Msil
     {
         private readonly Settings Settings = new Settings();
         private readonly CancellationTokenSource Cts = new CancellationTokenSource();
-        private readonly BackgroundWorker DiscStatusWorker = new BackgroundWorker();
-        private readonly BackgroundWorker DiscDetectWorker = new BackgroundWorker();
-        private readonly BackgroundWorker DiscDumpWorker = new BackgroundWorker();
+        private BackgroundWorker DiscBackgroundWorker;
 
         private const int WM_DEVICECHANGE = 0x219;
 
@@ -72,10 +70,6 @@ namespace UI.WinForms.Msil
             }
 
             ResetForm();
-
-            DiscDetectWorker.WorkerSupportsCancellation = true;
-            DiscDetectWorker.DoWork += DetectPs3DiscGame;
-            DiscDetectWorker.RunWorkerCompleted += DetectDiscFinished;
         }
 
         private void MainForm_Shown(object sender, EventArgs e) => DetectPhysicalDiscStatus();
@@ -100,54 +94,79 @@ namespace UI.WinForms.Msil
             step2Label.Enabled = false;
             step3Label.Enabled = false;
             step4Label.Enabled = false;
+
+            DiscBackgroundWorker?.Dispose();
+            DiscBackgroundWorker = new BackgroundWorker {WorkerSupportsCancellation = true};
+            DiscBackgroundWorker.DoWork += DetectPs3DiscGame;
+            DiscBackgroundWorker.RunWorkerCompleted += DetectPs3DiscGameFinished;
         }
 
         private void DetectPhysicalDiscStatus()
         {
-            if (DiscDetectWorker.IsBusy && !DiscDetectWorker.CancellationPending)
-                DiscDetectWorker.CancelAsync();
-            if (!(DiscDetectWorker.IsBusy || DiscDetectWorker.CancellationPending))
+            if (DiscBackgroundWorker.IsBusy && !DiscBackgroundWorker.CancellationPending)
+                DiscBackgroundWorker.CancelAsync();
+            if (!(DiscBackgroundWorker.IsBusy || DiscBackgroundWorker.CancellationPending))
             {
                 step1Label.Text = "Checking inserted disc...";
-                DiscDetectWorker.RunWorkerAsync(new Dumper());
+                DiscBackgroundWorker.RunWorkerAsync(new Dumper());
             }
         }
 
-        private async void DetectPs3DiscGame(object sender, DoWorkEventArgs doWorkEventArgs)
+        private void DetectPs3DiscGame(object sender, DoWorkEventArgs doWorkEventArgs)
         {
             var dumper = (Dumper)doWorkEventArgs.Argument;
             try
             {
-                await dumper.DetectDiscAsync(Settings.OutputDir, Settings.IrdDir, Cts.Token).ConfigureAwait(false);
+                dumper.DetectDisc();
             }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message, "Disc check error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            catch { }
             doWorkEventArgs.Result = dumper;
         }
 
-        private void DetectDiscFinished(object sender, RunWorkerCompletedEventArgs e)
+        private void DetectPs3DiscGameFinished(object sender, RunWorkerCompletedEventArgs e)
         {
             var dumper = (Dumper)e.Result;
-            if (!string.IsNullOrEmpty(dumper.ProductCode))
-            {
-                step1StatusLabel.Text = "✔";
-                step1Label.Text = "PS3 game disc detected";
-                step2StatusLabel.Text = "⏳";
-                step2Label.Enabled = true;
-
-                productCodeLabel.Text = dumper.ProductCode;
-                gameTitleLabel.Text = dumper.Title;
-                discSizeLabel.Text = dumper.TotalFileSize.AsStorageUnit();
-                //irdMatchLabel.Text = string.IsNullOrEmpty(dumper.IrdFilename) ? "❌" : "✔";
-            }
-            else
+            if (string.IsNullOrEmpty(dumper.ProductCode))
             {
                 ResetForm();
                 return;
             }
 
+            step1StatusLabel.Text = "✔";
+            step1Label.Text = "PS3 game disc detected";
+            step2StatusLabel.Text = "⏳";
+            step2Label.Enabled = true;
+            step2Label.Text = "Looking for matching IRD file...";
+
+            productCodeLabel.Text = dumper.ProductCode;
+            gameTitleLabel.Text = dumper.Title;
+            discSizeLabel.Text = dumper.TotalFileSize.AsStorageUnit();
+            //irdMatchLabel.Text = string.IsNullOrEmpty(dumper.IrdFilename) ? "❌" : "✔";
+
+            DiscBackgroundWorker.DoWork -= DetectPs3DiscGame;
+            DiscBackgroundWorker.RunWorkerCompleted -= DetectPs3DiscGameFinished;
+            DiscBackgroundWorker.DoWork += FindMatchingIrd;
+            DiscBackgroundWorker.RunWorkerCompleted += FindMatchingIrdFinished;
+            DiscBackgroundWorker.RunWorkerAsync(dumper);
+        }
+
+        private void FindMatchingIrd(object sender, DoWorkEventArgs doWorkEventArgs)
+        {
+            var dumper = (Dumper)doWorkEventArgs.Argument;
+            try
+            {
+                dumper.FindIrdAsync(Settings.OutputDir, Settings.IrdDir, Cts.Token).Wait(Cts.Token);
+            }
+            catch (Exception e)
+            {
+//                MessageBox.Show(e.Message, "Disc check error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            doWorkEventArgs.Result = dumper;
+        }
+
+        private void FindMatchingIrdFinished(object sender, RunWorkerCompletedEventArgs e)
+        {
+            var dumper = (Dumper)e.Result;
             if (string.IsNullOrEmpty(dumper.IrdFilename))
             {
                 irdMatchLabel.Text = "No match found";

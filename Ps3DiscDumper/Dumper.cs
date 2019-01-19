@@ -22,9 +22,11 @@ namespace Ps3DiscDumper
         private static readonly char[] MultilineSplit = {'\r', '\n'};
         private long currentSector;
 
+        public ParamSfo ParamSfo { get; private set; }
         public string ProductCode { get; private set; }
         public string Title { get; private set; }
         public string OutputDir { get; private set; }
+        public char Drive { get; set; }
         private string input;
         public string IrdFilename { get; private set; }
         public Ird Ird { get; private set; }
@@ -104,26 +106,32 @@ namespace Ps3DiscDumper
             return titleId;
         }
 
-        private (string appVer, string updateVer, string gameVer) CheckParamSfo(ParamSfo sfo)
+        private void CheckParamSfo(ParamSfo sfo)
         {
-            var updateVer = sfo.Items.FirstOrDefault(i => i.Key == "PS3_SYSTEM_VER")?.StringValue?.Substring(0, 5).TrimStart('0').Trim();
-            var gameVer = sfo.Items.FirstOrDefault(i => i.Key == "VERSION")?.StringValue?.Substring(0, 5).Trim();
-            var appVer = sfo.Items.FirstOrDefault(i => i.Key == "APP_VER")?.StringValue?.Substring(0, 5).Trim();
             Title = sfo.Items.FirstOrDefault(i => i.Key == "TITLE")?.StringValue?.Trim(' ', '\0');
             var titleParts = Title.Split(MultilineSplit, StringSplitOptions.RemoveEmptyEntries);
             if (titleParts.Length > 1)
                 Title = string.Join(" ", titleParts);
             ProductCode = sfo.Items.FirstOrDefault(i => i.Key == "TITLE_ID")?.StringValue?.Trim(' ', '\0');
 
+            Log.Info($"Game title: {Title}");
+        }
+
+        private (string appVer, string updateVer, string gameVer) GetVersions(ParamSfo sfo)
+        {
+            var updateVer = sfo.Items.FirstOrDefault(i => i.Key == "PS3_SYSTEM_VER")?.StringValue?.Substring(0, 5).TrimStart('0').Trim();
+            var gameVer = sfo.Items.FirstOrDefault(i => i.Key == "VERSION")?.StringValue?.Substring(0, 5).Trim();
+            var appVer = sfo.Items.FirstOrDefault(i => i.Key == "APP_VER")?.StringValue?.Substring(0, 5).Trim();
+
             Log.Debug($"Game version: {gameVer}");
             Log.Debug($"App version: {appVer}");
             Log.Debug($"Update version: {updateVer}");
-            Log.Info($"Game title: {Title}");
             return (appVer, updateVer, gameVer);
         }
 
-        public async Task DetectDiscAsync(string output, string irdCachePath, CancellationToken cancellationToken)
+        public void DetectDisc(Func<Dumper, string> outputDirFormatter = null)
         {
+            outputDirFormatter = outputDirFormatter ?? (d => $"[{d.ProductCode}] {d.Title}");
             string discSfbPath = null;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -134,6 +142,7 @@ namespace Ps3DiscDumper
                     if (!File.Exists(discSfbPath))
                         continue;
 
+                    Drive = drive.Name[0];
                     input = drive.Name;
                 }
             }
@@ -155,15 +164,25 @@ namespace Ps3DiscDumper
             if (!File.Exists(paramSfoPath))
                 throw new InvalidOperationException($"Specified folder is not a valid PS3 disc root (param.sfo is missing): {input}");
 
-            ParamSfo sfo;
             using (var stream = File.Open(paramSfoPath, FileMode.Open, FileAccess.Read, FileShare.Read))
-                sfo = ParamSfo.ReadFrom(stream);
-            var (appVer, updateVer, gameVer) = CheckParamSfo(sfo);
+                ParamSfo = ParamSfo.ReadFrom(stream);
+            CheckParamSfo(ParamSfo);
             if (titleId != ProductCode)
                 Log.Warn($"Product codes in ps3_disc.sfb ({titleId}) and in param.sfo ({ProductCode}) do not match");
 
-            OutputDir = new string($"[{ProductCode}] {Title}".ToCharArray().Where(c => !InvalidChars.Contains(c)).ToArray());
+            var files = IOEx.GetFilepaths(input, "*", SearchOption.AllDirectories);
+            var totalFilesize = 0L;
+            foreach (var f in files)
+                try { totalFilesize += new FileInfo(f).Length; } catch { }
+            TotalFileSize = totalFilesize;
+
+            OutputDir = new string(outputDirFormatter(this).ToCharArray().Where(c => !InvalidChars.Contains(c)).ToArray());
             Log.Debug($"Output: {OutputDir}");
+        }
+
+        public async Task FindIrdAsync(string output, string irdCachePath, CancellationToken cancellationToken)
+        {
+            var (appVer, updateVer, gameVer) = GetVersions(ParamSfo);
             Log.Trace("Searching local cache for match...");
             if (Directory.Exists(irdCachePath))
             {
@@ -242,6 +261,7 @@ namespace Ps3DiscDumper
                         Log.Warn($"Target drive might require {diff.AsStorageUnit()} of additional free space");
                 }
             }
+
         }
 
         public void Dump(string output, CancellationToken cancellationToken)
