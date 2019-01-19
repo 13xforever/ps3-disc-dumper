@@ -97,6 +97,7 @@
     </Compile>
     <Compile Include="Utils\DEV_BROADCAST_HDR.cs" />
     <Compile Include="Utils\DEV_BROADCAST_VOLUME.cs" />
+    <Compile Include="Utils\DriveLetterToIdConverter.cs" />
     <EmbeddedResource Include="Forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

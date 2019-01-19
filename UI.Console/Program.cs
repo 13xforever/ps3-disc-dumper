@@ -25,9 +25,9 @@ start:
                 }
 
                 var output = args.Length == 1 ? args[0] : ".";
-                var dumper = new Dumper();
+                var dumper = new Dumper(ApiConfig.Cts);
                 dumper.DetectDisc();
-                await dumper.FindIrdAsync(output, ApiConfig.IrdCachePath, ApiConfig.Cts.Token).ConfigureAwait(false);
+                await dumper.FindIrdAsync(output, ApiConfig.IrdCachePath).ConfigureAwait(false);
                 if (string.IsNullOrEmpty(dumper.OutputDir))
                 {
                     Log.Info("No compatible disc was found, exiting");
@@ -68,7 +68,7 @@ start:
                 });
                 monitor.Start();
 
-                dumper.Dump(output, ApiConfig.Cts.Token);
+                await dumper.DumpAsync(output).ConfigureAwait(false);
 
                 ApiConfig.Cts.Cancel(false);
                 monitor.Join(100);

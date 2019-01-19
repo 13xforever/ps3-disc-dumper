@@ -36,6 +36,12 @@ namespace Ps3DiscDumper
         public long TotalSectors { get; private set; }
         public long TotalFileSize { get; private set; }
         public List<(string filename, string error)> BrokenFiles { get; } = new List<(string filename, string error)>();
+        public CancellationTokenSource Cts { get; private set; }
+
+        public Dumper(CancellationTokenSource cancellationTokenSource)
+        {
+            Cts = cancellationTokenSource;
+        }
 
         public long CurrentSector
         {
@@ -180,7 +186,7 @@ namespace Ps3DiscDumper
             Log.Debug($"Output: {OutputDir}");
         }
 
-        public async Task FindIrdAsync(string output, string irdCachePath, CancellationToken cancellationToken)
+        public async Task FindIrdAsync(string output, string irdCachePath)
         {
             var (appVer, updateVer, gameVer) = GetVersions(ParamSfo);
             Log.Trace("Searching local cache for match...");
@@ -212,7 +218,7 @@ namespace Ps3DiscDumper
             if (Ird == null)
             {
                 Log.Trace("Searching IRD Library for match...");
-                var irdInfoList = await Client.SearchAsync(ProductCode, cancellationToken).ConfigureAwait(false);
+                var irdInfoList = await Client.SearchAsync(ProductCode, Cts.Token).ConfigureAwait(false);
                 var irdList = irdInfoList?.Data?.Where(
                                   i => i.Filename.Substring(0, 9).ToUpperInvariant() == ProductCode?.ToUpperInvariant()
                                        && i.AppVersion == appVer
@@ -225,7 +231,7 @@ namespace Ps3DiscDumper
                     Log.Warn($"{irdList.Count} matching IRD files were found???");
                 else
                 {
-                    Ird = await Client.DownloadAsync(irdList[0], irdCachePath, cancellationToken).ConfigureAwait(false);
+                    Ird = await Client.DownloadAsync(irdList[0], irdCachePath, Cts.Token).ConfigureAwait(false);
                     IrdFilename = irdList[0].Filename;
                     Log.Info("Using IRD Library");
                 }
@@ -264,7 +270,7 @@ namespace Ps3DiscDumper
 
         }
 
-        public void Dump(string output, CancellationToken cancellationToken)
+        public async Task DumpAsync(string output)
         {
             var fileInfo = Ird.GetFilesystemStructure();
             foreach (var file in fileInfo)
@@ -316,6 +322,9 @@ namespace Ps3DiscDumper
 
             foreach (var file in fileInfo)
             {
+                if (Cts.IsCancellationRequested)
+                    return;
+
                 Log.Info($"Reading {file.Filename} ({file.Length.AsStorageUnit()})");
                 CurrentFileNumber++;
                 var convertedFilename = Path.DirectorySeparatorChar == '\\' ? file.Filename : file.Filename.Replace('\\', Path.DirectorySeparatorChar);
@@ -344,7 +353,7 @@ namespace Ps3DiscDumper
                         using (var inputStream = File.Open(inputFilename, FileMode.Open, FileAccess.Read, FileShare.Read))
                         using (Decrypter = new Decrypter(inputStream, physicalDevice, decryptionKey, file.StartSector, sectorSize, unprotectedRegions))
                         {
-                            Decrypter.CopyTo(outputStream);
+                            await Decrypter.CopyToAsync(outputStream, 8*1024*1024, Cts.Token).ConfigureAwait(false);
                             outputStream.Flush();
                             var resultMd5 = Decrypter.GetMd5().ToHexString();
                             if (Decrypter.WasEncrypted && Decrypter.WasUnprotected)

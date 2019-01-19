@@ -12,9 +12,9 @@ namespace UI.WinForms.Msil
 {
     public partial class MainForm : Form
     {
-        private readonly Settings Settings = new Settings();
-        private readonly CancellationTokenSource Cts = new CancellationTokenSource();
-        private BackgroundWorker DiscBackgroundWorker;
+        private readonly Settings settings = new Settings();
+        private BackgroundWorker discBackgroundWorker;
+        private Dumper currentDumper;
 
         private const int WM_DEVICECHANGE = 0x219;
 
@@ -39,19 +39,38 @@ namespace UI.WinForms.Msil
                 var msgType = msg.WParam.ToInt32();
                 switch (msgType)
                 {
+/*
                     case DBT_DEVNODES_CHANGED:
                         DetectPhysicalDiscStatus();
                         break;
+*/
                     case DBT_DEVICEARRIVAL:
-//                    case DBT_DEVICEREMOVECOMPLETE:
+                    case DBT_DEVICEREMOVECOMPLETE:
                         var hdr = (DEV_BROADCAST_HDR)Marshal.PtrToStructure(msg.LParam, typeof(DEV_BROADCAST_HDR));
                         if (hdr.dbch_devicetype == DBT_DEVTYP_VOLUME)
                         {
                             var vol = (DEV_BROADCAST_VOLUME)msg.GetLParam(typeof(DEV_BROADCAST_VOLUME));
                             if ((vol.dbcv_flags & (DBTF_MEDIA | DBTF_MOUNT_ISO)) != 0)
                             {
-//                                if (msgType == DBT_DEVICEARRIVAL)
-                                    DetectPhysicalDiscStatus();
+                                if (msgType == DBT_DEVICEARRIVAL)
+                                {
+                                    if (!discBackgroundWorker.IsBusy)
+                                        DetectPhysicalDiscStatus();
+                                }
+                                else
+                                {
+                                    var dumper = currentDumper;
+                                    var driveId = dumper.Drive.ToDriveId();
+                                    if ((vol.dbcv_unitmask & driveId) != 0)
+                                    {
+                                        if (discBackgroundWorker.IsBusy && !discBackgroundWorker.CancellationPending)
+                                        {
+                                            dumper.Cts.Cancel();
+                                            discBackgroundWorker.CancelAsync();
+                                        }
+                                        ResetForm();
+                                    }
+                                }
                             }
                         }
                         break;
@@ -61,12 +80,12 @@ namespace UI.WinForms.Msil
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            Settings.Reload();
-            if (!Settings.Configured)
+            settings.Reload();
+            if (!settings.Configured)
             {
                 var settingsForm = new SettingsForm();
                 settingsForm.ShowDialog();
-                Settings.Reload();
+                settings.Reload();
             }
 
             ResetForm();
@@ -81,7 +100,7 @@ namespace UI.WinForms.Msil
             irdMatchLabel.Text = "";
             discSizeLabel.Text = "";
 
-            step1StatusLabel.Text = "⏳";
+            step1StatusLabel.Text = "▶";
             step2StatusLabel.Text = "";
             step3StatusLabel.Text = "";
             step4StatusLabel.Text = "";
@@ -95,21 +114,17 @@ namespace UI.WinForms.Msil
             step3Label.Enabled = false;
             step4Label.Enabled = false;
 
-            DiscBackgroundWorker?.Dispose();
-            DiscBackgroundWorker = new BackgroundWorker {WorkerSupportsCancellation = true};
-            DiscBackgroundWorker.DoWork += DetectPs3DiscGame;
-            DiscBackgroundWorker.RunWorkerCompleted += DetectPs3DiscGameFinished;
+            discBackgroundWorker?.Dispose();
+            discBackgroundWorker = new BackgroundWorker {WorkerSupportsCancellation = true};
+            discBackgroundWorker.DoWork += DetectPs3DiscGame;
+            discBackgroundWorker.RunWorkerCompleted += DetectPs3DiscGameFinished;
         }
 
         private void DetectPhysicalDiscStatus()
         {
-            if (DiscBackgroundWorker.IsBusy && !DiscBackgroundWorker.CancellationPending)
-                DiscBackgroundWorker.CancelAsync();
-            if (!(DiscBackgroundWorker.IsBusy || DiscBackgroundWorker.CancellationPending))
-            {
-                step1Label.Text = "Checking inserted disc...";
-                DiscBackgroundWorker.RunWorkerAsync(new Dumper());
-            }
+            step1Label.Text = "Checking inserted disc...";
+            currentDumper = new Dumper(new CancellationTokenSource());
+            discBackgroundWorker.RunWorkerAsync(currentDumper);
         }
 
         private void DetectPs3DiscGame(object sender, DoWorkEventArgs doWorkEventArgs)
@@ -126,6 +141,9 @@ namespace UI.WinForms.Msil
         private void DetectPs3DiscGameFinished(object sender, RunWorkerCompletedEventArgs e)
         {
             var dumper = (Dumper)e.Result;
+            if (e.Cancelled || dumper.Cts.IsCancellationRequested)
+                return;
+
             if (string.IsNullOrEmpty(dumper.ProductCode))
             {
                 ResetForm();
@@ -143,11 +161,11 @@ namespace UI.WinForms.Msil
             discSizeLabel.Text = dumper.TotalFileSize.AsStorageUnit();
             //irdMatchLabel.Text = string.IsNullOrEmpty(dumper.IrdFilename) ? "❌" : "✔";
 
-            DiscBackgroundWorker.DoWork -= DetectPs3DiscGame;
-            DiscBackgroundWorker.RunWorkerCompleted -= DetectPs3DiscGameFinished;
-            DiscBackgroundWorker.DoWork += FindMatchingIrd;
-            DiscBackgroundWorker.RunWorkerCompleted += FindMatchingIrdFinished;
-            DiscBackgroundWorker.RunWorkerAsync(dumper);
+            discBackgroundWorker.DoWork -= DetectPs3DiscGame;
+            discBackgroundWorker.RunWorkerCompleted -= DetectPs3DiscGameFinished;
+            discBackgroundWorker.DoWork += FindMatchingIrd;
+            discBackgroundWorker.RunWorkerCompleted += FindMatchingIrdFinished;
+            discBackgroundWorker.RunWorkerAsync(dumper);
         }
 
         private void FindMatchingIrd(object sender, DoWorkEventArgs doWorkEventArgs)
@@ -155,7 +173,7 @@ namespace UI.WinForms.Msil
             var dumper = (Dumper)doWorkEventArgs.Argument;
             try
             {
-                dumper.FindIrdAsync(Settings.OutputDir, Settings.IrdDir, Cts.Token).Wait(Cts.Token);
+                dumper.FindIrdAsync(settings.OutputDir, settings.IrdDir).Wait(dumper.Cts.Token);
             }
             catch (Exception e)
             {
@@ -167,6 +185,9 @@ namespace UI.WinForms.Msil
         private void FindMatchingIrdFinished(object sender, RunWorkerCompletedEventArgs e)
         {
             var dumper = (Dumper)e.Result;
+            if (e.Cancelled || dumper.Cts.IsCancellationRequested)
+                return;
+
             if (string.IsNullOrEmpty(dumper.IrdFilename))
             {
                 irdMatchLabel.Text = "No match found";
@@ -182,6 +203,8 @@ namespace UI.WinForms.Msil
                 step3Label.Enabled = true;
                 irdMatchLabel.Text = Path.GetFileNameWithoutExtension(dumper.IrdFilename);
             }
+            discBackgroundWorker.DoWork -= FindMatchingIrd;
+            discBackgroundWorker.RunWorkerCompleted -= FindMatchingIrdFinished;
         }
     }
 }
