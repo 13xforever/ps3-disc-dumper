@@ -96,5 +96,15 @@
   <ItemGroup>
     <Folder Include="Utils\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IrdLibraryClient\IrdLibraryClient.csproj">
+      <Project>{ec25c188-51bb-4665-b79b-2ae17cabb01e}</Project>
+      <Name>IrdLibraryClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Ps3DiscDumper\Ps3DiscDumper.csproj">
+      <Project>{c8c058f0-01da-41b9-bbaa-6787c5c755f1}</Project>
+      <Name>Ps3DiscDumper</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
