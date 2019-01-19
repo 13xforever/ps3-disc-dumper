@@ -54,13 +54,12 @@ namespace UI.WinForms.Msil
                             {
                                 if (msgType == DBT_DEVICEARRIVAL)
                                 {
-                                    if (!discBackgroundWorker.IsBusy)
-                                        DetectPhysicalDiscStatus();
+                                    rescanDiscsButton_Click(null, null);
                                 }
                                 else
                                 {
                                     var dumper = currentDumper;
-                                    var driveId = dumper.Drive.ToDriveId();
+                                    var driveId = dumper?.Drive.ToDriveId() ?? 0;
                                     if ((vol.dbcv_unitmask & driveId) != 0)
                                     {
                                         if (discBackgroundWorker.IsBusy && !discBackgroundWorker.CancellationPending)
@@ -91,7 +90,14 @@ namespace UI.WinForms.Msil
             ResetForm();
         }
 
-        private void MainForm_Shown(object sender, EventArgs e) => DetectPhysicalDiscStatus();
+        private void MainForm_Shown(object sender, EventArgs e) => rescanDiscsButton_Click(sender, e);
+
+
+        private void rescanDiscsButton_Click(object sender, EventArgs e)
+        {
+            if (!discBackgroundWorker.IsBusy && currentDumper == null)
+                DetectPhysicalDiscStatus();
+        }
 
         private void ResetForm()
         {
@@ -114,14 +120,19 @@ namespace UI.WinForms.Msil
             step3Label.Enabled = false;
             step4Label.Enabled = false;
 
+            currentDumper = null;
             discBackgroundWorker?.Dispose();
             discBackgroundWorker = new BackgroundWorker {WorkerSupportsCancellation = true};
             discBackgroundWorker.DoWork += DetectPs3DiscGame;
             discBackgroundWorker.RunWorkerCompleted += DetectPs3DiscGameFinished;
+
+            rescanDiscsButton.Enabled = true;
+            rescanDiscsButton.Visible = true;
         }
 
         private void DetectPhysicalDiscStatus()
         {
+            rescanDiscsButton.Enabled = false;
             step1Label.Text = "Checking inserted disc...";
             currentDumper = new Dumper(new CancellationTokenSource());
             discBackgroundWorker.RunWorkerAsync(currentDumper);
@@ -150,6 +161,7 @@ namespace UI.WinForms.Msil
                 return;
             }
 
+            rescanDiscsButton.Visible = false;
             step1StatusLabel.Text = "✔";
             step1Label.Text = "PS3 game disc detected";
             step2StatusLabel.Text = "⏳";

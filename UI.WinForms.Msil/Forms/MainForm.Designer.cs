@@ -47,6 +47,7 @@
             this.step3StatusLabel = new System.Windows.Forms.Label();
             this.step2StatusLabel = new System.Windows.Forms.Label();
             this.step1StatusLabel = new System.Windows.Forms.Label();
+            this.rescanDiscsButton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -237,11 +238,23 @@
             this.step1StatusLabel.TabIndex = 0;
             this.step1StatusLabel.Text = "⏳";
             // 
+            // rescanDiscsButton
+            // 
+            this.rescanDiscsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rescanDiscsButton.Location = new System.Drawing.Point(385, 128);
+            this.rescanDiscsButton.Name = "rescanDiscsButton";
+            this.rescanDiscsButton.Size = new System.Drawing.Size(393, 54);
+            this.rescanDiscsButton.TabIndex = 2;
+            this.rescanDiscsButton.Text = "Re-scan discs";
+            this.rescanDiscsButton.UseVisualStyleBackColor = true;
+            this.rescanDiscsButton.Click += new System.EventHandler(this.rescanDiscsButton_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(788, 197);
+            this.ClientSize = new System.Drawing.Size(788, 192);
+            this.Controls.Add(this.rescanDiscsButton);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -279,6 +292,7 @@
         private System.Windows.Forms.Label step1StatusLabel;
         private System.Windows.Forms.Label discSizeLabel;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button rescanDiscsButton;
     }
 }
 

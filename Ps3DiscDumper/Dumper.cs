@@ -150,6 +150,7 @@ namespace Ps3DiscDumper
 
                     Drive = drive.Name[0];
                     input = drive.Name;
+                    break;
                 }
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
