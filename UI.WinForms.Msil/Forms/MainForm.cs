@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using IrdLibraryClient.IrdFormat;
 using Ps3DiscDumper;
@@ -26,6 +29,18 @@ namespace UI.WinForms.Msil
         private const int DBT_DEVTYP_VOLUME = 0x2;
         private const int DBTF_MEDIA = 0x0001;
         private const int DBTF_MOUNT_ISO = 0x001b0000; // ???????
+
+        private static readonly NameValueCollection RegionMapping = new NameValueCollection
+        {
+            ["A"] = "ASIA",
+            ["E"] = "EU",
+            ["H"] = "HK",
+            ["J"] = "JP",
+            ["K"] = "KR",
+            ["P"] = "JP",
+            ["T"] = "JP",
+            ["U"] = "US",
+        };
 
         public MainForm()
         {
@@ -91,8 +106,51 @@ namespace UI.WinForms.Msil
             ResetForm();
         }
 
-        private void MainForm_Shown(object sender, EventArgs e) => rescanDiscsButton_Click(sender, e);
+        private void ResetForm()
+        {
+            productCodeLabel.Text = "";
+            gameTitleLabel.Text = "";
+            irdMatchLabel.Text = "";
+            discSizeLabel.Text = "";
 
+            step1StatusLabel.Text = "▶";
+            step2StatusLabel.Text = "";
+            step3StatusLabel.Text = "";
+            step4StatusLabel.Text = "";
+
+            step1Label.Text = "Insert PS3 game disc";
+            step2Label.Text = "Select matching IRD file";
+            step3Label.Text = "Decrypt and copy files";
+            step4Label.Text = "Validate integrity";
+
+            step2Label.Enabled = false;
+            step3Label.Enabled = false;
+            step4Label.Enabled = false;
+
+            currentDumper = null;
+            discBackgroundWorker?.Dispose();
+            discBackgroundWorker = new BackgroundWorker { WorkerSupportsCancellation = true };
+            discBackgroundWorker.DoWork += DetectPs3DiscGame;
+            discBackgroundWorker.RunWorkerCompleted += DetectPs3DiscGameFinished;
+
+            rescanDiscsButton.Enabled = true;
+            rescanDiscsButton.Visible = true;
+            selectIrdButton.Visible = false;
+            selectIrdButton.Enabled = false;
+            startDumpingButton.Visible = false;
+            startDumpingButton.Enabled = false;
+            cancelDiscDumpButton.Visible = false;
+            cancelDiscDumpButton.Enabled = false;
+            dumpingProgressLabel.Visible = false;
+            dumpingProgressLabel.Text = "";
+            dumpingProgressBar.Visible = false;
+            dumpingProgressBar.Value = 0;
+        }
+
+        private void MainForm_Shown(object sender, EventArgs e)
+        {
+            rescanDiscsButton_Click(sender, e);
+        }
 
         private void rescanDiscsButton_Click(object sender, EventArgs e)
         {
@@ -128,12 +186,14 @@ namespace UI.WinForms.Msil
                 {
                     if (currentDumper.IsFilenameSetMatch(ird))
                     {
-                        var msgResult = MessageBox.Show("Selected IRD file does not fully match with the selected PS3 game disc.\n" +
-                                                        "Successful decryption cannot be guaranteed.\n" +
-                                                        "Do you want to use this IRD file anyway?",
+                        var msgResult = MessageBox.Show(
+                            "Selected IRD file does not fully match with the selected PS3 game disc.\n" +
+                            "Successful decryption cannot be guaranteed.\n" +
+                            "Do you want to use this IRD file anyway?",
                             "IRD file check",
                             MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Warning);
+                            MessageBoxIcon.Warning
+                        );
                         if (msgResult == DialogResult.No)
                             return;
                     }
@@ -155,37 +215,42 @@ namespace UI.WinForms.Msil
             }
         }
 
-        private void ResetForm()
+        private void startDumpingButton_Click(object sender, EventArgs e)
         {
-            productCodeLabel.Text = "";
-            gameTitleLabel.Text = "";
-            irdMatchLabel.Text = "";
-            discSizeLabel.Text = "";
+            var outputDir = Path.Combine(settings.OutputDir, currentDumper.OutputDir);
+            if (Directory.Exists(outputDir))
+            {
+                var msgResult = MessageBox.Show(
+                    $"Output folder ({currentDumper.OutputDir}) already exists.\n" +
+                    "Are you sure you want to overwrite any existing files?",
+                    "Output folder check",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning
+                );
+                if (msgResult == DialogResult.No)
+                    return;
+            }
 
-            step1StatusLabel.Text = "▶";
-            step2StatusLabel.Text = "";
-            step3StatusLabel.Text = "";
-            step4StatusLabel.Text = "";
+            startDumpingButton.Enabled = false;
+            startDumpingButton.Visible = false;
 
-            step1Label.Text = "Insert PS3 game disc";
-            step2Label.Text = "Select matching IRD file";
-            step3Label.Text = "Decrypt and copy files";
-            step4Label.Text = "Validate integrity";
+            discBackgroundWorker.DoWork += DumpDisc;
+            discBackgroundWorker.RunWorkerCompleted += DumpDiscFinished;
+            discBackgroundWorker.ProgressChanged += DiscDumpUpdateProgress;
+            discBackgroundWorker.RunWorkerAsync(currentDumper);
 
-            step2Label.Enabled = false;
-            step3Label.Enabled = false;
-            step4Label.Enabled = false;
+            cancelDiscDumpButton.Enabled = true;
+            cancelDiscDumpButton.Visible = true;
+            dumpingProgressBar.Visible = true;
+            dumpingProgressLabel.Visible = true;
+        }
 
-            currentDumper = null;
-            discBackgroundWorker?.Dispose();
-            discBackgroundWorker = new BackgroundWorker {WorkerSupportsCancellation = true};
-            discBackgroundWorker.DoWork += DetectPs3DiscGame;
-            discBackgroundWorker.RunWorkerCompleted += DetectPs3DiscGameFinished;
-
-            rescanDiscsButton.Enabled = true;
-            rescanDiscsButton.Visible = true;
-            selectIrdButton.Visible = false;
-            selectIrdButton.Enabled = false;
+        private void cancelDiscDumpButton_Click(object sender, EventArgs e)
+        {
+            discBackgroundWorker.CancelAsync();
+            currentDumper.Cts.Cancel();
+            ResetForm();
+            rescanDiscsButton_Click(sender, e);
         }
 
         private void DetectPhysicalDiscStatus()
@@ -201,7 +266,18 @@ namespace UI.WinForms.Msil
             var dumper = (Dumper)doWorkEventArgs.Argument;
             try
             {
-                dumper.DetectDisc();
+                dumper.DetectDisc(d =>
+                                  {
+                                      var items = new NameValueCollection
+                                      {
+                                          [Patterns.ProductCode] = d.ProductCode,
+                                          [Patterns.ProductCodeLetters] = d.ProductCode?.Substring(0, 4),
+                                          [Patterns.ProductCodeNumbers] = d.ProductCode?.Substring(4),
+                                          [Patterns.Title] = d.Title,
+                                          [Patterns.Region] = RegionMapping[d.ProductCode?.Substring(2, 1) ?? ""],
+                                      };
+                                      return PatternFormatter.Format(settings.DumpNameTemplate, items);
+                                  });
             }
             catch { }
             doWorkEventArgs.Result = dumper;
@@ -274,9 +350,82 @@ namespace UI.WinForms.Msil
                 step3Label.Text = "Start disc decryption...";
                 step3Label.Enabled = true;
                 irdMatchLabel.Text = Path.GetFileNameWithoutExtension(dumper.IrdFilename);
+                rescanDiscsButton.Visible = false;
+                rescanDiscsButton.Enabled = false;
+                startDumpingButton.Enabled = true;
+                startDumpingButton.Visible = true;
+                discBackgroundWorker.DoWork -= FindMatchingIrd;
+                discBackgroundWorker.RunWorkerCompleted -= FindMatchingIrdFinished;
             }
-            discBackgroundWorker.DoWork -= FindMatchingIrd;
-            discBackgroundWorker.RunWorkerCompleted -= FindMatchingIrdFinished;
+        }
+
+        private void DumpDisc(object sender, DoWorkEventArgs doWorkEventArgs)
+        {
+            var backgroundWorker = (BackgroundWorker)sender;
+            var dumper = (Dumper)doWorkEventArgs.Argument;
+            try
+            {
+                var threadCts = new CancellationTokenSource();
+                var combinedToken = CancellationTokenSource.CreateLinkedTokenSource(threadCts.Token, dumper.Cts.Token);
+                var monitor = new Thread(() =>
+                                         {
+                                             try
+                                             {
+                                                 do
+                                                 {
+                                                     if (dumper.CurrentSector > 0)
+                                                         backgroundWorker.ReportProgress((int)(dumper.CurrentSector * 10000L / dumper.TotalSectors), dumper);
+                                                     Task.Delay(1000, combinedToken.Token).GetAwaiter().GetResult();
+                                                 } while (!combinedToken.Token.IsCancellationRequested);
+                                             }
+                                             catch (TaskCanceledException)
+                                             {
+                                             }
+                                         });
+                monitor.Start();
+                dumper.DumpAsync(settings.OutputDir).Wait(dumper.Cts.Token);
+                monitor.Join(100);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message, "Disc dumping error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            doWorkEventArgs.Result = dumper;
+        }
+
+        private void DumpDiscFinished(object sender, RunWorkerCompletedEventArgs e)
+        {
+            var dumper = (Dumper)e.Result;
+            if (e.Cancelled || dumper.Cts.IsCancellationRequested)
+                return;
+
+            cancelDiscDumpButton.Visible = false;
+            cancelDiscDumpButton.Enabled = false;
+            dumpingProgressBar.Visible = false;
+            step3StatusLabel.Text = "✔";
+            step3Label.Text = "Files are decrypted and copied";
+            step4Label.Enabled = true;
+
+            if (dumper.BrokenFiles.Any())
+            {
+                step4StatusLabel.Text = "❌";
+                step4Label.Text = "Dump is corrupted";
+            }
+            else
+            {
+                step4StatusLabel.Text = "✔";
+                step4Label.Text = "Dump is valid";
+            }
+            discBackgroundWorker.DoWork -= DumpDisc;
+            discBackgroundWorker.RunWorkerCompleted -= DumpDiscFinished;
+            discBackgroundWorker.ProgressChanged -= DiscDumpUpdateProgress;
+        }
+
+        private void DiscDumpUpdateProgress(object sender, ProgressChangedEventArgs e)
+        {
+            var dumper = (Dumper)e.UserState;
+            dumpingProgressBar.Value = e.ProgressPercentage;
+            dumpingProgressLabel.Text = $"File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
         }
     }
 }

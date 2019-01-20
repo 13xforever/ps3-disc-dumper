@@ -38,7 +38,9 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
+            this.dumpingProgressBar = new System.Windows.Forms.ProgressBar();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.selectIrdButton = new System.Windows.Forms.Button();
             this.step4Label = new System.Windows.Forms.Label();
             this.step3Label = new System.Windows.Forms.Label();
             this.step2Label = new System.Windows.Forms.Label();
@@ -48,7 +50,9 @@
             this.step2StatusLabel = new System.Windows.Forms.Label();
             this.step1StatusLabel = new System.Windows.Forms.Label();
             this.rescanDiscsButton = new System.Windows.Forms.Button();
-            this.selectIrdButton = new System.Windows.Forms.Button();
+            this.startDumpingButton = new System.Windows.Forms.Button();
+            this.cancelDiscDumpButton = new System.Windows.Forms.Button();
+            this.dumpingProgressLabel = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -142,6 +146,15 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "Product Code:";
             // 
+            // dumpingProgressBar
+            // 
+            this.dumpingProgressBar.Location = new System.Drawing.Point(384, 128);
+            this.dumpingProgressBar.Maximum = 10000;
+            this.dumpingProgressBar.Name = "dumpingProgressBar";
+            this.dumpingProgressBar.Size = new System.Drawing.Size(394, 23);
+            this.dumpingProgressBar.Step = 1;
+            this.dumpingProgressBar.TabIndex = 10;
+            // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.selectIrdButton);
@@ -159,6 +172,16 @@
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Steps";
+            // 
+            // selectIrdButton
+            // 
+            this.selectIrdButton.Location = new System.Drawing.Point(332, 58);
+            this.selectIrdButton.Name = "selectIrdButton";
+            this.selectIrdButton.Size = new System.Drawing.Size(26, 26);
+            this.selectIrdButton.TabIndex = 3;
+            this.selectIrdButton.Text = "...";
+            this.selectIrdButton.UseVisualStyleBackColor = true;
+            this.selectIrdButton.Click += new System.EventHandler(this.selectIrdButton_Click);
             // 
             // step4Label
             // 
@@ -251,21 +274,45 @@
             this.rescanDiscsButton.UseVisualStyleBackColor = true;
             this.rescanDiscsButton.Click += new System.EventHandler(this.rescanDiscsButton_Click);
             // 
-            // selectIrdButton
+            // startDumpingButton
             // 
-            this.selectIrdButton.Location = new System.Drawing.Point(332, 58);
-            this.selectIrdButton.Name = "selectIrdButton";
-            this.selectIrdButton.Size = new System.Drawing.Size(26, 26);
-            this.selectIrdButton.TabIndex = 3;
-            this.selectIrdButton.Text = "...";
-            this.selectIrdButton.UseVisualStyleBackColor = true;
-            this.selectIrdButton.Click += new System.EventHandler(this.selectIrdButton_Click);
+            this.startDumpingButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.startDumpingButton.Location = new System.Drawing.Point(385, 128);
+            this.startDumpingButton.Name = "startDumpingButton";
+            this.startDumpingButton.Size = new System.Drawing.Size(393, 54);
+            this.startDumpingButton.TabIndex = 3;
+            this.startDumpingButton.Text = "Start";
+            this.startDumpingButton.UseVisualStyleBackColor = true;
+            this.startDumpingButton.Click += new System.EventHandler(this.startDumpingButton_Click);
+            // 
+            // cancelDiscDumpButton
+            // 
+            this.cancelDiscDumpButton.Location = new System.Drawing.Point(703, 159);
+            this.cancelDiscDumpButton.Name = "cancelDiscDumpButton";
+            this.cancelDiscDumpButton.Size = new System.Drawing.Size(75, 23);
+            this.cancelDiscDumpButton.TabIndex = 4;
+            this.cancelDiscDumpButton.Text = "Cancel";
+            this.cancelDiscDumpButton.UseVisualStyleBackColor = true;
+            this.cancelDiscDumpButton.Click += new System.EventHandler(this.cancelDiscDumpButton_Click);
+            // 
+            // dumpingProgressLabel
+            // 
+            this.dumpingProgressLabel.Location = new System.Drawing.Point(390, 159);
+            this.dumpingProgressLabel.Name = "dumpingProgressLabel";
+            this.dumpingProgressLabel.Size = new System.Drawing.Size(307, 23);
+            this.dumpingProgressLabel.TabIndex = 11;
+            this.dumpingProgressLabel.Text = "File 1 of 13";
+            this.dumpingProgressLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(788, 192);
+            this.Controls.Add(this.dumpingProgressLabel);
+            this.Controls.Add(this.dumpingProgressBar);
+            this.Controls.Add(this.cancelDiscDumpButton);
+            this.Controls.Add(this.startDumpingButton);
             this.Controls.Add(this.rescanDiscsButton);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -306,6 +353,10 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button rescanDiscsButton;
         private System.Windows.Forms.Button selectIrdButton;
+        private System.Windows.Forms.Button startDumpingButton;
+        private System.Windows.Forms.Button cancelDiscDumpButton;
+        private System.Windows.Forms.ProgressBar dumpingProgressBar;
+        private System.Windows.Forms.Label dumpingProgressLabel;
     }
 }
 

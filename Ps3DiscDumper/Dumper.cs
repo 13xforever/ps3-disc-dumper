@@ -38,6 +38,7 @@ namespace Ps3DiscDumper
         private List<string> DiscFilenames { get; set; }
         public List<(string filename, string error)> BrokenFiles { get; } = new List<(string filename, string error)>();
         public CancellationTokenSource Cts { get; private set; }
+        public bool? ValidationStatus { get; private set; }
 
         public Dumper(CancellationTokenSource cancellationTokenSource)
         {
