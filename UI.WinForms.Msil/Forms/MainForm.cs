@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Shell;
 using IrdLibraryClient.IrdFormat;
 using Ps3DiscDumper;
 using Ps3DiscDumper.Utils;
@@ -16,6 +17,7 @@ namespace UI.WinForms.Msil
 {
     public partial class MainForm : Form
     {
+        private readonly TaskbarItemInfo taskbarItemInfo = new TaskbarItemInfo();
         private readonly Settings settings = new Settings();
         private BackgroundWorker discBackgroundWorker;
         private Dumper currentDumper;
@@ -55,11 +57,6 @@ namespace UI.WinForms.Msil
                 var msgType = msg.WParam.ToInt32();
                 switch (msgType)
                 {
-/*
-                    case DBT_DEVNODES_CHANGED:
-                        DetectPhysicalDiscStatus();
-                        break;
-*/
                     case DBT_DEVICEARRIVAL:
                     case DBT_DEVICEREMOVECOMPLETE:
                         var hdr = (DEV_BROADCAST_HDR)Marshal.PtrToStructure(msg.LParam, typeof(DEV_BROADCAST_HDR));
@@ -149,6 +146,8 @@ namespace UI.WinForms.Msil
             dumpingProgressLabel.Text = "";
             dumpingProgressBar.Visible = false;
             dumpingProgressBar.Value = 0;
+            taskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
+            taskbarItemInfo.ProgressValue = 0;
         }
 
         private void MainForm_Shown(object sender, EventArgs e)
@@ -251,6 +250,7 @@ namespace UI.WinForms.Msil
             cancelDiscDumpButton.Visible = true;
             dumpingProgressBar.Visible = true;
             dumpingProgressLabel.Visible = true;
+            taskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
         }
 
         private void cancelDiscDumpButton_Click(object sender, EventArgs e)
@@ -383,8 +383,8 @@ namespace UI.WinForms.Msil
                                              {
                                                  do
                                                  {
-                                                     if (dumper.TotalSectors > 0)
-                                                        backgroundWorker.ReportProgress((int)(dumper.CurrentSector * 10000L / dumper.TotalSectors), dumper);
+                                                     if (dumper.TotalSectors > 0 && backgroundWorker.IsBusy && !backgroundWorker.CancellationPending)
+                                                        try { backgroundWorker.ReportProgress((int)(dumper.CurrentSector * 10000L / dumper.TotalSectors), dumper); } catch { }
                                                      Task.Delay(1000, combinedToken.Token).GetAwaiter().GetResult();
                                                  } while (!combinedToken.Token.IsCancellationRequested);
                                              }
@@ -394,6 +394,7 @@ namespace UI.WinForms.Msil
                                          });
                 monitor.Start();
                 dumper.DumpAsync(settings.OutputDir).Wait(dumper.Cts.Token);
+                threadCts.Cancel();
                 monitor.Join(100);
             }
             catch (Exception e)
@@ -413,9 +414,15 @@ namespace UI.WinForms.Msil
             cancelDiscDumpButton.Visible = false;
             cancelDiscDumpButton.Enabled = false;
             dumpingProgressBar.Visible = false;
+            taskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
+            taskbarItemInfo.ProgressValue = 0;
+            dumpingProgressLabel.Visible = false;
+            dumpingProgressLabel.Text = "";
             step3StatusLabel.Text = "✔";
             step3Label.Text = "Files are decrypted and copied";
             step4Label.Enabled = true;
+            rescanDiscsButton.Enabled = true;
+            rescanDiscsButton.Visible = true;
 
             if (dumper.BrokenFiles.Any())
             {
@@ -437,6 +444,12 @@ namespace UI.WinForms.Msil
             var dumper = (Dumper)e.UserState;
             dumpingProgressBar.Value = e.ProgressPercentage;
             dumpingProgressLabel.Text = $"File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
+            taskbarItemInfo.ProgressValue = e.ProgressPercentage / 100.0;
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            currentDumper?.Cts.Cancel();
         }
     }
 }
