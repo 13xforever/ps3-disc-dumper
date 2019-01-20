@@ -143,4 +143,7 @@
     <Content Include="LICENSE.EndianBitConverter.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>"$(ProjectDir)..\packages\ILRepack.2.0.16\tools\ILRepack.exe" /targetplatform:v4 /wildcards "/out:$(TargetDir)Packed\$(TargetName).net472.gui$(TargetExt)" "$(TargetPath)" "$(TargetDir)*.dll"</PostBuildEvent>
+  </PropertyGroup>
 </Project>
