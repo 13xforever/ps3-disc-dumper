@@ -97,13 +97,16 @@ namespace UI.WinForms.Msil
         {
             settings.Reload();
             if (!settings.Configured)
-            {
-                var settingsForm = new SettingsForm();
-                settingsForm.ShowDialog();
-                settings.Reload();
-            }
-
+                settingsButton_Click(sender, e);
             ResetForm();
+        }
+
+
+        private void settingsButton_Click(object sender, EventArgs e)
+        {
+            var settingsForm = new SettingsForm();
+            settingsForm.ShowDialog();
+            settings.Reload();
         }
 
         private void ResetForm()
@@ -129,10 +132,11 @@ namespace UI.WinForms.Msil
 
             currentDumper = null;
             discBackgroundWorker?.Dispose();
-            discBackgroundWorker = new BackgroundWorker { WorkerSupportsCancellation = true };
+            discBackgroundWorker = new BackgroundWorker { WorkerSupportsCancellation = true, WorkerReportsProgress = true };
             discBackgroundWorker.DoWork += DetectPs3DiscGame;
             discBackgroundWorker.RunWorkerCompleted += DetectPs3DiscGameFinished;
 
+            settingsButton.Enabled = true;
             rescanDiscsButton.Enabled = true;
             rescanDiscsButton.Visible = true;
             selectIrdButton.Visible = false;
@@ -231,8 +235,12 @@ namespace UI.WinForms.Msil
                     return;
             }
 
+            settingsButton.Enabled = false;
             startDumpingButton.Enabled = false;
             startDumpingButton.Visible = false;
+            step3StatusLabel.Text = "⏳";
+            step3Label.Text = "Decrypting and copying files...";
+
 
             discBackgroundWorker.DoWork += DumpDisc;
             discBackgroundWorker.RunWorkerCompleted += DumpDiscFinished;
@@ -255,6 +263,7 @@ namespace UI.WinForms.Msil
 
         private void DetectPhysicalDiscStatus()
         {
+            settingsButton.Enabled = false;
             rescanDiscsButton.Enabled = false;
             step1Label.Text = "Checking inserted disc...";
             currentDumper = new Dumper(new CancellationTokenSource());
@@ -334,6 +343,7 @@ namespace UI.WinForms.Msil
             if (e.Cancelled || dumper.Cts.IsCancellationRequested)
                 return;
 
+            settingsButton.Enabled = true;
             if (dumper.Ird == null)
             {
                 irdMatchLabel.Text = "No match found";
@@ -373,8 +383,8 @@ namespace UI.WinForms.Msil
                                              {
                                                  do
                                                  {
-                                                     if (dumper.CurrentSector > 0)
-                                                         backgroundWorker.ReportProgress((int)(dumper.CurrentSector * 10000L / dumper.TotalSectors), dumper);
+                                                     if (dumper.TotalSectors > 0)
+                                                        backgroundWorker.ReportProgress((int)(dumper.CurrentSector * 10000L / dumper.TotalSectors), dumper);
                                                      Task.Delay(1000, combinedToken.Token).GetAwaiter().GetResult();
                                                  } while (!combinedToken.Token.IsCancellationRequested);
                                              }
@@ -399,6 +409,7 @@ namespace UI.WinForms.Msil
             if (e.Cancelled || dumper.Cts.IsCancellationRequested)
                 return;
 
+            settingsButton.Enabled = true;
             cancelDiscDumpButton.Visible = false;
             cancelDiscDumpButton.Enabled = false;
             dumpingProgressBar.Visible = false;

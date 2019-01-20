@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.settingsButton = new System.Windows.Forms.Button();
             this.discSizeLabel = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.irdMatchLabel = new System.Windows.Forms.Label();
@@ -59,6 +60,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.settingsButton);
             this.groupBox1.Controls.Add(this.discSizeLabel);
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.irdMatchLabel);
@@ -73,6 +75,16 @@
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Disc Information";
+            // 
+            // settingsButton
+            // 
+            this.settingsButton.Location = new System.Drawing.Point(365, 10);
+            this.settingsButton.Name = "settingsButton";
+            this.settingsButton.Size = new System.Drawing.Size(23, 23);
+            this.settingsButton.TabIndex = 10;
+            this.settingsButton.Text = "⚙";
+            this.settingsButton.UseVisualStyleBackColor = true;
+            this.settingsButton.Click += new System.EventHandler(this.settingsButton_Click);
             // 
             // discSizeLabel
             // 
@@ -357,6 +369,7 @@
         private System.Windows.Forms.Button cancelDiscDumpButton;
         private System.Windows.Forms.ProgressBar dumpingProgressBar;
         private System.Windows.Forms.Label dumpingProgressLabel;
+        private System.Windows.Forms.Button settingsButton;
     }
 }
 

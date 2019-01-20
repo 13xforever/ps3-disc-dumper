@@ -50,6 +50,7 @@ namespace UI.WinForms.Msil
             Settings.DumpNameTemplate = namePatternTextBox.Text.Trim();
             Settings.Configured = true;
             Settings.Save();
+            Close();
         }
 
         private void namePatternTextBox_TextChanged(object sender = null, EventArgs e = null)
