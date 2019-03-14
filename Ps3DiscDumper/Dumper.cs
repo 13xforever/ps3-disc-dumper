@@ -327,6 +327,7 @@ namespace Ps3DiscDumper
             TotalFileCount = fileInfo.Count;
             TotalSectors = Ird.GetTotalSectors();
             var decryptionKey = Decrypter.GetDecryptionKey(Ird);
+            Log.Debug("Using decryption key: " + decryptionKey.ToHexString());
             var sectorSize = Ird.GetSectorSize();
             var unprotectedRegions = Ird.GetUnprotectedRegions();
             string physicalDevice = null;

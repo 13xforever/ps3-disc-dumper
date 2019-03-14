@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IrdLibraryClient\IrdLibraryClient.csproj" />
+    <ProjectReference Include="..\Ps3DiscDumper\Ps3DiscDumper.csproj" />
   </ItemGroup>
 
 </Project>
