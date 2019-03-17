@@ -4,11 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DiscUtils.Iso9660;
 using IrdLibraryClient;
 using IrdLibraryClient.IrdFormat;
 using IrdLibraryClient.POCOs;
+using Ps3DiscDumper.DiscKeyProviders;
 using Ps3DiscDumper.Sfb;
 using Ps3DiscDumper.Sfo;
 using Ps3DiscDumper.Utils;
@@ -17,10 +20,14 @@ namespace Ps3DiscDumper
 {
     public class Dumper
     {
-        private static readonly IrdClient Client = new IrdClient();
         private static readonly HashSet<char> InvalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
         private static readonly char[] MultilineSplit = {'\r', '\n'};
         private long currentSector;
+        private static readonly IDiscKeyProvider[] DiscKeyProviders = {new IrdProvider(), new RedumpProvider(),};
+        private static readonly Dictionary<string, HashSet<DiscKeyInfo>> AllKnownDiscKeys = new Dictionary<string, HashSet<DiscKeyInfo>>();
+        private readonly HashSet<string> TestedDiscKeys = new HashSet<string>();
+        private byte[] discSfbData;
+        private static readonly byte[] LicenseMagic = Encoding.UTF8.GetBytes("PS3LICDA");
 
         public ParamSfo ParamSfo { get; private set; }
         public string ProductCode { get; private set; }
@@ -28,8 +35,7 @@ namespace Ps3DiscDumper
         public string OutputDir { get; private set; }
         public char Drive { get; set; }
         private string input;
-        public string IrdFilename { get; set; }
-        public Ird Ird { get; set; }
+        public string DiscKeyFilename { get; set; }
         private Decrypter Decrypter { get; set; }
         public int TotalFileCount { get; private set; }
         public int CurrentFileNumber { get; private set; }
@@ -39,6 +45,8 @@ namespace Ps3DiscDumper
         public List<(string filename, string error)> BrokenFiles { get; } = new List<(string filename, string error)>();
         public CancellationTokenSource Cts { get; private set; }
         public bool? ValidationStatus { get; private set; }
+
+        public Action<string> OnDiscKeyFound = null;
 
         public Dumper(CancellationTokenSource cancellationTokenSource)
         {
@@ -125,27 +133,7 @@ namespace Ps3DiscDumper
             Log.Info($"Game title: {Title}");
         }
 
-        private (string appVer, string updateVer, string gameVer) GetVersions(ParamSfo sfo)
-        {
-            var updateVer = sfo.Items.FirstOrDefault(i => i.Key == "PS3_SYSTEM_VER")?.StringValue?.Substring(0, 5).TrimStart('0').Trim();
-            var gameVer = sfo.Items.FirstOrDefault(i => i.Key == "VERSION")?.StringValue?.Substring(0, 5).Trim();
-            var appVer = sfo.Items.FirstOrDefault(i => i.Key == "APP_VER")?.StringValue?.Substring(0, 5).Trim();
-
-            Log.Debug($"Game version: {gameVer}");
-            Log.Debug($"App version: {appVer}");
-            Log.Debug($"Update version: {updateVer}");
-            return (appVer, updateVer, gameVer);
-        }
-
-        public bool IsFullMatch(Ird ird)
-        {
-            var (appVer, updateVer, gameVer) = GetVersions(ParamSfo);
-            return ird.ProductCode == ProductCode
-                   && ird.AppVersion == appVer
-                   && ird.UpdateVersion == updateVer
-                   && ird.GameVersion == gameVer;
-        }
-
+/*
         public bool IsFilenameSetMatch(Ird ird)
         {
             var expectedSet = new HashSet<string>(DiscFilenames, StringComparer.InvariantCultureIgnoreCase);
@@ -161,6 +149,7 @@ namespace Ps3DiscDumper
             }
             return expectedSet.SetEquals(irdSet);
         }
+*/
 
         public void DetectDisc(Func<Dumper, string> outputDirFormatter = null)
         {
@@ -192,7 +181,7 @@ namespace Ps3DiscDumper
                 throw new DriveNotFoundException("No valid PS3 disc was detected. Disc must be detected and mounted.");
 
             Log.Info("Selected disc: " + input);
-            var discSfbData = File.ReadAllBytes(discSfbPath);
+            discSfbData = File.ReadAllBytes(discSfbPath);
             var titleId = CheckDiscSfb(discSfbData);
             var paramSfoPath = Path.Combine(input, "PS3_GAME", "PARAM.SFO");
             if (!File.Exists(paramSfoPath))
@@ -219,117 +208,30 @@ namespace Ps3DiscDumper
             Log.Debug($"Output: {OutputDir}");
         }
 
-        public async Task FindIrdAsync(string output, string irdCachePath)
+        public async Task DumpAsync(string output, string discKeyCachePath)
         {
-            var (appVer, updateVer, gameVer) = GetVersions(ParamSfo);
-            Log.Trace("Searching local cache for match...");
-            if (Directory.Exists(irdCachePath))
+            // reload disc keys
+            foreach (var keyProvider in DiscKeyProviders)
             {
-                var matchingIrdFiles = Directory.GetFiles(irdCachePath, "*.ird", SearchOption.TopDirectoryOnly);
-                foreach (var irdFile in matchingIrdFiles)
+                var newKeys = await keyProvider.EnumerateAsync(discKeyCachePath, ProductCode, Cts.Token).ConfigureAwait(false);
+                lock(AllKnownDiscKeys)
                 {
-                    try
+                    foreach (var keyInfo in newKeys)
                     {
-                        Ird ird;
-                        try
-                        {
-                            ird = IrdParser.Parse(File.ReadAllBytes(irdFile));
-                        }
-                        catch (InvalidDataException)
-                        {
-                            File.Delete(irdFile);
-                            continue;
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Warn(e);
-                            continue;
-                        }
-
-                        if (IsFullMatch(ird))
-                        {
-                            Ird = ird;
-                            IrdFilename = Path.GetFileName(irdFile);
-                            Log.Info("Using local IRD cache");
-                            break;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Warn(e, e.Message);
+                        if (!AllKnownDiscKeys.TryGetValue(keyInfo.DecryptedKeyId, out var duplicates))
+                            AllKnownDiscKeys[keyInfo.DecryptedKeyId] = duplicates = new HashSet<DiscKeyInfo>();
+                        duplicates.Add(keyInfo);
                     }
                 }
             }
-            if (Ird == null)
-            {
-                Log.Trace("Searching IRD Library for match...");
-                var irdInfoList = await Client.SearchAsync(ProductCode, Cts.Token).ConfigureAwait(false);
-                var irdList = irdInfoList?.Data?.Where(
-                                  i => i.Filename.Substring(0, 9).ToUpperInvariant() == ProductCode?.ToUpperInvariant()
-                                       && i.AppVersion == appVer
-                                       && i.UpdateVersion == updateVer
-                                       && i.GameVersion == gameVer
-                              ).ToList() ?? new List<SearchResultItem>(0);
-                if (irdList.Count == 0)
-                    Log.Error("No matching IRD file was found in the Library");
-                else if (irdList.Count > 1)
-                    Log.Warn($"{irdList.Count} matching IRD files were found???");
-                else
-                {
-                    Ird = await Client.DownloadAsync(irdList[0], irdCachePath, Cts.Token).ConfigureAwait(false);
-                    IrdFilename = irdList[0].Filename;
-                    Log.Info("Using IRD Library");
-                }
-            }
-            if (Ird == null)
-            {
-                Log.Error("No valid matching IRD file could be found");
-                Log.Info($"If you have matching IRD file, you can put it in '{irdCachePath}' and try dumping the disc again");
-                return;
-            }
+            // check if user provided something new since the last attempt
+            var untestedKeys = new HashSet<string>();
+            lock (AllKnownDiscKeys)
+                untestedKeys.UnionWith(AllKnownDiscKeys.Keys);
+            untestedKeys.ExceptWith(TestedDiscKeys);
+            if (untestedKeys.Count == 0)
+                throw new KeyNotFoundException("No valid disc decryption key was found");
 
-            Log.Info($"Matching IRD: {IrdFilename}");
-
-            var dumpPath = output;
-            while (!string.IsNullOrEmpty(dumpPath) && !Directory.Exists(dumpPath))
-            {
-                var parent = Path.GetDirectoryName(dumpPath);
-                if (parent == null || parent == dumpPath)
-                    dumpPath = null;
-                else
-                    dumpPath = parent;
-            }
-            if (!string.IsNullOrEmpty(dumpPath))
-            {
-                var root = Path.GetPathRoot(Path.GetFullPath(output));
-                var drive = DriveInfo.GetDrives().FirstOrDefault(d => d?.RootDirectory.FullName.StartsWith(root) ?? false);
-                if (drive != null)
-                {
-                    var spaceAvailable = drive.AvailableFreeSpace;
-                    TotalFileSize = Ird.GetFilesystemStructure().Sum(f => f.Length);
-                    var diff = TotalFileSize + 100 * 1024 - spaceAvailable;
-                    if (diff > 0)
-                        Log.Warn($"Target drive might require {diff.AsStorageUnit()} of additional free space");
-                }
-            }
-
-        }
-
-        public async Task DumpAsync(string output)
-        {
-            var fileInfo = Ird.GetFilesystemStructure();
-            foreach (var file in fileInfo)
-                Log.Trace($"0x{file.StartSector:x8}: {file.Filename} ({file.Length})");
-            var outputPathBase = Path.Combine(output, OutputDir);
-            if (!Directory.Exists(outputPathBase))
-                Directory.CreateDirectory(outputPathBase);
-
-            TotalFileCount = fileInfo.Count;
-            TotalSectors = Ird.GetTotalSectors();
-            var decryptionKey = Decrypter.GetDecryptionKey(Ird);
-            Log.Debug("Using decryption key: " + decryptionKey.ToHexString());
-            var sectorSize = Ird.GetSectorSize();
-            var unprotectedRegions = Ird.GetUnprotectedRegions();
             string physicalDevice = null;
             List<string> physicalDrives;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -342,19 +244,30 @@ namespace Ps3DiscDumper
             if (physicalDrives.Count == 0)
                 throw new InvalidOperationException("No optical drives were found");
 
-            var firstSector = Ird.GetFirstSector(sectorSize);
             foreach (var drive in physicalDrives)
             {
                 try
                 {
                     using (var discStream = File.Open(drive, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    using (var reader = new BinaryReader(discStream))
                     {
-                        var bytes = reader.ReadBytes(firstSector.Length);
-                        if (bytes.SequenceEqual(firstSector))
+                        var discReader = new CDReader(discStream, true, true);
+                        if (discReader.FileExists("/PS3_DISC.SFB"))
                         {
-                            physicalDevice = drive;
-                            break;
+                            var discSfbInfo = discReader.GetFileInfo("/PS3_DISC.SFB");
+                            if (discSfbInfo.Length == discSfbData.Length)
+                            {
+                                using (var testSfbStream = discSfbInfo.OpenRead())
+                                using (var memStream = new MemoryStream())
+                                {
+                                    await testSfbStream.CopyToAsync(memStream).ConfigureAwait(false);
+                                    if (memStream.ToArray().SequenceEqual(discSfbData))
+                                    {
+                                        physicalDevice = drive;
+                                        break;
+                                    }
+                                }
+
+                            }
                         }
                     }
                 }
@@ -363,72 +276,153 @@ namespace Ps3DiscDumper
                     Log.Debug($"Skipping drive {drive}: {e.Message}");
                 }
             }
-            if (string.IsNullOrEmpty(physicalDevice))
-                throw new DriveNotFoundException("No matching physical device was found");
+            if (physicalDevice == null)
+                throw new AccessViolationException("Couldn't get physical access to the drive");
 
-            foreach (var file in fileInfo)
+            using (var driveStream = File.Open(physicalDevice, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
+                var discReader = new CDReader(driveStream, true, true);
+                var filesystemStructure = discReader.GetFilesystemStructure();
+                var licInfo = filesystemStructure.FirstOrDefault(fr => fr.Filename.EndsWith("LICDIR/LIC.DAT"));
+                if (licInfo == null)
+                    throw new FileNotFoundException("Couldn't find a single disc license file, please report");
+
                 if (Cts.IsCancellationRequested)
                     return;
 
-                Log.Info($"Reading {file.Filename} ({file.Length.AsStorageUnit()})");
-                CurrentFileNumber++;
-                var convertedFilename = Path.DirectorySeparatorChar == '\\' ? file.Filename : file.Filename.Replace('\\', Path.DirectorySeparatorChar);
-                var inputFilename = Path.Combine(input, convertedFilename);
- 
-                if (!File.Exists(inputFilename))
+                driveStream.Seek(licInfo.StartSector, SeekOrigin.Begin);
+                var licSector = new byte[discReader.ClusterSize];
+                var sectorIV = Decrypter.GetSectorIV(licInfo.StartSector);
+                driveStream.ReadExact(licSector, 0, licSector.Length);
+                var discKey = untestedKeys.FirstOrDefault(k => !Cts.IsCancellationRequested && IsValidDiscKey(k, licSector, sectorIV));
+                if (discKey == null)
+                    throw new KeyNotFoundException("No valid disc decryption key was found");
+
+                if (Cts.IsCancellationRequested)
+                    return;
+
+                HashSet<DiscKeyInfo> allMatchingKeys;
+                lock (AllKnownDiscKeys)
+                AllKnownDiscKeys.TryGetValue(discKey, out allMatchingKeys);
+
+                var dumpPath = output;
+                while (!string.IsNullOrEmpty(dumpPath) && !Directory.Exists(dumpPath))
                 {
-                    Log.Error($"Missing {file.Filename}");
-                    BrokenFiles.Add((file.Filename, "missing"));
-                    continue;
+                    var parent = Path.GetDirectoryName(dumpPath);
+                    if (parent == null || parent == dumpPath)
+                        dumpPath = null;
+                    else
+                        dumpPath = parent;
+                }
+                if (!string.IsNullOrEmpty(dumpPath))
+                {
+                    var root = Path.GetPathRoot(Path.GetFullPath(output));
+                    var drive = DriveInfo.GetDrives().FirstOrDefault(d => d?.RootDirectory.FullName.StartsWith(root) ?? false);
+                    if (drive != null)
+                    {
+                        var spaceAvailable = drive.AvailableFreeSpace;
+                        TotalFileSize = filesystemStructure.Sum(f => f.Length);
+                        var diff = TotalFileSize + 100 * 1024 - spaceAvailable;
+                        if (diff > 0)
+                            Log.Warn($"Target drive might require {diff.AsStorageUnit()} of additional free space");
+                    }
                 }
 
-                var outputFilename = Path.Combine(outputPathBase, convertedFilename);
-                var fileDir = Path.GetDirectoryName(outputFilename);
-                if (!Directory.Exists(fileDir))
-                    Directory.CreateDirectory(fileDir);
+                foreach (var file in filesystemStructure)
+                    Log.Trace($"0x{file.StartSector:x8}: {file.Filename} ({file.Length})");
+                var outputPathBase = Path.Combine(output, OutputDir);
+                if (!Directory.Exists(outputPathBase))
+                    Directory.CreateDirectory(outputPathBase);
 
-                var error = false;
-                var expectedMd5 = Ird.Files.First(f => f.Offset == file.StartSector).Md5Checksum.ToHexString();
-                var lastMd5 = expectedMd5;
-                do
+                TotalFileCount = filesystemStructure.Count;
+                TotalSectors = discReader.TotalClusters;
+                Log.Debug("Using decryption key: " + discKey);
+                var decryptionKey = allMatchingKeys.First().DecryptedKey;
+                var sectorSize = (int)discReader.ClusterSize;
+                var unprotectedRegions = driveStream.GetUnprotectedRegions();
+
+                foreach (var file in filesystemStructure)
                 {
-                    try
+                    if (Cts.IsCancellationRequested)
+                        return;
+
+                    Log.Info($"Reading {file.Filename} ({file.Length.AsStorageUnit()})");
+                    CurrentFileNumber++;
+                    var convertedFilename = Path.DirectorySeparatorChar == '\\' ? file.Filename : file.Filename.Replace('\\', Path.DirectorySeparatorChar);
+                    var inputFilename = Path.Combine(input, convertedFilename);
+
+                    if (!File.Exists(inputFilename))
                     {
-                        using (var outputStream = File.Open(outputFilename, FileMode.Create, FileAccess.Write, FileShare.Read))
-                        using (var inputStream = File.Open(inputFilename, FileMode.Open, FileAccess.Read, FileShare.Read))
-                        using (Decrypter = new Decrypter(inputStream, physicalDevice, decryptionKey, file.StartSector, sectorSize, unprotectedRegions))
+                        Log.Error($"Missing {file.Filename}");
+                        BrokenFiles.Add((file.Filename, "missing"));
+                        continue;
+                    }
+
+                    var outputFilename = Path.Combine(outputPathBase, convertedFilename);
+                    var fileDir = Path.GetDirectoryName(outputFilename);
+                    if (!Directory.Exists(fileDir))
+                        Directory.CreateDirectory(fileDir);
+
+                    var error = false;
+                    //var expectedMd5 = Ird.Files.First(f => f.Offset == file.StartSector).Md5Checksum.ToHexString();
+                    //var lastMd5 = expectedMd5;
+                    string lastMd5 = null;
+                    do
+                    {
+                        try
                         {
-                            await Decrypter.CopyToAsync(outputStream, 8*1024*1024, Cts.Token).ConfigureAwait(false);
-                            outputStream.Flush();
-                            var resultMd5 = Decrypter.GetMd5().ToHexString();
-                            if (Decrypter.WasEncrypted && Decrypter.WasUnprotected)
-                                Log.Debug("Partially decrypted");
-                            else if (Decrypter.WasEncrypted)
-                                Log.Debug("Decrypted");
-                            if (expectedMd5 != resultMd5)
+                            using (var outputStream = File.Open(outputFilename, FileMode.Create, FileAccess.Write, FileShare.Read))
+                            using (var inputStream = File.Open(inputFilename, FileMode.Open, FileAccess.Read, FileShare.Read))
+                            using (Decrypter = new Decrypter(inputStream, driveStream, decryptionKey, file.StartSector, sectorSize, unprotectedRegions))
                             {
-                                error = true;
-                                var msg = $"Expected {expectedMd5}, but was {resultMd5}";
-                                if (lastMd5 == resultMd5 || Decrypter.LastBlockCorrupted)
+                                await Decrypter.CopyToAsync(outputStream, 8 * 1024 * 1024, Cts.Token).ConfigureAwait(false);
+                                outputStream.Flush();
+                                var resultMd5 = Decrypter.GetMd5().ToHexString();
+                                if (Decrypter.WasEncrypted && Decrypter.WasUnprotected)
+                                    Log.Debug("Partially decrypted");
+                                else if (Decrypter.WasEncrypted)
+                                    Log.Debug("Decrypted");
+/*
+                                if (expectedMd5 != resultMd5)
                                 {
-                                    Log.Error(msg);
-                                    BrokenFiles.Add((file.Filename, "corrupted"));
-                                    break;
+                                    error = true;
+                                    var msg = $"Expected {expectedMd5}, but was {resultMd5}";
+                                    if (lastMd5 == resultMd5 || Decrypter.LastBlockCorrupted)
+                                    {
+                                        Log.Error(msg);
+                                        BrokenFiles.Add((file.Filename, "corrupted"));
+                                        break;
+                                    }
+                                    Log.Warn(msg + ", retrying");
                                 }
-                                Log.Warn(msg + ", retrying");
+*/
+                                lastMd5 = resultMd5;
                             }
-                            lastMd5 = resultMd5;
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Error(e, e.Message);
-                        error = true;
-                    }
-                } while (error);
+                        catch (Exception e)
+                        {
+                            Log.Error(e, e.Message);
+                            error = true;
+                        }
+                    } while (error);
+                }
+                Log.Info("Completed");
             }
-            Log.Info("Completed");
+        }
+
+        private static bool IsValidDiscKey(string discKeyId, byte[] licSector, byte[] sectorIV)
+        {
+            HashSet<DiscKeyInfo> keys;
+            lock (AllKnownDiscKeys)
+                if (!AllKnownDiscKeys.TryGetValue(discKeyId, out keys))
+                    return false;
+
+            var key = keys.FirstOrDefault()?.DecryptedKey;
+            if (key == null)
+                return false;
+
+            var licBytes = Decrypter.DecryptSector(key, licSector, sectorIV);
+            return LicenseMagic.SequenceEqual(licBytes);
         }
     }
 }

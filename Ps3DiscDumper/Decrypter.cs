@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using IrdLibraryClient;
-using IrdLibraryClient.IrdFormat;
 using Ps3DiscDumper.Utils;
 
 namespace Ps3DiscDumper
@@ -15,7 +14,7 @@ namespace Ps3DiscDumper
         private static readonly byte[] IV = "69474772af6fdab342743aefaa186287".ToByteArray();
 
         private Stream inputStream;
-        private readonly string physicalDevice;
+        private Stream discStream;
         private byte[] decryptionKey;
         private readonly int sectorSize;
         private readonly MD5 md5;
@@ -23,15 +22,15 @@ namespace Ps3DiscDumper
         private byte[] bufferedSector, tmpSector, hash = null;
         private readonly List<(int start, int end)> unprotectedSectorRanges;
 
-        public static byte[] GetDecryptionKey(Ird ird)
+        public static byte[] GetDecryptionKey(byte[] data1)
         {
             using (var aes = Aes.Create())
             {
-                aes.BlockSize = ird.Data1.Length * 8;
+                aes.BlockSize = data1.Length * 8;
                 aes.Mode = CipherMode.CBC;
                 aes.Padding = PaddingMode.None;
                 using (var transform = aes.CreateEncryptor(Secret, IV))
-                    return transform.TransformFinalBlock(ird.Data1, 0, ird.Data1.Length);
+                    return transform.TransformFinalBlock(data1, 0, data1.Length);
             }
         }
 
@@ -46,10 +45,21 @@ namespace Ps3DiscDumper
             return result;
         }
 
-        public Decrypter(Stream input, string physicalDevice, byte[] decryptionKey, long startSector, int sectorSize, List<(int start, int end)> unprotectedSectorRanges)
+        public static byte[] DecryptSector(byte[] decryptionKey, byte[] sector, byte[] sectorIV)
         {
-            if (input == null)
-                throw new ArgumentNullException(nameof(input));
+            using (var aes = Aes.Create())
+            {
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.None;
+                using (var aesTransform = aes.CreateDecryptor(decryptionKey, sectorIV))
+                    return aesTransform.TransformFinalBlock(sector, 0, sector.Length);
+            }
+        }
+
+        public Decrypter(Stream fileStream, Stream discStream, byte[] decryptionKey, long startSector, int sectorSize, List<(int start, int end)> unprotectedSectorRanges)
+        {
+            if (fileStream == null)
+                throw new ArgumentNullException(nameof(fileStream));
 
             if (decryptionKey == null)
                 throw new ArgumentNullException(nameof(decryptionKey));
@@ -57,17 +67,17 @@ namespace Ps3DiscDumper
             if (decryptionKey.Length != 128 / 8 && decryptionKey.Length != 256 / 8)
                 throw new ArgumentException($"Unsupported decryption key size of {decryptionKey.Length * 8} bits. Expected 128 or 256 bit key");
 
-            if (!input.CanRead)
-                throw new ArgumentException("Input stream should be readable", nameof(input));
+            if (!fileStream.CanRead)
+                throw new ArgumentException("Input stream should be readable", nameof(fileStream));
 
-            if (string.IsNullOrEmpty(physicalDevice))
+            if (discStream == null)
                 throw new ArgumentException("Physical device is needed for proper decryption");
 
             if (sectorSize == 0)
                 throw new ArgumentException("Sector size cannot be 0", nameof(sectorSize));
 
-            inputStream = input;
-            this.physicalDevice = physicalDevice;
+            inputStream = fileStream;
+            this.discStream = discStream;
             this.decryptionKey = decryptionKey;
             md5 = MD5.Create();
             aes = Aes.Create();
@@ -80,7 +90,7 @@ namespace Ps3DiscDumper
             SectorPosition = startSector;
         }
 
-        public override int Read(byte[] buffer, int offset, int count)
+        public override int Read( byte[] buffer, int offset, int count)
         {
             if (Position == inputStream.Length)
                 return 0;
@@ -114,15 +124,12 @@ namespace Ps3DiscDumper
                     if (readCount % 16 != 0)
                     {
                         Log.Debug($"Block has only {(readCount % 16) * 8} bits of data, reading raw sector...");
-                        using (var deviceStream = File.Open(physicalDevice, FileMode.Open, FileAccess.Read, FileShare.Read))
-                        {
-                            deviceStream.Seek(SectorPosition * sectorSize, SeekOrigin.Begin);
-                            var newTmpSector = new byte[sectorSize];
-                            deviceStream.ReadExact(newTmpSector, 0, sectorSize);
-                            if (!newTmpSector.Take(readCount).SequenceEqual(tmpSector.Take(readCount)))
-                                Log.Warn($"Filesystem data and raw data do not match for sector 0x{SectorPosition:x8}");
-                            tmpSector = newTmpSector;
-                        }
+                        discStream.Seek(SectorPosition * sectorSize, SeekOrigin.Begin);
+                        var newTmpSector = new byte[sectorSize];
+                        discStream.ReadExact(newTmpSector, 0, sectorSize);
+                        if (!newTmpSector.Take(readCount).SequenceEqual(tmpSector.Take(readCount)))
+                            Log.Warn($"Filesystem data and raw data do not match for sector 0x{SectorPosition:x8}");
+                        tmpSector = newTmpSector;
                     }
                     using (var aesTransform = aes.CreateDecryptor(decryptionKey, GetSectorIV(SectorPosition)))
                         decryptedSector = aesTransform.TransformFinalBlock(tmpSector, 0, sectorSize);

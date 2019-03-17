@@ -1,8 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\*Disc_Keys*.zip" Visible="False" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="EndianBitConverter" Version="1.1.0" />

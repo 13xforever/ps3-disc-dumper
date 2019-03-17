@@ -262,3 +262,5 @@ __pycache__/
 
 launchSettings.json
 *.ird
+*.dkey
+*.zip

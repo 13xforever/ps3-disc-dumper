@@ -316,7 +316,7 @@ namespace UI.WinForms.Msil
             productCodeLabel.Text = dumper.ProductCode;
             gameTitleLabel.Text = dumper.Title;
             discSizeLabel.Text = dumper.TotalFileSize.AsStorageUnit();
-            //irdMatchLabel.Text = string.IsNullOrEmpty(dumper.IrdFilename) ? "❌" : "✔";
+            //irdMatchLabel.Text = string.IsNullOrEmpty(dumper.DiscKeyFilename) ? "❌" : "✔";
 
             discBackgroundWorker.DoWork -= DetectPs3DiscGame;
             discBackgroundWorker.RunWorkerCompleted -= DetectPs3DiscGameFinished;
