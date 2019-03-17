@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.settingsButton = new System.Windows.Forms.Button();
@@ -41,7 +42,6 @@
             this.label1 = new System.Windows.Forms.Label();
             this.dumpingProgressBar = new System.Windows.Forms.ProgressBar();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.selectIrdButton = new System.Windows.Forms.Button();
             this.step4Label = new System.Windows.Forms.Label();
             this.step3Label = new System.Windows.Forms.Label();
             this.step2Label = new System.Windows.Forms.Label();
@@ -50,10 +50,12 @@
             this.step3StatusLabel = new System.Windows.Forms.Label();
             this.step2StatusLabel = new System.Windows.Forms.Label();
             this.step1StatusLabel = new System.Windows.Forms.Label();
+            this.selectIrdButton = new System.Windows.Forms.Button();
             this.rescanDiscsButton = new System.Windows.Forms.Button();
             this.startDumpingButton = new System.Windows.Forms.Button();
             this.cancelDiscDumpButton = new System.Windows.Forms.Button();
             this.dumpingProgressLabel = new System.Windows.Forms.Label();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -83,6 +85,7 @@
             this.settingsButton.Size = new System.Drawing.Size(23, 23);
             this.settingsButton.TabIndex = 10;
             this.settingsButton.Text = "⚙";
+            this.toolTip1.SetToolTip(this.settingsButton, "View or change program settings");
             this.settingsButton.UseVisualStyleBackColor = true;
             this.settingsButton.Click += new System.EventHandler(this.settingsButton_Click);
             // 
@@ -136,9 +139,9 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(6, 89);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(76, 13);
+            this.label3.Size = new System.Drawing.Size(74, 13);
             this.label3.TabIndex = 2;
-            this.label3.Text = "Matching IRD:";
+            this.label3.Text = "Matching key:";
             // 
             // label2
             // 
@@ -169,7 +172,6 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.selectIrdButton);
             this.groupBox2.Controls.Add(this.step4Label);
             this.groupBox2.Controls.Add(this.step3Label);
             this.groupBox2.Controls.Add(this.step2Label);
@@ -184,16 +186,6 @@
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Steps";
-            // 
-            // selectIrdButton
-            // 
-            this.selectIrdButton.Location = new System.Drawing.Point(332, 58);
-            this.selectIrdButton.Name = "selectIrdButton";
-            this.selectIrdButton.Size = new System.Drawing.Size(26, 26);
-            this.selectIrdButton.TabIndex = 3;
-            this.selectIrdButton.Text = "...";
-            this.selectIrdButton.UseVisualStyleBackColor = true;
-            this.selectIrdButton.Click += new System.EventHandler(this.selectIrdButton_Click);
             // 
             // step4Label
             // 
@@ -221,9 +213,9 @@
             this.step2Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.step2Label.Location = new System.Drawing.Point(42, 58);
             this.step2Label.Name = "step2Label";
-            this.step2Label.Size = new System.Drawing.Size(246, 26);
+            this.step2Label.Size = new System.Drawing.Size(192, 26);
             this.step2Label.TabIndex = 5;
-            this.step2Label.Text = "Select matching IRD file";
+            this.step2Label.Text = "Select disc key file";
             // 
             // step1Label
             // 
@@ -275,6 +267,16 @@
             this.step1StatusLabel.TabIndex = 0;
             this.step1StatusLabel.Text = "⏳";
             // 
+            // selectIrdButton
+            // 
+            this.selectIrdButton.Location = new System.Drawing.Point(385, 128);
+            this.selectIrdButton.Name = "selectIrdButton";
+            this.selectIrdButton.Size = new System.Drawing.Size(393, 54);
+            this.selectIrdButton.TabIndex = 3;
+            this.selectIrdButton.Text = "Select disc key file...";
+            this.selectIrdButton.UseVisualStyleBackColor = true;
+            this.selectIrdButton.Click += new System.EventHandler(this.selectIrdButton_Click);
+            // 
             // rescanDiscsButton
             // 
             this.rescanDiscsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -321,6 +323,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(788, 192);
+            this.Controls.Add(this.selectIrdButton);
             this.Controls.Add(this.dumpingProgressLabel);
             this.Controls.Add(this.dumpingProgressBar);
             this.Controls.Add(this.cancelDiscDumpButton);
@@ -333,7 +336,7 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "PS3 Disc Dumper v2.0 beta 1";
+            this.Text = "PS3 Disc Dumper v2.0 beta 2";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.Shown += new System.EventHandler(this.MainForm_Shown);
@@ -372,6 +375,7 @@
         private System.Windows.Forms.ProgressBar dumpingProgressBar;
         private System.Windows.Forms.Label dumpingProgressLabel;
         private System.Windows.Forms.Button settingsButton;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }
 
