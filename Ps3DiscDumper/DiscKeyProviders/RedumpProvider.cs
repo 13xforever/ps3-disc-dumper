@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using IrdLibraryClient;
@@ -16,7 +17,6 @@ namespace Ps3DiscDumper.DiscKeyProviders
         public async Task<HashSet<DiscKeyInfo>> EnumerateAsync(string discKeyCachePath, string ProductCode, CancellationToken cancellationToken)
         {
             var result = new HashSet<DiscKeyInfo>();
-
             try
             {
                 var assembly = Assembly.GetExecutingAssembly();
@@ -29,18 +29,26 @@ namespace Ps3DiscDumper.DiscKeyProviders
                     using (var zip = new ZipArchive(resStream, ZipArchiveMode.Read))
                         foreach (var zipEntry in zip.Entries.Where(e => e.Name.EndsWith(".dkey", StringComparison.InvariantCultureIgnoreCase)))
                         {
-                            if (zipEntry.Length > 256/8)
-                            {
-                                Log.Warn($"Disc key size is too big: {zipEntry.Length * 8} ({res}/{zipEntry.FullName})");
-                                continue;
-                            }
 
                             using (var keyStream = zipEntry.Open())
-                            using (var memStream = new MemoryStream())
+                            using (var streamReader = new StreamReader(keyStream, Encoding.UTF8))
                             {
-                                await keyStream.CopyToAsync(memStream).ConfigureAwait(false);
-                                var discKey = memStream.ToArray();
-                                result.Add(new DiscKeyInfo(null, discKey, zipEntry.FullName, KeyType.Redump, discKey.ToHexString()));
+                                var keyStr = await streamReader.ReadLineAsync().ConfigureAwait(false);
+                                if (zipEntry.Length > 256/8*2)
+                                {
+                                    Log.Warn($"Disc key size is too big: {keyStr} ({res}/{zipEntry.FullName})");
+                                    continue;
+                                }
+
+                                try
+                                {
+                                    var discKey = keyStr.ToByteArray();
+                                    result.Add(new DiscKeyInfo(null, discKey, zipEntry.FullName, KeyType.Redump, discKey.ToHexString()));
+                                }
+                                catch (Exception e)
+                                {
+                                    Log.Warn(e, $"Invalid disc key format: {keyStr}");
+                                }
                             }
                         }
                 }

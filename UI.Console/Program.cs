@@ -27,7 +27,7 @@ start:
                 var output = args.Length == 1 ? args[0] : ".";
                 var dumper = new Dumper(ApiConfig.Cts);
                 dumper.DetectDisc();
-                await dumper.FindDiscKeyAsync(output, ApiConfig.IrdCachePath).ConfigureAwait(false);
+                await dumper.FindDiscKeyAsync(ApiConfig.IrdCachePath).ConfigureAwait(false);
                 if (string.IsNullOrEmpty(dumper.OutputDir))
                 {
                     Log.Info("No compatible disc was found, exiting");

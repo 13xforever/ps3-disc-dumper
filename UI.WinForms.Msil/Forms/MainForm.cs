@@ -177,39 +177,30 @@ namespace UI.WinForms.Msil
             if (dialogResult != DialogResult.OK || string.IsNullOrEmpty(dialog.FileName) || !File.Exists(dialog.FileName))
                 return;
 
-            var irdPath = dialog.FileName;
+            var discKeyPath = dialog.FileName;
             try
             {
-                var ird = IrdParser.Parse(File.ReadAllBytes(irdPath));
-                var irdFilename = Path.GetFileName(irdPath);
-                var cacheFilename = Path.Combine(settings.IrdDir, irdFilename);
+                var discKey = File.ReadAllBytes(discKeyPath);
+                DiscKeyInfo keyInfo;
+                if (discKey.Length > 256 / 8)
+                {
+                    var ird = IrdParser.Parse(discKey);
+                    keyInfo = new DiscKeyInfo(ird.Data1, null, discKeyPath, KeyType.Ird, ird.Crc32.ToString("x8"));
+                }
+                else
+                    keyInfo = new DiscKeyInfo(null, discKey, discKeyPath, KeyType.Redump, discKey.ToHexString());
+                var discKeyFilename = Path.GetFileName(discKeyPath);
+                var cacheFilename = Path.Combine(settings.IrdDir, discKeyFilename);
                 if (!File.Exists(cacheFilename))
-                    File.Copy(irdPath, cacheFilename);
+                    File.Copy(discKeyPath, cacheFilename);
 
                 //todo: proper check
-                if (!currentDumper.IsFullMatch(ird))
+                if (!currentDumper.IsValidDiscKey(discKey))
                 {
-                    if (currentDumper.IsFilenameSetMatch(ird))
-                    {
-                        var msgResult = MessageBox.Show(
-                            "Selected IRD file does not fully match with the selected PS3 game disc.\n" +
-                            "Successful decryption cannot be guaranteed.\n" +
-                            "Do you want to use this IRD file anyway?",
-                            "IRD file check",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Warning
-                        );
-                        if (msgResult == DialogResult.No)
-                            return;
-                    }
-                    else
-                    {
-                        MessageBox.Show("Selected disk key file contains incompatible file set, and cannot be used with the selected PS3 game disc.", "IRD file check", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
+                    MessageBox.Show("Selected disk key file contains incompatible file set, and cannot be used with the selected PS3 game disc.", "IRD file check", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
-                currentDumper.Ird = ird;
-                currentDumper.IrdFilename = irdFilename;
+
                 selectIrdButton.Visible = false;
                 selectIrdButton.Enabled = false;
                 FindMatchingIrdFinished(sender, new RunWorkerCompletedEventArgs(currentDumper, null, currentDumper?.Cts.IsCancellationRequested ?? true));
@@ -311,7 +302,7 @@ namespace UI.WinForms.Msil
             step1Label.Text = "PS3 game disc detected";
             step2StatusLabel.Text = "⏳";
             step2Label.Enabled = true;
-            step2Label.Text = "Looking for the matching disc key...";
+            step2Label.Text = "Looking for the disc key...";
 
             productCodeLabel.Text = dumper.ProductCode;
             gameTitleLabel.Text = dumper.Title;
@@ -330,7 +321,7 @@ namespace UI.WinForms.Msil
             var dumper = (Dumper)doWorkEventArgs.Argument;
             try
             {
-                dumper.FindIrdAsync(settings.OutputDir, settings.IrdDir).Wait(dumper.Cts.Token);
+                dumper.FindDiscKeyAsync(settings.IrdDir).Wait(dumper.Cts.Token);
             }
             catch (Exception e)
             {
@@ -346,7 +337,7 @@ namespace UI.WinForms.Msil
                 return;
 
             settingsButton.Enabled = true;
-            if (dumper.Ird == null)
+            if (dumper.DiscKeyFilename == null)
             {
                 irdMatchLabel.Text = "No match found";
                 step2StatusLabel.Text = "❌";
@@ -361,7 +352,7 @@ namespace UI.WinForms.Msil
                 step3StatusLabel.Text = "▶";
                 step3Label.Text = "Start disc decryption...";
                 step3Label.Enabled = true;
-                irdMatchLabel.Text = Path.GetFileNameWithoutExtension(dumper.IrdFilename);
+                irdMatchLabel.Text = Path.GetFileNameWithoutExtension(dumper.DiscKeyFilename);
                 rescanDiscsButton.Visible = false;
                 rescanDiscsButton.Enabled = false;
                 startDumpingButton.Enabled = true;

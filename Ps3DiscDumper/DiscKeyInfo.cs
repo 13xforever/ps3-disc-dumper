@@ -15,6 +15,8 @@ namespace Ps3DiscDumper
 
             if (decryptedKey == null || decryptedKey.Length == 0)
                 DecryptedKey = Decrypter.GetDecryptionKey(encryptedKey);
+            else
+                DecryptedKey = decryptedKey;
             EncryptedKey = encryptedKey;
             DecryptedKeyId = DecryptedKey.ToHexString();
             FullPath = fullPath;

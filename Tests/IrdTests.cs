@@ -1,5 +1,8 @@
+using System.IO;
+using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
+using DiscUtils.Iso9660;
 using IrdLibraryClient;
 using IrdLibraryClient.IrdFormat;
 using NUnit.Framework;
@@ -23,8 +26,12 @@ namespace Tests
             Assert.That(ird, Is.Not.Null);
             Assert.That(ird.FileCount, Is.EqualTo(expectedFileCount));
 
-            var files = ird.GetFilesystemStructure();
-            Assert.That(files.Count, Is.EqualTo(expectedFileCount));
+            using (var decompressedStream = GetDecompressHeader(ird))
+            {
+                var reader = new CDReader(decompressedStream, true, true);
+                var files = reader.GetFilesystemStructure();
+                Assert.That(files.Count, Is.EqualTo(expectedFileCount));
+            }
         }
 
         [TestCase("BLUS31604", "0A37A83C")]
@@ -36,8 +43,18 @@ namespace Tests
             var ird = await Client.DownloadAsync(searchResults.Data[0], "ird", CancellationToken.None).ConfigureAwait(false);
             Assert.That(ird, Is.Not.Null);
 
-            var decryptionKey = Decrypter.GetDecryptionKey(ird).ToHexString();
+            var decryptionKey = Decrypter.GetDecryptionKey(ird.Data1).ToHexString();
             Assert.That(decryptionKey, Does.StartWith(expectedKey.ToLowerInvariant()));
+        }
+
+        private static MemoryStream GetDecompressHeader(Ird ird)
+        {
+            var decompressedStream = new MemoryStream();
+            using (var compressedStream = new MemoryStream(ird.Header, false))
+            using (var gzip = new GZipStream(compressedStream, CompressionMode.Decompress))
+                gzip.CopyTo(decompressedStream);
+            decompressedStream.Seek(0, SeekOrigin.Begin);
+            return decompressedStream;
         }
     }
 }

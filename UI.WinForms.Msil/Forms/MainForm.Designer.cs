@@ -109,19 +109,21 @@
             // 
             // irdMatchLabel
             // 
-            this.irdMatchLabel.AutoSize = true;
+            this.irdMatchLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.irdMatchLabel.Location = new System.Drawing.Point(87, 89);
             this.irdMatchLabel.Name = "irdMatchLabel";
-            this.irdMatchLabel.Size = new System.Drawing.Size(291, 13);
+            this.irdMatchLabel.Size = new System.Drawing.Size(301, 13);
             this.irdMatchLabel.TabIndex = 5;
             this.irdMatchLabel.Text = "BCES00802-v2-0338EC334F5ADEF4DE4E4007D7E1D80B";
             // 
             // gameTitleLabel
             // 
-            this.gameTitleLabel.AutoSize = true;
+            this.gameTitleLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.gameTitleLabel.Location = new System.Drawing.Point(87, 43);
             this.gameTitleLabel.Name = "gameTitleLabel";
-            this.gameTitleLabel.Size = new System.Drawing.Size(86, 13);
+            this.gameTitleLabel.Size = new System.Drawing.Size(301, 13);
             this.gameTitleLabel.TabIndex = 4;
             this.gameTitleLabel.Text = "Weebs in Space";
             // 
@@ -336,7 +338,7 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "PS3 Disc Dumper v2.0 beta 2";
+            this.Text = "PS3 Disc Dumper v3.0 beta 1";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.Shown += new System.EventHandler(this.MainForm_Shown);
