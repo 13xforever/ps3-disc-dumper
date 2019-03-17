@@ -422,10 +422,15 @@ namespace UI.WinForms.Msil
                 step4StatusLabel.Text = "❌";
                 step4Label.Text = "Dump is corrupted";
             }
-            else
+            else if (dumper.ValidatingDiscKeys.Any())
             {
                 step4StatusLabel.Text = "✔";
                 step4Label.Text = "Dump is valid";
+            }
+            else
+            {
+                step4StatusLabel.Text = "❔";
+                step4Label.Text = "No validation info available";
             }
             discBackgroundWorker.DoWork -= DumpDisc;
             discBackgroundWorker.RunWorkerCompleted -= DumpDiscFinished;

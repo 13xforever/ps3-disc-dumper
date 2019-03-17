@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,6 +50,7 @@ namespace Ps3DiscDumper
         public long TotalFileSize { get; private set; }
         private List<string> DiscFilenames { get; set; }
         public List<(string filename, string error)> BrokenFiles { get; } = new List<(string filename, string error)>();
+        public HashSet<DiscKeyInfo> ValidatingDiscKeys { get; } = new HashSet<DiscKeyInfo>();
         public CancellationTokenSource Cts { get; private set; }
         public bool? ValidationStatus { get; private set; }
 
