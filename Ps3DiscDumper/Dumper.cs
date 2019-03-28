@@ -12,10 +12,12 @@ using DiscUtils.Iso9660;
 using IrdLibraryClient;
 using IrdLibraryClient.IrdFormat;
 using IrdLibraryClient.POCOs;
+using Ps3DiscDumper.DiscInfo;
 using Ps3DiscDumper.DiscKeyProviders;
 using Ps3DiscDumper.Sfb;
 using Ps3DiscDumper.Sfo;
 using Ps3DiscDumper.Utils;
+using FileInfo = System.IO.FileInfo;
 
 namespace Ps3DiscDumper
 {
@@ -35,6 +37,7 @@ namespace Ps3DiscDumper
 
         public ParamSfo ParamSfo { get; private set; }
         public string ProductCode { get; private set; }
+        public string DiscVersion { get; private set; }
         public string Title { get; private set; }
         public string OutputDir { get; private set; }
         public char Drive { get; set; }
@@ -135,27 +138,10 @@ namespace Ps3DiscDumper
             if (titleParts.Length > 1)
                 Title = string.Join(" ", titleParts);
             ProductCode = sfo.Items.FirstOrDefault(i => i.Key == "TITLE_ID")?.StringValue?.Trim(' ', '\0');
+            DiscVersion = sfo.Items.FirstOrDefault(i => i.Key == "VERSION")?.StringValue?.Trim();
 
             Log.Info($"Game title: {Title}");
         }
-
-/*
-        public bool IsFilenameSetMatch(Ird ird)
-        {
-            var expectedSet = new HashSet<string>(DiscFilenames, StringComparer.InvariantCultureIgnoreCase);
-            var irdSet = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-            var fileInfo = ird.GetFilesystemStructure();
-            foreach (var file in fileInfo)
-            {
-                if (Cts.IsCancellationRequested)
-                    return false;
-
-                var convertedFilename = Path.DirectorySeparatorChar == '\\' ? file.Filename : file.Filename.Replace('\\', Path.DirectorySeparatorChar);
-                irdSet.Add(convertedFilename);
-            }
-            return expectedSet.SetEquals(irdSet);
-        }
-*/
 
         public void DetectDisc(Func<Dumper, string> outputDirFormatter = null)
         {
@@ -343,7 +329,7 @@ namespace Ps3DiscDumper
 
             lock (AllKnownDiscKeys)
                 AllKnownDiscKeys.TryGetValue(discKey, out allMatchingKeys);
-            DiscKeyFilename = Path.GetFileName(allMatchingKeys.First().FullPath);
+            DiscKeyFilename = Path.GetFileName(allMatchingKeys?.First().FullPath);
         }
 
         public async Task DumpAsync(string output)
@@ -358,7 +344,9 @@ namespace Ps3DiscDumper
                 else
                     dumpPath = parent;
             }
-            filesystemStructure = filesystemStructure ?? discReader.GetFilesystemStructure();
+            var getFsTask = Task.Run(() => filesystemStructure ?? discReader.GetFilesystemStructure());
+            var validators = await Task.Run(GetValidationInfo).ConfigureAwait(false);
+            filesystemStructure = await getFsTask.ConfigureAwait(false);
             if (!string.IsNullOrEmpty(dumpPath))
             {
                 var root = Path.GetPathRoot(Path.GetFullPath(output));
@@ -385,6 +373,7 @@ namespace Ps3DiscDumper
             var decryptionKey = allMatchingKeys.First().DecryptedKey;
             var sectorSize = (int)discReader.ClusterSize;
             var unprotectedRegions = driveStream.GetUnprotectedRegions();
+            ValidationStatus = true;
 
             foreach (var file in filesystemStructure)
             {
@@ -409,9 +398,12 @@ namespace Ps3DiscDumper
                     Directory.CreateDirectory(fileDir);
 
                 var error = false;
-                //var expectedMd5 = Ird.Files.First(f => f.Offset == file.StartSector).Md5Checksum.ToHexString();
-                //var lastMd5 = expectedMd5;
-                string lastMd5 = null;
+                var expectedHashes = (
+                    from v in validators
+                    where v.Files.ContainsKey(file.Filename)
+                    select v.Files[file.Filename].Hashes
+                ).ToList();
+                var lastHash = "";
                 do
                 {
                     try
@@ -422,26 +414,32 @@ namespace Ps3DiscDumper
                         {
                             await Decrypter.CopyToAsync(outputStream, 8 * 1024 * 1024, Cts.Token).ConfigureAwait(false);
                             outputStream.Flush();
-                            var resultMd5 = Decrypter.GetMd5().ToHexString();
+                            var resultHashes = Decrypter.GetHashes();
+                            var resultMd5 = resultHashes["MD5"];
                             if (Decrypter.WasEncrypted && Decrypter.WasUnprotected)
                                 Log.Debug("Partially decrypted");
                             else if (Decrypter.WasEncrypted)
                                 Log.Debug("Decrypted");
-/*
-                                if (expectedMd5 != resultMd5)
+
+                            if (!expectedHashes.Any())
+                            {
+                                if (ValidationStatus == true)
+                                    ValidationStatus = null;
+                            }
+                            else if (!IsMatch(resultHashes, expectedHashes))
+                            {
+                                error = true;
+                                var msg = "Unexpected hash: " + resultMd5;
+                                if (resultMd5 == lastHash || Decrypter.LastBlockCorrupted)
                                 {
-                                    error = true;
-                                    var msg = $"Expected {expectedMd5}, but was {resultMd5}";
-                                    if (lastMd5 == resultMd5 || Decrypter.LastBlockCorrupted)
-                                    {
-                                        Log.Error(msg);
-                                        BrokenFiles.Add((file.Filename, "corrupted"));
-                                        break;
-                                    }
-                                    Log.Warn(msg + ", retrying");
+                                    Log.Error(msg);
+                                    BrokenFiles.Add((file.Filename, "corrupted"));
+                                    break;
                                 }
-*/
-                            lastMd5 = resultMd5;
+                                Log.Warn(msg + ", retrying");
+                            }
+
+                            lastHash = resultMd5;
                         }
                     }
                     catch (Exception e)
@@ -452,6 +450,20 @@ namespace Ps3DiscDumper
                 } while (error);
             }
             Log.Info("Completed");
+        }
+
+        private List<DiscInfo.DiscInfo> GetValidationInfo()
+        {
+            var discInfoList = new List<DiscInfo.DiscInfo>();
+            foreach (var discKeyInfo in allMatchingKeys.Where(ki => ki.KeyType == KeyType.Ird))
+            {
+                var ird = IrdParser.Parse(File.ReadAllBytes(discKeyInfo.FullPath));
+                if (!DiscVersion.Equals(ird.GameVersion))
+                    continue;
+
+                discInfoList.Add(ird.ToDiscInfo());
+            }
+            return discInfoList;
         }
 
         private bool IsValidDiscKey(string discKeyId)
@@ -474,6 +486,15 @@ namespace Ps3DiscDumper
 
             return licBytes.Take(LicenseMagic.Length).SequenceEqual(LicenseMagic);
 
+        }
+
+        private static bool IsMatch(Dictionary<string, string> hashes, List<Dictionary<string, string>> expectedHashes)
+        {
+            foreach (var eh in expectedHashes)
+            foreach (var h in hashes)
+                if (eh.TryGetValue(h.Key, out var expectedHash) && expectedHash == h.Value)
+                    return true;
+            return false;
         }
 
         public void Dispose()

@@ -417,12 +417,12 @@ namespace UI.WinForms.Msil
             rescanDiscsButton.Enabled = true;
             rescanDiscsButton.Visible = true;
 
-            if (dumper.BrokenFiles.Any())
+            if (dumper.ValidationStatus == false)
             {
                 step4StatusLabel.Text = "❌";
                 step4Label.Text = "Dump is corrupted";
             }
-            else if (dumper.ValidatingDiscKeys.Any())
+            else if (dumper.ValidationStatus == true)
             {
                 step4StatusLabel.Text = "✔";
                 step4Label.Text = "Dump is valid";

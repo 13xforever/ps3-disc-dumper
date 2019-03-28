@@ -338,7 +338,7 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "PS3 Disc Dumper v3.0 beta 1";
+            this.Text = "PS3 Disc Dumper v3.0";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.Shown += new System.EventHandler(this.MainForm_Shown);

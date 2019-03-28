@@ -18,8 +18,11 @@ namespace Ps3DiscDumper
         private byte[] decryptionKey;
         private readonly int sectorSize;
         private readonly MD5 md5;
+        private readonly SHA1 sha1;
+        private readonly SHA256 sha256;
         private readonly Aes aes;
-        private byte[] bufferedSector, tmpSector, hash = null;
+        private byte[] bufferedSector, tmpSector;
+        private Dictionary<string, string> hashes = new Dictionary<string, string>(3);
         private readonly List<(int start, int end)> unprotectedSectorRanges;
 
         public static byte[] DecryptDiscKey(byte[] data1)
@@ -92,6 +95,8 @@ namespace Ps3DiscDumper
             this.discStream = discStream;
             this.decryptionKey = decryptionKey;
             md5 = MD5.Create();
+            sha1 = SHA1.Create();
+            sha256 = SHA256.Create();
             aes = Aes.Create();
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.None;
@@ -113,6 +118,8 @@ namespace Ps3DiscDumper
             {
                 var len = (int)Math.Min(Math.Min(count, sectorSize - positionInSector), inputStream.Position - Position);
                 md5.TransformBlock(bufferedSector, (int)positionInSector, len, buffer, offset);
+                sha1.TransformBlock(bufferedSector, (int)positionInSector, len, buffer, offset);
+                sha256.TransformBlock(bufferedSector, (int)positionInSector, len, buffer, offset);
                 offset += len;
                 count -= len;
                 resultCount += len;
@@ -151,6 +158,8 @@ namespace Ps3DiscDumper
                 if (count >= readCount)
                 {
                     md5.TransformBlock(decryptedSector, 0, readCount, buffer, offset);
+                    sha1.TransformBlock(decryptedSector, 0, readCount, buffer, offset);
+                    sha256.TransformBlock(decryptedSector, 0, readCount, buffer, offset);
                     offset += readCount;
                     count -= readCount;
                     resultCount += readCount;
@@ -161,6 +170,8 @@ namespace Ps3DiscDumper
                 {
                     Buffer.BlockCopy(decryptedSector, 0, bufferedSector, 0, sectorSize);
                     md5.TransformBlock(decryptedSector, 0, count, buffer, offset);
+                    sha1.TransformBlock(decryptedSector, 0, count, buffer, offset);
+                    sha256.TransformBlock(decryptedSector, 0, count, buffer, offset);
                     offset += count;
                     count = 0;
                     resultCount += count;
@@ -170,14 +181,18 @@ namespace Ps3DiscDumper
             return resultCount;
         }
 
-        public byte[] GetMd5()
+        public Dictionary<string, string> GetHashes()
         {
-            if (hash == null)
+            if (hashes.Count == 0)
             {
                 md5.TransformFinalBlock(tmpSector, 0, 0);
-                hash = md5.Hash;
+                sha1.TransformFinalBlock(tmpSector, 0, 0);
+                sha256.TransformFinalBlock(tmpSector, 0, 0);
+                hashes["MD5"] = md5.Hash.ToHexString();
+                hashes["SHA1"] = sha1.Hash.ToHexString();
+                hashes["SHA256"] = sha256.Hash.ToHexString();
             }
-            return hash;
+            return hashes;
         }
 
         private bool IsEncrypted(long sector)
