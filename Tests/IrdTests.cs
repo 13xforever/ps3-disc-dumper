@@ -43,8 +43,18 @@ namespace Tests
             var ird = await Client.DownloadAsync(searchResults.Data[0], "ird", CancellationToken.None).ConfigureAwait(false);
             Assert.That(ird, Is.Not.Null);
 
-            var decryptionKey = Decrypter.GetDecryptionKey(ird.Data1).ToHexString();
+            var decryptionKey = Decrypter.DecryptDiscKey(ird.Data1).ToHexString();
             Assert.That(decryptionKey, Does.StartWith(expectedKey.ToLowerInvariant()));
+        }
+
+        [Test]
+        public void KeyEncryptionTest()
+        {
+            var randomIrdKey = new byte[16];
+            var decryptedKey = Decrypter.DecryptDiscKey(randomIrdKey);
+            Assert.That(randomIrdKey.ToHexString(), Is.Not.EqualTo(decryptedKey.ToHexString()));
+            var encryptedKey = Decrypter.EncryptDiscKey(decryptedKey);
+            Assert.That(encryptedKey.ToHexString(), Is.EqualTo(randomIrdKey.ToHexString()));
         }
 
         private static MemoryStream GetDecompressHeader(Ird ird)

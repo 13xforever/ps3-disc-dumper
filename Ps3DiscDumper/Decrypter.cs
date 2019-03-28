@@ -22,7 +22,7 @@ namespace Ps3DiscDumper
         private byte[] bufferedSector, tmpSector, hash = null;
         private readonly List<(int start, int end)> unprotectedSectorRanges;
 
-        public static byte[] GetDecryptionKey(byte[] data1)
+        public static byte[] DecryptDiscKey(byte[] data1)
         {
             using (var aes = Aes.Create())
             {
@@ -30,6 +30,18 @@ namespace Ps3DiscDumper
                 aes.Mode = CipherMode.CBC;
                 aes.Padding = PaddingMode.None;
                 using (var transform = aes.CreateEncryptor(Secret, IV))
+                    return transform.TransformFinalBlock(data1, 0, data1.Length);
+            }
+        }
+
+        public static byte[] EncryptDiscKey(byte[] data1)
+        {
+            using (var aes = Aes.Create())
+            {
+                aes.BlockSize = data1.Length * 8;
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.None;
+                using (var transform = aes.CreateDecryptor(Secret, IV))
                     return transform.TransformFinalBlock(data1, 0, data1.Length);
             }
         }

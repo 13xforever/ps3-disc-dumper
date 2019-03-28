@@ -14,7 +14,7 @@ namespace Ps3DiscDumper
                 throw new ArgumentException("Key file hash is required and can not be empty", nameof(keyFileHash));
 
             if (decryptedKey == null || decryptedKey.Length == 0)
-                DecryptedKey = Decrypter.GetDecryptionKey(encryptedKey);
+                DecryptedKey = Decrypter.DecryptDiscKey(encryptedKey);
             else
                 DecryptedKey = decryptedKey;
             EncryptedKey = encryptedKey;
