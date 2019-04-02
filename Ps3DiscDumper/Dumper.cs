@@ -4,14 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
-using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DiscUtils.Iso9660;
 using IrdLibraryClient;
 using IrdLibraryClient.IrdFormat;
-using IrdLibraryClient.POCOs;
 using Ps3DiscDumper.DiscInfo;
 using Ps3DiscDumper.DiscKeyProviders;
 using Ps3DiscDumper.Sfb;
@@ -30,8 +28,13 @@ namespace Ps3DiscDumper
         private static readonly Dictionary<string, HashSet<DiscKeyInfo>> AllKnownDiscKeys = new Dictionary<string, HashSet<DiscKeyInfo>>();
         private readonly HashSet<string> TestedDiscKeys = new HashSet<string>();
         private byte[] discSfbData;
-        private static readonly byte[] LicenseMagic = Encoding.UTF8.GetBytes("PS3LICDA");
-        private byte[] licSector;
+        private static readonly Dictionary<string, byte[]> Detectors = new Dictionary<string, byte[]>
+        {
+            [@"\PS3_GAME\LICDIR\LIC.DAT"] = Encoding.UTF8.GetBytes("PS3LICDA"),
+            [@"\PS3_GAME\USRDIR\EBOOT.BIN"] = Encoding.UTF8.GetBytes("SCE").Concat(new byte[] { 0, 0, 0, 0, 2 }).ToArray(),
+        };
+        private byte[] detectionSector;
+        private byte[] detectionBytesExpected;
         private byte[] sectorIV;
         private Stream driveStream;
 
@@ -282,36 +285,36 @@ namespace Ps3DiscDumper
 
             // find disc license file
             discReader = new CDReader(driveStream, true, true);
-            FileRecord licInfo = null;
+            FileRecord detectionRecord = null;
+            byte[] expectedBytes = null;
             try
             {
-                var licPath = @"\PS3_GAME\LICDIR\LIC.DAT";
-                if (discReader.FileExists(licPath))
-                {
-                    var clusterRange = discReader.PathToClusters(licPath);
-                    licInfo = new FileRecord(licPath, clusterRange.Min(r => r.Offset), discReader.GetFileLength(licPath));
-                }
-                else
-                {
-                    filesystemStructure = discReader.GetFilesystemStructure();
-                    licInfo = filesystemStructure.FirstOrDefault(fr => fr.Filename.EndsWith("LICDIR\\LIC.DAT"));
-                }
+                foreach (var path in Detectors.Keys)
+                    if (discReader.FileExists(path))
+                    {
+                        var clusterRange = discReader.PathToClusters(path);
+                        detectionRecord = new FileRecord(path, clusterRange.Min(r => r.Offset), discReader.GetFileLength(path));
+                        expectedBytes = Detectors[path];
+                        Log.Debug($"Using {path} for disc key detection");
+                        break;
+                    }
             }
             catch (Exception e)
             {
                 Log.Error(e);
             }
-            if (licInfo == null)
-                throw new FileNotFoundException("Couldn't find a single disc license file, please report");
+            if (detectionRecord == null)
+                throw new FileNotFoundException("Couldn't find a single disc key detection file, please report");
 
             if (Cts.IsCancellationRequested)
                 return;
 
             // select decryption key
-            driveStream.Seek(licInfo.StartSector * discReader.ClusterSize, SeekOrigin.Begin);
-            licSector = new byte[discReader.ClusterSize];
-            sectorIV = Decrypter.GetSectorIV(licInfo.StartSector);
-            driveStream.ReadExact(licSector, 0, licSector.Length);
+            driveStream.Seek(detectionRecord.StartSector * discReader.ClusterSize, SeekOrigin.Begin);
+            detectionSector = new byte[discReader.ClusterSize];
+            detectionBytesExpected = expectedBytes;
+            sectorIV = Decrypter.GetSectorIV(detectionRecord.StartSector);
+            driveStream.ReadExact(detectionSector, 0, detectionSector.Length);
             string discKey = null;
             try
             {
@@ -482,9 +485,8 @@ namespace Ps3DiscDumper
 
         public bool IsValidDiscKey(byte[] discKey)
         {
-            var licBytes = Decrypter.DecryptSector(discKey, licSector, sectorIV);
-
-            return licBytes.Take(LicenseMagic.Length).SequenceEqual(LicenseMagic);
+            var licBytes = Decrypter.DecryptSector(discKey, detectionSector, sectorIV);
+            return licBytes.Take(detectionBytesExpected.Length).SequenceEqual(detectionBytesExpected);
 
         }
 
