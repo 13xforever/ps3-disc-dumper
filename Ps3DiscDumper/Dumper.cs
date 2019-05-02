@@ -427,9 +427,9 @@ namespace Ps3DiscDumper
                                 var resultHashes = Decrypter.GetHashes();
                                 var resultMd5 = resultHashes["MD5"];
                                 if (Decrypter.WasEncrypted && Decrypter.WasUnprotected)
-                                    Log.Debug("Partially decrypted");
+                                    Log.Debug("Partially decrypted " + file.Filename);
                                 else if (Decrypter.WasEncrypted)
-                                    Log.Debug("Decrypted");
+                                    Log.Debug("Decrypted " + file.Filename);
 
                                 if (!expectedHashes.Any())
                                 {
