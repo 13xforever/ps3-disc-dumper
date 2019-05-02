@@ -21,6 +21,8 @@ namespace Ps3DiscDumper
 {
     public class Dumper: IDisposable
     {
+        public const string Version = "3.0.2";
+
         private static readonly HashSet<char> InvalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
         private static readonly char[] MultilineSplit = {'\r', '\n'};
         private long currentSector;
@@ -380,77 +382,88 @@ namespace Ps3DiscDumper
 
             foreach (var file in filesystemStructure)
             {
-                if (Cts.IsCancellationRequested)
-                    return;
-
-                Log.Info($"Reading {file.Filename} ({file.Length.AsStorageUnit()})");
-                CurrentFileNumber++;
-                var convertedFilename = Path.DirectorySeparatorChar == '\\' ? file.Filename : file.Filename.Replace('\\', Path.DirectorySeparatorChar);
-                var inputFilename = Path.Combine(input, convertedFilename);
-
-                if (!File.Exists(inputFilename))
+                try
                 {
-                    Log.Error($"Missing {file.Filename}");
-                    BrokenFiles.Add((file.Filename, "missing"));
-                    continue;
-                }
+                    if (Cts.IsCancellationRequested)
+                        return;
 
-                var outputFilename = Path.Combine(outputPathBase, convertedFilename);
-                var fileDir = Path.GetDirectoryName(outputFilename);
-                if (!Directory.Exists(fileDir))
-                    Directory.CreateDirectory(fileDir);
+                    Log.Info($"Reading {file.Filename} ({file.Length.AsStorageUnit()})");
+                    CurrentFileNumber++;
+                    var convertedFilename = Path.DirectorySeparatorChar == '\\' ? file.Filename : file.Filename.Replace('\\', Path.DirectorySeparatorChar);
+                    var inputFilename = Path.Combine(input, convertedFilename);
 
-                var error = false;
-                var expectedHashes = (
-                    from v in validators
-                    where v.Files.ContainsKey(file.Filename)
-                    select v.Files[file.Filename].Hashes
-                ).ToList();
-                var lastHash = "";
-                do
-                {
-                    try
+                    if (!File.Exists(inputFilename))
                     {
-                        using (var outputStream = File.Open(outputFilename, FileMode.Create, FileAccess.Write, FileShare.Read))
-                        using (var inputStream = File.Open(inputFilename, FileMode.Open, FileAccess.Read, FileShare.Read))
-                        using (Decrypter = new Decrypter(inputStream, driveStream, decryptionKey, file.StartSector, sectorSize, unprotectedRegions))
+                        Log.Error($"Missing {file.Filename}");
+                        BrokenFiles.Add((file.Filename, "missing"));
+                        continue;
+                    }
+
+                    var outputFilename = Path.Combine(outputPathBase, convertedFilename);
+                    var fileDir = Path.GetDirectoryName(outputFilename);
+                    if (!Directory.Exists(fileDir))
+                    {
+                        Log.Debug("Creating directory " + fileDir);
+                        Directory.CreateDirectory(fileDir);
+                    }
+
+                    var error = false;
+                    var expectedHashes = (
+                        from v in validators
+                        where v.Files.ContainsKey(file.Filename)
+                        select v.Files[file.Filename].Hashes
+                    ).ToList();
+                    var lastHash = "";
+                    do
+                    {
+                        try
                         {
-                            await Decrypter.CopyToAsync(outputStream, 8 * 1024 * 1024, Cts.Token).ConfigureAwait(false);
-                            outputStream.Flush();
-                            var resultHashes = Decrypter.GetHashes();
-                            var resultMd5 = resultHashes["MD5"];
-                            if (Decrypter.WasEncrypted && Decrypter.WasUnprotected)
-                                Log.Debug("Partially decrypted");
-                            else if (Decrypter.WasEncrypted)
-                                Log.Debug("Decrypted");
+                            using (var outputStream = File.Open(outputFilename, FileMode.Create, FileAccess.Write, FileShare.Read))
+                            using (var inputStream = File.Open(inputFilename, FileMode.Open, FileAccess.Read, FileShare.Read))
+                            using (Decrypter = new Decrypter(inputStream, driveStream, decryptionKey, file.StartSector, sectorSize, unprotectedRegions))
+                            {
+                                await Decrypter.CopyToAsync(outputStream, 8 * 1024 * 1024, Cts.Token).ConfigureAwait(false);
+                                outputStream.Flush();
+                                var resultHashes = Decrypter.GetHashes();
+                                var resultMd5 = resultHashes["MD5"];
+                                if (Decrypter.WasEncrypted && Decrypter.WasUnprotected)
+                                    Log.Debug("Partially decrypted");
+                                else if (Decrypter.WasEncrypted)
+                                    Log.Debug("Decrypted");
 
-                            if (!expectedHashes.Any())
-                            {
-                                if (ValidationStatus == true)
-                                    ValidationStatus = null;
-                            }
-                            else if (!IsMatch(resultHashes, expectedHashes))
-                            {
-                                error = true;
-                                var msg = "Unexpected hash: " + resultMd5;
-                                if (resultMd5 == lastHash || Decrypter.LastBlockCorrupted)
+                                if (!expectedHashes.Any())
                                 {
-                                    Log.Error(msg);
-                                    BrokenFiles.Add((file.Filename, "corrupted"));
-                                    break;
+                                    if (ValidationStatus == true)
+                                        ValidationStatus = null;
                                 }
-                                Log.Warn(msg + ", retrying");
-                            }
+                                else if (!IsMatch(resultHashes, expectedHashes))
+                                {
+                                    error = true;
+                                    var msg = "Unexpected hash: " + resultMd5;
+                                    if (resultMd5 == lastHash || Decrypter.LastBlockCorrupted)
+                                    {
+                                        Log.Error(msg);
+                                        BrokenFiles.Add((file.Filename, "corrupted"));
+                                        break;
+                                    }
+                                    Log.Warn(msg + ", retrying");
+                                }
 
-                            lastHash = resultMd5;
+                                lastHash = resultMd5;
+                            }
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Error(e, e.Message);
-                        error = true;
-                    }
-                } while (error);
+                        catch (Exception e)
+                        {
+                            Log.Error(e, e.Message);
+                            error = true;
+                        }
+                    } while (error);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex);
+                    BrokenFiles.Add((file.Filename, "Unexpected error: " + ex.Message));
+                }
             }
             Log.Info("Completed");
         }

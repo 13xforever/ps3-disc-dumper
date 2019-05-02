@@ -11,6 +11,10 @@ namespace UI.WinForms.Msil
 
             foreach (var k in items.AllKeys)
                 pattern = pattern.Replace($"%{k}%", items[k]);
+            pattern = pattern.Replace("®", "")
+                .Replace("™", "")
+                .Replace("(TM)", "")
+                .Replace("(R)", "");
             return pattern;
         }
     }

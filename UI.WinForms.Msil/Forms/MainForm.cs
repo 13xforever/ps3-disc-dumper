@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Shell;
+using IrdLibraryClient;
 using IrdLibraryClient.IrdFormat;
 using Ps3DiscDumper;
 using Ps3DiscDumper.Utils;
@@ -92,6 +93,8 @@ namespace UI.WinForms.Msil
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            Text = "PS3 Disc Dumper v" + Dumper.Version;
+            Log.Info(Text);
             settings.Reload();
             if (!settings.Configured)
                 settingsButton_Click(sender, e);

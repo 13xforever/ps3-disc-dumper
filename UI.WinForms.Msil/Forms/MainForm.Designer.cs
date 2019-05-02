@@ -125,7 +125,7 @@
             this.gameTitleLabel.Name = "gameTitleLabel";
             this.gameTitleLabel.Size = new System.Drawing.Size(301, 13);
             this.gameTitleLabel.TabIndex = 4;
-            this.gameTitleLabel.Text = "Weebs in Space";
+            this.gameTitleLabel.Text = "Weebs in Space™";
             // 
             // productCodeLabel
             // 
@@ -338,7 +338,7 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "PS3 Disc Dumper v3.0.1";
+            this.Text = "PS3 Disc Dumper";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.Shown += new System.EventHandler(this.MainForm_Shown);
