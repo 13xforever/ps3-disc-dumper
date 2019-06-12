@@ -15,10 +15,10 @@
 
   <ItemGroup>
     <PackageReference Include="Crc32.NET" Version="1.2.0" />
-    <PackageReference Include="DiscUtils.OpticalDisk" Version="0.14.0-alpha234" />
-    <PackageReference Include="DotNetZip" Version="1.13.0" />
+    <PackageReference Include="DiscUtils.OpticalDisk" Version="0.15.1-ci0002" />
+    <PackageReference Include="DotNetZip" Version="1.13.3" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>
 
 </Project>
