@@ -21,7 +21,7 @@ namespace Ps3DiscDumper
 {
     public class Dumper: IDisposable
     {
-        public const string Version = "3.0.2";
+        public const string Version = "3.0.3";
 
         private static readonly HashSet<char> InvalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
         private static readonly char[] MultilineSplit = {'\r', '\n'};
@@ -50,6 +50,7 @@ namespace Ps3DiscDumper
         private List<FileRecord> filesystemStructure;
         private CDReader discReader;
         private HashSet<DiscKeyInfo> allMatchingKeys;
+        public KeyType DiscKeyType { get; set; }
         public string DiscKeyFilename { get; set; }
         private Decrypter Decrypter { get; set; }
         public int TotalFileCount { get; private set; }
@@ -200,6 +201,7 @@ namespace Ps3DiscDumper
                 DiscFilenames.Add(f.Substring(rootLength));
             }
             TotalFileSize = totalFilesize;
+            TotalFileCount = DiscFilenames.Count;
 
             OutputDir = new string(outputDirFormatter(this).ToCharArray().Where(c => !InvalidChars.Contains(c)).ToArray());
             Log.Debug($"Output: {OutputDir}");
@@ -334,7 +336,9 @@ namespace Ps3DiscDumper
 
             lock (AllKnownDiscKeys)
                 AllKnownDiscKeys.TryGetValue(discKey, out allMatchingKeys);
-            DiscKeyFilename = Path.GetFileName(allMatchingKeys?.First().FullPath);
+            var discKeyInfo = allMatchingKeys?.First();
+            DiscKeyFilename = Path.GetFileName(discKeyInfo?.FullPath);
+            DiscKeyType = discKeyInfo.KeyType;
         }
 
         public async Task DumpAsync(string output)

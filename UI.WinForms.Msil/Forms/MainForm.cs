@@ -2,7 +2,6 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -245,6 +244,7 @@ namespace UI.WinForms.Msil
             cancelDiscDumpButton.Enabled = true;
             cancelDiscDumpButton.Visible = true;
             dumpingProgressBar.Visible = true;
+            dumpingProgressLabel.Text = "Analyzing file structure...";
             dumpingProgressLabel.Visible = true;
             taskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
         }
@@ -309,7 +309,7 @@ namespace UI.WinForms.Msil
 
             productCodeLabel.Text = dumper.ProductCode;
             gameTitleLabel.Text = dumper.Title;
-            discSizeLabel.Text = dumper.TotalFileSize.AsStorageUnit();
+            discSizeLabel.Text = $"{dumper.TotalFileSize.AsStorageUnit()} ({dumper.TotalFileCount} files)";
             //irdMatchLabel.Text = string.IsNullOrEmpty(dumper.DiscKeyFilename) ? "❌" : "✔";
 
             discBackgroundWorker.DoWork -= DetectPs3DiscGame;
@@ -355,6 +355,7 @@ namespace UI.WinForms.Msil
                 step3StatusLabel.Text = "▶";
                 step3Label.Text = "Start disc decryption...";
                 step3Label.Enabled = true;
+                label3.Text = $"Matching {(dumper.DiscKeyType == KeyType.Ird ? "IRD" : "Key")}:";
                 irdMatchLabel.Text = Path.GetFileNameWithoutExtension(dumper.DiscKeyFilename);
                 rescanDiscsButton.Visible = false;
                 rescanDiscsButton.Enabled = false;
