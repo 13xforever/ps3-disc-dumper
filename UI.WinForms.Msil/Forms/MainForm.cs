@@ -445,7 +445,7 @@ namespace UI.WinForms.Msil
         {
             var dumper = (Dumper)e.UserState;
             dumpingProgressBar.Value = e.ProgressPercentage;
-            dumpingProgressLabel.Text = $"File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
+            dumpingProgressLabel.Text = $"{(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
             taskbarItemInfo.ProgressValue = e.ProgressPercentage / 100.0;
         }
 

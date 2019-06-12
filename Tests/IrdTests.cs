@@ -1,5 +1,9 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using DiscUtils.Iso9660;
@@ -55,6 +59,37 @@ namespace Tests
             Assert.That(randomIrdKey.ToHexString(), Is.Not.EqualTo(decryptedKey.ToHexString()));
             var encryptedKey = Decrypter.EncryptDiscKey(decryptedKey);
             Assert.That(encryptedKey.ToHexString(), Is.EqualTo(randomIrdKey.ToHexString()));
+        }
+
+        [Test, Explicit("Requires custom data")]
+        public async Task TocSizeTest()
+        {
+            var path = @"E:\FakeCDs\PS3 Games\ird";
+            var result = new List<(string filename, long size)>();
+            foreach (var f in Directory.EnumerateFiles(path, "*.ird", SearchOption.TopDirectoryOnly))
+            {
+                var bytes = await File.ReadAllBytesAsync(f).ConfigureAwait(false);
+                var ird = IrdParser.Parse(bytes);
+                using (var header = GetDecompressHeader(ird))
+                    result.Add((Path.GetFileName(f), header.Length));
+            }
+            Assert.That(result.Count, Is.GreaterThan(0));
+
+            var groupedStats = (from t in result
+                    group t by t.size into g
+                    select new {size = g.Key, count = g.Count()}
+                ).OrderByDescending(i => i.count)
+                .ThenByDescending(i => i.size)
+                .ToList();
+
+            var largest = groupedStats.Max(i => i.size);
+            var largestItem = result.First(i => i.size == largest);
+            Console.WriteLine($"Largest TOC: {largestItem.filename} ({largest.AsStorageUnit()})");
+
+            foreach (var s in groupedStats)
+                Console.WriteLine($"{s.count} items of size {s.size}");
+
+            Assert.That(groupedStats.Count, Is.EqualTo(1));
         }
 
         private static MemoryStream GetDecompressHeader(Ird ird)

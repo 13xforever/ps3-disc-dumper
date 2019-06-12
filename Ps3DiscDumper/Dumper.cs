@@ -39,6 +39,7 @@ namespace Ps3DiscDumper
         private byte[] detectionBytesExpected;
         private byte[] sectorIV;
         private Stream driveStream;
+        private static readonly byte[] Iso9660PrimaryVolumeDescriptorHeader = {0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0x00};
 
         public ParamSfo ParamSfo { get; private set; }
         public string ProductCode { get; private set; }
@@ -57,6 +58,7 @@ namespace Ps3DiscDumper
         public int CurrentFileNumber { get; private set; }
         public long TotalSectors { get; private set; }
         public long TotalFileSize { get; private set; }
+        public long SectorSize { get; private set; }
         private List<string> DiscFilenames { get; set; }
         public List<(string filename, string error)> BrokenFiles { get; } = new List<(string filename, string error)>();
         public HashSet<DiscKeyInfo> ValidatingDiscKeys { get; } = new HashSet<DiscKeyInfo>();
@@ -313,6 +315,8 @@ namespace Ps3DiscDumper
             if (Cts.IsCancellationRequested)
                 return;
 
+            SectorSize = discReader.ClusterSize;
+
             // select decryption key
             driveStream.Seek(detectionRecord.StartSector * discReader.ClusterSize, SeekOrigin.Begin);
             detectionSector = new byte[discReader.ClusterSize];
@@ -353,9 +357,8 @@ namespace Ps3DiscDumper
                 else
                     dumpPath = parent;
             }
-            var getFsTask = Task.Run(() => filesystemStructure ?? discReader.GetFilesystemStructure());
-            var validators = await Task.Run(GetValidationInfo).ConfigureAwait(false);
-            filesystemStructure = await getFsTask.ConfigureAwait(false);
+            filesystemStructure = filesystemStructure ?? GetFilesystemStructure();
+            var validators = GetValidationInfo();
             if (!string.IsNullOrEmpty(dumpPath))
             {
                 var root = Path.GetPathRoot(Path.GetFullPath(output));
@@ -470,6 +473,28 @@ namespace Ps3DiscDumper
                 }
             }
             Log.Info("Completed");
+        }
+
+        private List<FileRecord> GetFilesystemStructure()
+        {
+            var pos = driveStream.Position;
+            var buf = new byte[64 * 1024 * 1024];
+            driveStream.Seek(0, SeekOrigin.Begin);
+            driveStream.ReadExact(buf, 0, buf.Length);
+            driveStream.Seek(pos, SeekOrigin.Begin);
+            try
+            {
+                using (var memStream = new MemoryStream(buf, false))
+                {
+                    var reader = new CDReader(memStream, true, true);
+                    return reader.GetFilesystemStructure();
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Failed to buffer TOC");
+            }
+            return discReader.GetFilesystemStructure();
         }
 
         private List<DiscInfo.DiscInfo> GetValidationInfo()
