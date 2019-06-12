@@ -191,6 +191,7 @@ namespace Ps3DiscDumper
             }
             else
                 throw new NotImplementedException("Current OS is not supported");
+
             if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(discSfbPath))
                 throw new DriveNotFoundException("No valid PS3 disc was detected. Disc must be detected and mounted.");
 
@@ -207,6 +208,7 @@ namespace Ps3DiscDumper
             if (titleId != ProductCode)
                 Log.Warn($"Product codes in ps3_disc.sfb ({titleId}) and in param.sfo ({ProductCode}) do not match");
 
+            // todo: maybe use discutils instead to read TOC as one block
             var files = IOEx.GetFilepaths(input, "*", SearchOption.AllDirectories);
             DiscFilenames = new List<string>();
             var totalFilesize = 0L;

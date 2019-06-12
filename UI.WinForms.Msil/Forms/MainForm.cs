@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Shell;
 using IrdLibraryClient;
 using IrdLibraryClient.IrdFormat;
 using Ps3DiscDumper;
@@ -17,7 +16,6 @@ namespace UI.WinForms.Msil
 {
     public partial class MainForm : Form
     {
-        private readonly TaskbarItemInfo taskbarItemInfo = new TaskbarItemInfo();
         private readonly Settings settings = new Settings();
         private BackgroundWorker discBackgroundWorker;
         private Dumper currentDumper;
@@ -148,8 +146,8 @@ namespace UI.WinForms.Msil
             dumpingProgressLabel.Text = "";
             dumpingProgressBar.Visible = false;
             dumpingProgressBar.Value = 0;
-            taskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
-            taskbarItemInfo.ProgressValue = 0;
+            //taskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
+            //taskbarItemInfo.ProgressValue = 0;
         }
 
         private void MainForm_Shown(object sender, EventArgs e)
@@ -246,7 +244,7 @@ namespace UI.WinForms.Msil
             dumpingProgressBar.Visible = true;
             dumpingProgressLabel.Text = "Analyzing file structure...";
             dumpingProgressLabel.Visible = true;
-            taskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
+            //taskbarItemInfo.ProgressState = TaskbarItemProgressState.Normal;
         }
 
         private void cancelDiscDumpButton_Click(object sender, EventArgs e)
@@ -412,8 +410,8 @@ namespace UI.WinForms.Msil
             cancelDiscDumpButton.Visible = false;
             cancelDiscDumpButton.Enabled = false;
             dumpingProgressBar.Visible = false;
-            taskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
-            taskbarItemInfo.ProgressValue = 0;
+            //taskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
+            //taskbarItemInfo.ProgressValue = 0;
             dumpingProgressLabel.Visible = false;
             dumpingProgressLabel.Text = "";
             step3StatusLabel.Text = "✔";
@@ -447,7 +445,7 @@ namespace UI.WinForms.Msil
             var dumper = (Dumper)e.UserState;
             dumpingProgressBar.Value = e.ProgressPercentage;
             dumpingProgressLabel.Text = $"{(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
-            taskbarItemInfo.ProgressValue = e.ProgressPercentage / 100.0;
+            //taskbarItemInfo.ProgressValue = e.ProgressPercentage / 100.0;
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
