@@ -20,9 +20,11 @@ namespace Ps3DiscDumper.DiscKeyProviders
             try
             {
                 var assembly = Assembly.GetExecutingAssembly();
-                var embeddedResources = assembly.GetManifestResourceNames().Where(n => n.Contains("Disc_Keys")).ToList();
+                var embeddedResources = assembly.GetManifestResourceNames().Where(n => n.Contains("Disc_Keys_TXT") || n.Contains("Disc Keys TXT")).ToList();
                 if (embeddedResources.Any())
                     Log.Trace("Loading embedded redump keys");
+                else
+                    Log.Trace("No embedded redump keys found");
                 foreach (var res in embeddedResources)
                 {
                     using (var resStream = assembly.GetManifestResourceStream(res))
@@ -52,6 +54,8 @@ namespace Ps3DiscDumper.DiscKeyProviders
                             }
                         }
                 }
+                if (result.Any())
+                    Log.Info($"Found {result.Count} embedded redump keys");
             }
             catch (Exception e)
             {
@@ -59,6 +63,7 @@ namespace Ps3DiscDumper.DiscKeyProviders
             }
 
             Log.Trace("Loading cached redump keys");
+            var diff = result.Count;
             if (Directory.Exists(discKeyCachePath))
             {
                 var matchingDiskKeys = Directory.GetFiles(discKeyCachePath, "*.dkey", SearchOption.TopDirectoryOnly);
@@ -88,6 +93,9 @@ namespace Ps3DiscDumper.DiscKeyProviders
                     }
                 }
             }
+            diff = result.Count - diff;
+            if (diff > 0)
+                Log.Info($"Found {diff} cached disc keys");
             return result;
         }
     }
