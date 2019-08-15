@@ -527,9 +527,19 @@ namespace Ps3DiscDumper
 
         public bool IsValidDiscKey(byte[] discKey)
         {
-            var licBytes = Decrypter.DecryptSector(discKey, detectionSector, sectorIV);
-            return licBytes.Take(detectionBytesExpected.Length).SequenceEqual(detectionBytesExpected);
-
+            try
+            {
+                var licBytes = Decrypter.DecryptSector(discKey, detectionSector, sectorIV);
+                return licBytes.Take(detectionBytesExpected.Length).SequenceEqual(detectionBytesExpected);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+                Log.Error($"{nameof(discKey)} ({discKey.Length*8} bit): {discKey.ToHexString()}");
+                Log.Error($"{nameof(sectorIV)} ({sectorIV.Length * 8} bit): {sectorIV.ToHexString()}");
+                Log.Error($"{nameof(detectionSector)} ({detectionSector.Length} byte): {detectionSector.ToHexString()}");
+                throw;
+            }
         }
 
         private static bool IsMatch(Dictionary<string, string> hashes, List<Dictionary<string, string>> expectedHashes)
