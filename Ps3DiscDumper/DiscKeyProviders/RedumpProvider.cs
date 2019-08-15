@@ -74,6 +74,17 @@ namespace Ps3DiscDumper.DiscKeyProviders
                         try
                         {
                             var discKey = File.ReadAllBytes(dkeyFile);
+                            if (discKey.Length > 16)
+                            {
+                                try
+                                {
+                                    discKey = Convert.FromBase64String(Encoding.UTF8.GetString(discKey).TrimEnd());
+                                }
+                                catch (Exception e)
+                                {
+                                    Log.Warn(e, $"Failed to convert {discKey.ToHexString()} from hex to binary");
+                                }
+                            }
                             result.Add(new DiscKeyInfo(null, discKey, dkeyFile, KeyType.Redump, discKey.ToString()));
                         }
                         catch (InvalidDataException)
