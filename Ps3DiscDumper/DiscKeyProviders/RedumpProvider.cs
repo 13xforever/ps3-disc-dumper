@@ -20,7 +20,7 @@ namespace Ps3DiscDumper.DiscKeyProviders
             try
             {
                 var assembly = Assembly.GetExecutingAssembly();
-                var embeddedResources = assembly.GetManifestResourceNames().Where(n => n.Contains("Disc_Keys_TXT") || n.Contains("Disc Keys TXT")).ToList();
+                var embeddedResources = assembly.GetManifestResourceNames().Where(n => n.Contains("Disc_Keys") || n.Contains("Disc Keys")).ToList();
                 if (embeddedResources.Any())
                     Log.Trace("Loading embedded redump keys");
                 else
@@ -33,23 +33,27 @@ namespace Ps3DiscDumper.DiscKeyProviders
                         {
 
                             using (var keyStream = zipEntry.Open())
-                            using (var streamReader = new StreamReader(keyStream, Encoding.UTF8))
+                            using (var memStream = new MemoryStream())
                             {
-                                var keyStr = await streamReader.ReadLineAsync().ConfigureAwait(false);
+                                await keyStream.CopyToAsync(memStream).ConfigureAwait(false);
+                                var discKey = memStream.ToArray();
                                 if (zipEntry.Length > 256/8*2)
                                 {
-                                    Log.Warn($"Disc key size is too big: {keyStr} ({res}/{zipEntry.FullName})");
+                                    Log.Warn($"Disc key size is too big: {discKey} ({res}/{zipEntry.FullName})");
                                     continue;
+                                }
+                                if (discKey.Length > 16)
+                                {
+                                    discKey = Encoding.UTF8.GetString(discKey).TrimEnd().ToByteArray();
                                 }
 
                                 try
                                 {
-                                    var discKey = keyStr.ToByteArray();
                                     result.Add(new DiscKeyInfo(null, discKey, zipEntry.FullName, KeyType.Redump, discKey.ToHexString()));
                                 }
                                 catch (Exception e)
                                 {
-                                    Log.Warn(e, $"Invalid disc key format: {keyStr}");
+                                    Log.Warn(e, $"Invalid disc key format: {discKey}");
                                 }
                             }
                         }
@@ -78,7 +82,7 @@ namespace Ps3DiscDumper.DiscKeyProviders
                             {
                                 try
                                 {
-                                    discKey = Convert.FromBase64String(Encoding.UTF8.GetString(discKey).TrimEnd());
+                                    discKey = Encoding.UTF8.GetString(discKey).TrimEnd().ToByteArray();
                                 }
                                 catch (Exception e)
                                 {

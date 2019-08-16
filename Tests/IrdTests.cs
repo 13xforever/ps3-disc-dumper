@@ -39,6 +39,7 @@ namespace Tests
         }
 
         [TestCase("BLUS31604", "0A37A83C")]
+        [TestCase("BLUS30259", "4f5e86e7")]
         public async Task DiscDecryptionKeyTest(string productCode, string expectedKey)
         {
             var searchResults = await Client.SearchAsync(productCode, CancellationToken.None).ConfigureAwait(false);
