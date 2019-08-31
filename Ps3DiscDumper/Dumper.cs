@@ -21,7 +21,7 @@ namespace Ps3DiscDumper
 {
     public class Dumper: IDisposable
     {
-        public const string Version = "3.0.4";
+        public const string Version = "3.0.5";
 
         private static readonly HashSet<char> InvalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
         private static readonly char[] MultilineSplit = {'\r', '\n'};

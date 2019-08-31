@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="..\*Disc?Keys?TXT*.zip" Visible="False" />
+    <EmbeddedResource Include="..\*Disc?Keys*.zip" Visible="True" />
   </ItemGroup>
 
   <ItemGroup>

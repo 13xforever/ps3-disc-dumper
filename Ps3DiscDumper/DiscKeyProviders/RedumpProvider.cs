@@ -24,12 +24,13 @@ namespace Ps3DiscDumper.DiscKeyProviders
                 if (embeddedResources.Any())
                     Log.Trace("Loading embedded redump keys");
                 else
-                    Log.Trace("No embedded redump keys found");
+                    Log.Warn("No embedded redump keys found");
                 foreach (var res in embeddedResources)
                 {
                     using (var resStream = assembly.GetManifestResourceStream(res))
                     using (var zip = new ZipArchive(resStream, ZipArchiveMode.Read))
-                        foreach (var zipEntry in zip.Entries.Where(e => e.Name.EndsWith(".dkey", StringComparison.InvariantCultureIgnoreCase)))
+                        foreach (var zipEntry in zip.Entries.Where(e => e.Name.EndsWith(".dkey", StringComparison.InvariantCultureIgnoreCase)
+                                                                   || e.Name.EndsWith(".key", StringComparison.InvariantCultureIgnoreCase)))
                         {
 
                             using (var keyStream = zipEntry.Open())
@@ -60,6 +61,8 @@ namespace Ps3DiscDumper.DiscKeyProviders
                 }
                 if (result.Any())
                     Log.Info($"Found {result.Count} embedded redump keys");
+                else
+                    Log.Warn($"Failed to load any embedded redump keys");
             }
             catch (Exception e)
             {
@@ -70,7 +73,8 @@ namespace Ps3DiscDumper.DiscKeyProviders
             var diff = result.Count;
             if (Directory.Exists(discKeyCachePath))
             {
-                var matchingDiskKeys = Directory.GetFiles(discKeyCachePath, "*.dkey", SearchOption.TopDirectoryOnly);
+                var matchingDiskKeys = Directory.GetFiles(discKeyCachePath, "*.dkey", SearchOption.TopDirectoryOnly)
+                                                .Concat(Directory.GetFiles(discKeyCachePath, "*.key", SearchOption.TopDirectoryOnly));
                 foreach (var dkeyFile in matchingDiskKeys)
                 {
                     try
