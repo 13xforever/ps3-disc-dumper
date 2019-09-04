@@ -171,7 +171,7 @@ namespace Ps3DiscDumper
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                discSfbPath = IOEx.GetFilepaths("/media", "PS3_DISC.SFB", SearchOption.AllDirectories).FirstOrDefault();
+                discSfbPath = IOEx.GetFilepaths("/media", "PS3_DISC.SFB", 2).FirstOrDefault();
                 if (!string.IsNullOrEmpty(discSfbPath))
                     input = Path.GetDirectoryName(discSfbPath);
             }
