@@ -74,7 +74,7 @@ namespace Ps3DiscDumper.DiscKeyProviders
                 Log.Info($"If you have matching IRD file, you can put it in '{discKeyCachePath}' and try dumping the disc again");
             }
 
-            Log.Info($"Found {result.Count} IRD files");
+            Log.Info($"Found {result.Count} IRD files in the cache");
             return result;
         }
     }
