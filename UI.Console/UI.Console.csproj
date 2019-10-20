@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="1.0.0-alpha-*" />
+    <PackageReference Include="NDesk.Options.Core" Version="1.2.5" />
   </ItemGroup>
 
 </Project>

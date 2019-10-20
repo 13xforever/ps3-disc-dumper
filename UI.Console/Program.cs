@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using NDesk.Options;
 using IrdLibraryClient;
 using Ps3DiscDumper;
 
@@ -18,15 +19,17 @@ start:
             Console.Title = title;
             try
             {
-                if (args.Length > 1)
+                var output = ".";
+                var inDir = "";
+                var options = new OptionSet()
                 {
-                    Console.WriteLine("Expected one arguments: output folder");
-                    return;
-                }
+                    { "i=", v => { inDir = v; }},
+                    { "o=", v => { output = v; }}
+                };
+                options.Parse(args);
 
-                var output = args.Length == 1 ? args[0] : ".";
                 var dumper = new Dumper(ApiConfig.Cts);
-                dumper.DetectDisc();
+                dumper.DetectDisc(inDir);
                 await dumper.FindDiscKeyAsync(ApiConfig.IrdCachePath).ConfigureAwait(false);
                 if (string.IsNullOrEmpty(dumper.OutputDir))
                 {
@@ -85,6 +88,13 @@ start:
                     Console.WriteLine("Dump is valid");
                     Console.ResetColor();
                 }
+            }
+            catch (OptionException e)
+            {
+                Console.Write("Command line error: ");
+                Console.WriteLine(e.Message);
+                Console.WriteLine("Usage: dotnet run [-i input dir] [-o output dir]");
+                Environment.Exit(1);
             }
             catch (Exception e)
             {

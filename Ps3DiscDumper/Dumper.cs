@@ -151,27 +151,34 @@ namespace Ps3DiscDumper
             Log.Info($"Game title: {Title}");
         }
 
-        public void DetectDisc(Func<Dumper, string> outputDirFormatter = null)
+        public void DetectDisc(string inDir = "", Func<Dumper, string> outputDirFormatter = null)
         {
             outputDirFormatter = outputDirFormatter ?? (d => $"[{d.ProductCode}] {d.Title}");
             string discSfbPath = null;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                var drives = DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.CDRom && d.IsReady);
-                foreach (var drive in drives)
+                if (!String.IsNullOrEmpty(inDir))
+                    discSfbPath = Path.Combine(inDir, "PS3_DISC.SFB");
+                else
                 {
-                    discSfbPath = Path.Combine(drive.Name, "PS3_DISC.SFB");
-                    if (!File.Exists(discSfbPath))
-                        continue;
+                    var drives = DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.CDRom && d.IsReady);
+                    foreach (var drive in drives)
+                    {
+                        discSfbPath = Path.Combine(drive.Name, "PS3_DISC.SFB");
+                        if (!File.Exists(discSfbPath))
+                            continue;
 
-                    Drive = drive.Name[0];
-                    input = drive.Name;
-                    break;
+                        Drive = drive.Name[0];
+                        input = drive.Name;
+                        break;
+                    }
                 }
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                discSfbPath = IOEx.GetFilepaths("/media", "PS3_DISC.SFB", 2).FirstOrDefault();
+                if (String.IsNullOrEmpty(inDir))
+                    inDir = "/media";
+                discSfbPath = IOEx.GetFilepaths(inDir, "PS3_DISC.SFB", 2).FirstOrDefault();
                 if (!string.IsNullOrEmpty(discSfbPath))
                     input = Path.GetDirectoryName(discSfbPath);
             }
