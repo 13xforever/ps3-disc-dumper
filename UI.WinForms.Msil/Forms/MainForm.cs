@@ -271,7 +271,8 @@ namespace UI.WinForms.Msil
             var dumper = (Dumper)doWorkEventArgs.Argument;
             try
             {
-                dumper.DetectDisc(d =>
+                dumper.DetectDisc("",
+                    d =>
                                   {
                                       var items = new NameValueCollection
                                       {
