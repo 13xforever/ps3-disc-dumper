@@ -157,26 +157,33 @@ namespace Ps3DiscDumper
             string discSfbPath = null;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                if (!String.IsNullOrEmpty(inDir))
-                    discSfbPath = Path.Combine(inDir, "PS3_DISC.SFB");
-                else
+                var drives = DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.CDRom && d.IsReady);
+                if (string.IsNullOrEmpty(inDir))
                 {
-                    var drives = DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.CDRom && d.IsReady);
                     foreach (var drive in drives)
                     {
                         discSfbPath = Path.Combine(drive.Name, "PS3_DISC.SFB");
                         if (!File.Exists(discSfbPath))
                             continue;
 
-                        Drive = drive.Name[0];
                         input = drive.Name;
+                        Drive = drive.Name[0];
                         break;
+                    }
+                }
+                else
+                {
+                    discSfbPath = Path.Combine(inDir, "PS3_DISC.SFB");
+                    if (File.Exists(discSfbPath))
+                    {
+                        input = Path.GetPathRoot(discSfbPath);
+                        Drive = discSfbPath[0];
                     }
                 }
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                if (String.IsNullOrEmpty(inDir))
+                if (string.IsNullOrEmpty(inDir))
                     inDir = "/media";
                 discSfbPath = IOEx.GetFilepaths(inDir, "PS3_DISC.SFB", 2).FirstOrDefault();
                 if (!string.IsNullOrEmpty(discSfbPath))
