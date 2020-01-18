@@ -93,8 +93,10 @@ namespace UI.WinForms.Msil
             Text = "PS3 Disc Dumper v" + Dumper.Version;
             Log.Info(Text);
             settings.Reload();
+            /*
             if (!settings.Configured)
                 settingsButton_Click(sender, e);
+            */
             ResetForm();
         }
 
