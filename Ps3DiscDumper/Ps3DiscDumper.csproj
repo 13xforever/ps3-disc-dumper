@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="EndianBitConverter" Version="1.1.0" />
-    <PackageReference Include="System.Management" Version="4.6.0" />
+    <PackageReference Include="System.Management" Version="4.7.0" />
   </ItemGroup>
 
   <ItemGroup>
