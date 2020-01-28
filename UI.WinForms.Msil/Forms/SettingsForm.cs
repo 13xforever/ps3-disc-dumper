@@ -29,13 +29,6 @@ namespace UI.WinForms.Msil
             irdTextBox.Text = Settings.IrdDir;
             namePatternTextBox.Text = Settings.DumpNameTemplate;
             namePatternTextBox_TextChanged();
-/*
-            if (!Settings.Configured)
-            {
-                Settings.Configured = true;
-                Settings.Save();
-            }
-*/
         }
 
         private void cancelButton_Click(object sender, EventArgs e)

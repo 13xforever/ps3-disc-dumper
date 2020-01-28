@@ -10,7 +10,7 @@ namespace UI.WinForms.Msil
         [UserScopedSetting, DefaultSettingValue(@".\ird")]
         public string IrdDir { get => (string)this[nameof(IrdDir)]; set => this[nameof(IrdDir)] = value; }
 
-        [UserScopedSetting, DefaultSettingValue("[%product_code_letters% %product_code_numbers%] %title%")]
+        [UserScopedSetting, DefaultSettingValue("%" + Patterns.Title + "% [%" + Patterns.ProductCode + "%]")]
         public string DumpNameTemplate { get => (string)this[nameof(DumpNameTemplate)]; set => this[nameof(DumpNameTemplate)] = value; }
 
         [UserScopedSetting, DefaultSettingValue("false")]

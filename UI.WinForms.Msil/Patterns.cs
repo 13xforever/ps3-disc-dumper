@@ -2,10 +2,10 @@
 {
     internal static class Patterns
     {
-        public static string ProductCode = "product_code";
-        public static string ProductCodeLetters = "product_code_letters";
-        public static string ProductCodeNumbers = "product_code_numbers";
-        public static string Title = "title";
-        public static string Region = "region";
+        public const string ProductCode = "product_code";
+        public const string ProductCodeLetters = "product_code_letters";
+        public const string ProductCodeNumbers = "product_code_numbers";
+        public const string Title = "title";
+        public const string Region = "region";
     }
 }

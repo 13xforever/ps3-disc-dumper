@@ -21,7 +21,7 @@ namespace Ps3DiscDumper
 {
     public class Dumper: IDisposable
     {
-        public const string Version = "3.0.5 beta 3";
+        public const string Version = "3.0.5 beta 4";
 
         private static readonly HashSet<char> InvalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
         private static readonly char[] MultilineSplit = {'\r', '\n'};
@@ -153,7 +153,7 @@ namespace Ps3DiscDumper
 
         public void DetectDisc(string inDir = "", Func<Dumper, string> outputDirFormatter = null)
         {
-            outputDirFormatter = outputDirFormatter ?? (d => $"[{d.ProductCode}] {d.Title}");
+            outputDirFormatter ??= (d => $"[{d.ProductCode}] {d.Title}");
             string discSfbPath = null;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -373,7 +373,7 @@ namespace Ps3DiscDumper
                 else
                     dumpPath = parent;
             }
-            filesystemStructure = filesystemStructure ?? GetFilesystemStructure();
+            filesystemStructure ??= GetFilesystemStructure();
             var validators = GetValidationInfo();
             if (!string.IsNullOrEmpty(dumpPath))
             {
@@ -437,10 +437,12 @@ namespace Ps3DiscDumper
                         select v.Files[file.Filename].Hashes
                     ).ToList();
                     var lastHash = "";
+                    var tries = 2;
                     do
                     {
                         try
                         {
+                            tries--;
                             using (var outputStream = File.Open(outputFilename, FileMode.Create, FileAccess.Write, FileShare.Read))
                             using (var inputStream = File.Open(inputFilename, FileMode.Open, FileAccess.Read, FileShare.Read))
                             using (Decrypter = new Decrypter(inputStream, driveStream, decryptionKey, file.StartSector, sectorSize, unprotectedRegions))
@@ -480,7 +482,7 @@ namespace Ps3DiscDumper
                             Log.Error(e, e.Message);
                             error = true;
                         }
-                    } while (error);
+                    } while (error && tries > 0 && !Cts.IsCancellationRequested);
                 }
                 catch (Exception ex)
                 {
