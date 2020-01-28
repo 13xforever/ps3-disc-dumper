@@ -4,7 +4,9 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>UIConsole</RootNamespace>
-    <LangVersion>latest</LangVersion>
+    <PublishSingleFile Condition="'$(Configuration)'=='Release'">true</PublishSingleFile>
+    <PublishTrimmed Condition="'$(Configuration)'=='Release'">true</PublishTrimmed>
+    <PublishReadyToRun Condition="'$(Configuration)'=='Release'">false</PublishReadyToRun>
     <AssemblyName>ps3-disc-dumper</AssemblyName>
   </PropertyGroup>
 
@@ -15,6 +17,10 @@
     <EmbeddedResource Remove="ird\**" />
     <None Remove="logs\**" />
     <None Remove="ird\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
