@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using IrdLibraryClient;
@@ -12,6 +16,55 @@ namespace UIConsole
         static async Task<int> Main(string[] args)
         {
             Log.Info("PS3 Disc Dumper v" + Dumper.Version);
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && Console.WindowHeight < 1 && Console.WindowWidth < 1)
+                try
+                {
+                    Log.Error("Looks like there's no console present, restarting...");
+                    var launchArgs = Environment.GetCommandLineArgs()[0];
+                    if (launchArgs.Contains("/var/tmp") || launchArgs.EndsWith(".dll"))
+                    {
+                        Log.Debug("Looks like we were launched from a single executable, looking for the parent...");
+                        using var currentProcess = Process.GetCurrentProcess();
+                        var pid = currentProcess.Id;
+                        var procCmdlinePath = Path.Combine("/proc", pid.ToString(), "cmdline");
+                        launchArgs = File.ReadAllLines(procCmdlinePath).FirstOrDefault()?.TrimEnd('\0');
+                    }
+                    Log.Debug($"Using cmdline '{launchArgs}'");
+                    launchArgs = $"-e bash -c {launchArgs}";
+                    var startInfo = new ProcessStartInfo("x-terminal-emulator", launchArgs);
+                    using var proc = Process.Start(startInfo);
+                    if (proc.WaitForExit(1_000))
+                    {
+                        if (proc.ExitCode != 0)
+                        {
+                            startInfo = new ProcessStartInfo("xdg-terminal", launchArgs);
+                            using var proc2 = Process.Start(startInfo);
+                            if (proc2.WaitForExit(1_000))
+                            {
+                                if (proc2.ExitCode != 0)
+                                {
+                                    startInfo = new ProcessStartInfo("gnome-terminal", launchArgs);
+                                    using var proc3 = Process.Start(startInfo);
+                                    if (proc3.WaitForExit(1_000))
+                                    {
+                                        if (proc3.ExitCode != 0)
+                                        {
+                                            startInfo = new ProcessStartInfo("konsole", launchArgs);
+                                            using var _ = Process.Start(startInfo);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return -2;
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e);
+                    return -3;
+                }
             var lastDiscId = "";
 start:
             const string titleBase = "PS3 Disc Dumper";
