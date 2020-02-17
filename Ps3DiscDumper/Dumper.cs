@@ -85,15 +85,13 @@ namespace Ps3DiscDumper
         {
             var physicalDrives = new List<string>();
 #if !NATIVE
-            using (var mgmtObjSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMedia"))
+            using var mgmtObjSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMedia");
+            var drives = mgmtObjSearcher.Get();
+            foreach (var drive in drives)
             {
-                var drives = mgmtObjSearcher.Get();
-                foreach (var drive in drives)
-                {
-                    var tag = drive.Properties["Tag"].Value as string;
-                    if (tag?.IndexOf("CDROM", StringComparison.InvariantCultureIgnoreCase) > -1)
-                        physicalDrives.Add(tag);
-                }
+                var tag = drive.Properties["Tag"].Value as string;
+                if (tag?.IndexOf("CDROM", StringComparison.InvariantCultureIgnoreCase) > -1)
+                    physicalDrives.Add(tag);
             }
 #else
             for (var i = 0; i < 32; i++)
@@ -106,7 +104,7 @@ namespace Ps3DiscDumper
 
         private List<string> EnumeratePhysicalDrivesLinux()
         {
-            string cdInfo = "";
+            var cdInfo = "";
             try
             {
                 cdInfo = File.ReadAllText("/proc/sys/dev/cdrom/info");
@@ -153,7 +151,7 @@ namespace Ps3DiscDumper
 
         public void DetectDisc(string inDir = "", Func<Dumper, string> outputDirFormatter = null)
         {
-            outputDirFormatter = outputDirFormatter ?? (d => $"[{d.ProductCode}] {d.Title}");
+            outputDirFormatter ??= d => $"[{d.ProductCode}] {d.Title}";
             string discSfbPath = null;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -191,6 +189,7 @@ namespace Ps3DiscDumper
             }
             else
                 throw new NotImplementedException("Current OS is not supported");
+
             if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(discSfbPath))
                 throw new DriveNotFoundException("No valid PS3 disc was detected. Disc must be detected and mounted.");
 
@@ -207,6 +206,7 @@ namespace Ps3DiscDumper
             if (titleId != ProductCode)
                 Log.Warn($"Product codes in ps3_disc.sfb ({titleId}) and in param.sfo ({ProductCode}) do not match");
 
+            // todo: maybe use discutils instead to read TOC as one block
             var files = IOEx.GetFilepaths(input, "*", SearchOption.AllDirectories);
             DiscFilenames = new List<string>();
             var totalFilesize = 0L;
@@ -271,25 +271,23 @@ namespace Ps3DiscDumper
             {
                 try
                 {
-                    using (var discStream = File.Open(drive, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using var discStream = File.Open(drive, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    var tmpDiscReader = new CDReader(discStream, true, true);
+                    if (tmpDiscReader.FileExists("PS3_DISC.SFB"))
                     {
-                        var tmpDiscReader = new CDReader(discStream, true, true);
-                        if (tmpDiscReader.FileExists("PS3_DISC.SFB"))
+                        var discSfbInfo = tmpDiscReader.GetFileInfo("PS3_DISC.SFB");
+                        if (discSfbInfo.Length == discSfbData.Length)
                         {
-                            var discSfbInfo = tmpDiscReader.GetFileInfo("PS3_DISC.SFB");
-                            if (discSfbInfo.Length == discSfbData.Length)
+                            var buf = new byte[discSfbData.Length];
+                            var sector = tmpDiscReader.PathToClusters(discSfbInfo.FullName).First().Offset;
+                            discStream.Seek(sector * tmpDiscReader.ClusterSize, SeekOrigin.Begin);
+                            discStream.ReadExact(buf, 0, buf.Length);
+                            if (buf.SequenceEqual(discSfbData))
                             {
-                                var buf = new byte[discSfbData.Length];
-                                var sector = tmpDiscReader.PathToClusters(discSfbInfo.FullName).First().Offset;
-                                discStream.Seek(sector * tmpDiscReader.ClusterSize, SeekOrigin.Begin);
-                                discStream.ReadExact(buf, 0, buf.Length);
-                                if (buf.SequenceEqual(discSfbData))
-                                {
-                                    physicalDevice = drive;
-                                    break;
-                                }
-
+                                physicalDevice = drive;
+                                break;
                             }
+
                         }
                     }
                 }
@@ -356,7 +354,7 @@ namespace Ps3DiscDumper
                 AllKnownDiscKeys.TryGetValue(discKey, out allMatchingKeys);
             var discKeyInfo = allMatchingKeys?.First();
             DiscKeyFilename = Path.GetFileName(discKeyInfo?.FullPath);
-            DiscKeyType = discKeyInfo.KeyType;
+            DiscKeyType = discKeyInfo?.KeyType ?? default;
         }
 
         public async Task DumpAsync(string output)
@@ -371,7 +369,7 @@ namespace Ps3DiscDumper
                 else
                     dumpPath = parent;
             }
-            filesystemStructure = filesystemStructure ?? GetFilesystemStructure();
+            filesystemStructure ??= GetFilesystemStructure();
             var validators = GetValidationInfo();
             if (!string.IsNullOrEmpty(dumpPath))
             {
@@ -435,50 +433,51 @@ namespace Ps3DiscDumper
                         select v.Files[file.Filename].Hashes
                     ).ToList();
                     var lastHash = "";
+                    var tries = 2;
                     do
                     {
                         try
                         {
-                            using (var outputStream = File.Open(outputFilename, FileMode.Create, FileAccess.Write, FileShare.Read))
-                            using (var inputStream = File.Open(inputFilename, FileMode.Open, FileAccess.Read, FileShare.Read))
-                            using (Decrypter = new Decrypter(inputStream, driveStream, decryptionKey, file.StartSector, sectorSize, unprotectedRegions))
+                            tries--;
+                            using var outputStream = File.Open(outputFilename, FileMode.Create, FileAccess.Write, FileShare.Read);
+                            using var inputStream = File.Open(inputFilename, FileMode.Open, FileAccess.Read, FileShare.Read);
+                            using var decrypter = new Decrypter(inputStream, driveStream, decryptionKey, file.StartSector, sectorSize, unprotectedRegions);
+                            Decrypter = decrypter;
+                            await decrypter.CopyToAsync(outputStream, 8 * 1024 * 1024, Cts.Token).ConfigureAwait(false);
+                            outputStream.Flush();
+                            var resultHashes = decrypter.GetHashes();
+                            var resultMd5 = resultHashes["MD5"];
+                            if (decrypter.WasEncrypted && decrypter.WasUnprotected)
+                                Log.Debug("Partially decrypted " + file.Filename);
+                            else if (decrypter.WasEncrypted)
+                                Log.Debug("Decrypted " + file.Filename);
+
+                            if (!expectedHashes.Any())
                             {
-                                await Decrypter.CopyToAsync(outputStream, 8 * 1024 * 1024, Cts.Token).ConfigureAwait(false);
-                                outputStream.Flush();
-                                var resultHashes = Decrypter.GetHashes();
-                                var resultMd5 = resultHashes["MD5"];
-                                if (Decrypter.WasEncrypted && Decrypter.WasUnprotected)
-                                    Log.Debug("Partially decrypted " + file.Filename);
-                                else if (Decrypter.WasEncrypted)
-                                    Log.Debug("Decrypted " + file.Filename);
-
-                                if (!expectedHashes.Any())
-                                {
-                                    if (ValidationStatus == true)
-                                        ValidationStatus = null;
-                                }
-                                else if (!IsMatch(resultHashes, expectedHashes))
-                                {
-                                    error = true;
-                                    var msg = "Unexpected hash: " + resultMd5;
-                                    if (resultMd5 == lastHash || Decrypter.LastBlockCorrupted)
-                                    {
-                                        Log.Error(msg);
-                                        BrokenFiles.Add((file.Filename, "corrupted"));
-                                        break;
-                                    }
-                                    Log.Warn(msg + ", retrying");
-                                }
-
-                                lastHash = resultMd5;
+                                if (ValidationStatus == true)
+                                    ValidationStatus = null;
                             }
+                            else if (!IsMatch(resultHashes, expectedHashes))
+                            {
+                                error = true;
+                                var msg = "Unexpected hash: " + resultMd5;
+                                if (resultMd5 == lastHash || decrypter.LastBlockCorrupted)
+                                {
+                                    Log.Error(msg);
+                                    BrokenFiles.Add((file.Filename, "corrupted"));
+                                    break;
+                                }
+                                Log.Warn(msg + ", retrying");
+                            }
+
+                            lastHash = resultMd5;
                         }
                         catch (Exception e)
                         {
                             Log.Error(e, e.Message);
                             error = true;
                         }
-                    } while (error);
+                    } while (error && tries > 0 && !Cts.IsCancellationRequested);
                 }
                 catch (Exception ex)
                 {
@@ -498,11 +497,9 @@ namespace Ps3DiscDumper
             driveStream.Seek(pos, SeekOrigin.Begin);
             try
             {
-                using (var memStream = new MemoryStream(buf, false))
-                {
-                    var reader = new CDReader(memStream, true, true);
-                    return reader.GetFilesystemStructure();
-                }
+                using var memStream = new MemoryStream(buf, false);
+                var reader = new CDReader(memStream, true, true);
+                return reader.GetFilesystemStructure();
             }
             catch (Exception e)
             {

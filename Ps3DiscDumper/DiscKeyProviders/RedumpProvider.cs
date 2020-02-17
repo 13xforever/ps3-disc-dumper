@@ -27,37 +27,34 @@ namespace Ps3DiscDumper.DiscKeyProviders
                     Log.Warn("No embedded redump keys found");
                 foreach (var res in embeddedResources)
                 {
-                    using (var resStream = assembly.GetManifestResourceStream(res))
-                    using (var zip = new ZipArchive(resStream, ZipArchiveMode.Read))
-                        foreach (var zipEntry in zip.Entries.Where(e => e.Name.EndsWith(".dkey", StringComparison.InvariantCultureIgnoreCase)
-                                                                   || e.Name.EndsWith(".key", StringComparison.InvariantCultureIgnoreCase)))
+                    using var resStream = assembly.GetManifestResourceStream(res);
+                    using var zip = new ZipArchive(resStream, ZipArchiveMode.Read);
+                    foreach (var zipEntry in zip.Entries.Where(e => e.Name.EndsWith(".dkey", StringComparison.InvariantCultureIgnoreCase)
+                                                                    || e.Name.EndsWith(".key", StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        using var keyStream = zipEntry.Open();
+                        using var memStream = new MemoryStream();
+                        await keyStream.CopyToAsync(memStream, cancellationToken).ConfigureAwait(false);
+                        var discKey = memStream.ToArray();
+                        if (zipEntry.Length > 256/8*2)
                         {
-
-                            using (var keyStream = zipEntry.Open())
-                            using (var memStream = new MemoryStream())
-                            {
-                                await keyStream.CopyToAsync(memStream).ConfigureAwait(false);
-                                var discKey = memStream.ToArray();
-                                if (zipEntry.Length > 256/8*2)
-                                {
-                                    Log.Warn($"Disc key size is too big: {discKey} ({res}/{zipEntry.FullName})");
-                                    continue;
-                                }
-                                if (discKey.Length > 16)
-                                {
-                                    discKey = Encoding.UTF8.GetString(discKey).TrimEnd().ToByteArray();
-                                }
-
-                                try
-                                {
-                                    result.Add(new DiscKeyInfo(null, discKey, zipEntry.FullName, KeyType.Redump, discKey.ToHexString()));
-                                }
-                                catch (Exception e)
-                                {
-                                    Log.Warn(e, $"Invalid disc key format: {discKey}");
-                                }
-                            }
+                            Log.Warn($"Disc key size is too big: {discKey} ({res}/{zipEntry.FullName})");
+                            continue;
                         }
+                        if (discKey.Length > 16)
+                        {
+                            discKey = Encoding.UTF8.GetString(discKey).TrimEnd().ToByteArray();
+                        }
+
+                        try
+                        {
+                            result.Add(new DiscKeyInfo(null, discKey, zipEntry.FullName, KeyType.Redump, discKey.ToHexString()));
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Warn(e, $"Invalid disc key format: {discKey}");
+                        }
+                    }
                 }
                 if (result.Any())
                     Log.Info($"Found {result.Count} embedded redump keys");

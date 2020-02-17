@@ -1,10 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>UIConsole</RootNamespace>
-    <LangVersion>latest</LangVersion>
+    <PublishSingleFile Condition="'$(Configuration)'=='Release'">true</PublishSingleFile>
+    <PublishTrimmed Condition="'$(Configuration)'=='Release'">true</PublishTrimmed>
+    <PublishReadyToRun Condition="'$(Configuration)'=='Release'">false</PublishReadyToRun>
     <AssemblyName>ps3-disc-dumper</AssemblyName>
   </PropertyGroup>
 
@@ -18,11 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Properties\rd.xml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\rd.xml" />
+    <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,8 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="1.0.0-alpha-*" />
-    <PackageReference Include="Mono.Options" Version="5.3.0.1" />
+    <PackageReference Include="Mono.Options" Version="6.6.0.161" />
   </ItemGroup>
 
 </Project>
