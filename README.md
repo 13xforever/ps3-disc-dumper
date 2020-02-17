@@ -19,8 +19,8 @@ How to use
 3. On Linux open terminal in the folder where you put the binary
     1. `$ chmod +x ps3-disc-dumper` to make it executable
     2. Mount the disc (either through file manager or manually `$ mount` it to `/media/...`)
-3. Start the dumper
-4. Wait for it to complete
+4. Start the dumper
+5. Wait for it to complete
 
 By default all files will be copied in the folder where the dumper was started from (`.\[BLUS12345] Game Title\`).
 
