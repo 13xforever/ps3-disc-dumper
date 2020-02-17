@@ -27,26 +27,22 @@ namespace Ps3DiscDumper
 
         public static byte[] DecryptDiscKey(byte[] data1)
         {
-            using (var aes = Aes.Create())
-            {
-                aes.BlockSize = data1.Length * 8;
-                aes.Mode = CipherMode.CBC;
-                aes.Padding = PaddingMode.None;
-                using (var transform = aes.CreateEncryptor(Secret, IV))
-                    return transform.TransformFinalBlock(data1, 0, data1.Length);
-            }
+            using var aes = Aes.Create();
+            aes.BlockSize = data1.Length * 8;
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.None;
+            using var transform = aes.CreateEncryptor(Secret, IV);
+            return transform.TransformFinalBlock(data1, 0, data1.Length);
         }
 
         public static byte[] EncryptDiscKey(byte[] data1)
         {
-            using (var aes = Aes.Create())
-            {
-                aes.BlockSize = data1.Length * 8;
-                aes.Mode = CipherMode.CBC;
-                aes.Padding = PaddingMode.None;
-                using (var transform = aes.CreateDecryptor(Secret, IV))
-                    return transform.TransformFinalBlock(data1, 0, data1.Length);
-            }
+            using var aes = Aes.Create();
+            aes.BlockSize = data1.Length * 8;
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.None;
+            using var transform = aes.CreateDecryptor(Secret, IV);
+            return transform.TransformFinalBlock(data1, 0, data1.Length);
         }
 
         public static byte[] GetSectorIV(long sectorNumber)
@@ -62,13 +58,11 @@ namespace Ps3DiscDumper
 
         public static byte[] DecryptSector(byte[] decryptionKey, byte[] sector, byte[] sectorIV)
         {
-            using (var aes = Aes.Create())
-            {
-                aes.Mode = CipherMode.CBC;
-                aes.Padding = PaddingMode.None;
-                using (var aesTransform = aes.CreateDecryptor(decryptionKey, sectorIV))
-                    return aesTransform.TransformFinalBlock(sector, 0, sector.Length);
-            }
+            using var aes = Aes.Create();
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.None;
+            using var aesTransform = aes.CreateDecryptor(decryptionKey, sectorIV);
+            return aesTransform.TransformFinalBlock(sector, 0, sector.Length);
         }
 
         public Decrypter(Stream fileStream, Stream discStream, byte[] decryptionKey, long startSector, int sectorSize, List<(int start, int end)> unprotectedSectorRanges)
@@ -150,8 +144,8 @@ namespace Ps3DiscDumper
                             Log.Warn($"Filesystem data and raw data do not match for sector 0x{SectorPosition:x8}");
                         tmpSector = newTmpSector;
                     }
-                    using (var aesTransform = aes.CreateDecryptor(decryptionKey, GetSectorIV(SectorPosition)))
-                        decryptedSector = aesTransform.TransformFinalBlock(tmpSector, 0, sectorSize);
+                    using var aesTransform = aes.CreateDecryptor(decryptionKey, GetSectorIV(SectorPosition));
+                    decryptedSector = aesTransform.TransformFinalBlock(tmpSector, 0, sectorSize);
                 }
                 else
                     WasUnprotected = true;

@@ -18,9 +18,7 @@ namespace Ps3DiscDumper.DiscInfo
             {
                 using (var headerStream = new MemoryStream(ird.Header))
                 using (var gzipStream = new GZipStream(headerStream, CompressionMode.Decompress))
-                {
                     gzipStream.CopyTo(stream);
-                }
                 stream.Seek(0, SeekOrigin.Begin);
                 var reader = new CDReader(stream, true, true);
                 fsInfo = reader.GetFilesystemStructure();
