@@ -21,7 +21,7 @@ namespace Ps3DiscDumper
 {
     public class Dumper: IDisposable
     {
-        public const string Version = "3.0.8";
+        public const string Version = "3.0.9";
 
         private static readonly HashSet<char> InvalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
         private static readonly char[] MultilineSplit = {'\r', '\n'};
@@ -313,6 +313,9 @@ namespace Ps3DiscDumper
                         var clusterRange = discReader.PathToClusters(path);
                         detectionRecord = new FileRecord(path, clusterRange.Min(r => r.Offset), discReader.GetFileLength(path));
                         expectedBytes = Detectors[path];
+                        if (detectionRecord.Length == 0)
+                            continue;
+                        
                         Log.Debug($"Using {path} for disc key detection");
                         break;
                     }
