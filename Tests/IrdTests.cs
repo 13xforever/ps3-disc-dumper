@@ -33,7 +33,7 @@ namespace Tests
             using (var decompressedStream = GetDecompressHeader(ird))
             {
                 var reader = new CDReader(decompressedStream, true, true);
-                var files = reader.GetFilesystemStructure();
+                var (files, _) = reader.GetFilesystemStructure();
                 Assert.That(files.Count, Is.EqualTo(expectedFileCount));
             }
         }

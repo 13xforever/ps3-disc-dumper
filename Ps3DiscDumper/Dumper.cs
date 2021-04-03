@@ -21,7 +21,7 @@ namespace Ps3DiscDumper
 {
     public class Dumper: IDisposable
     {
-        public const string Version = "3.0.9";
+        public const string Version = "3.0.10";
 
         private static readonly HashSet<char> InvalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
         private static readonly char[] MultilineSplit = {'\r', '\n'};
@@ -49,6 +49,7 @@ namespace Ps3DiscDumper
         public char Drive { get; set; }
         private string input;
         private List<FileRecord> filesystemStructure;
+        private List<string> emptyDirStructure;
         private CDReader discReader;
         private HashSet<DiscKeyInfo> allMatchingKeys;
         public KeyType DiscKeyType { get; set; }
@@ -372,7 +373,8 @@ namespace Ps3DiscDumper
                 else
                     dumpPath = parent;
             }
-            filesystemStructure ??= GetFilesystemStructure();
+            if (filesystemStructure is null)
+                (filesystemStructure, emptyDirStructure) = GetFilesystemStructure();
             var validators = GetValidationInfo();
             if (!string.IsNullOrEmpty(dumpPath))
             {
@@ -388,6 +390,8 @@ namespace Ps3DiscDumper
                 }
             }
 
+            foreach (var dir in emptyDirStructure)
+                Log.Trace($"Empty dir: {dir}");
             foreach (var file in filesystemStructure)
                 Log.Trace($"0x{file.StartSector:x8}: {file.Filename} ({file.Length})");
             var outputPathBase = Path.Combine(output, OutputDir);
@@ -402,6 +406,28 @@ namespace Ps3DiscDumper
             var unprotectedRegions = driveStream.GetUnprotectedRegions();
             ValidationStatus = true;
 
+            foreach (var dir in emptyDirStructure)
+            {
+                try
+                {
+                    if (Cts.IsCancellationRequested)
+                        return;
+
+                    var convertedName = Path.DirectorySeparatorChar == '\\' ? dir : dir.Replace('\\', Path.DirectorySeparatorChar);
+                    var outputName = Path.Combine(outputPathBase, convertedName);
+                    if (!Directory.Exists(outputName))
+                    {
+                        Log.Debug("Creating empty directory " + outputName);
+                        Directory.CreateDirectory(outputName);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex);
+                    BrokenFiles.Add((dir, "Unexpected error: " + ex.Message));
+                }
+            }
+            
             foreach (var file in filesystemStructure)
             {
                 try
@@ -491,7 +517,7 @@ namespace Ps3DiscDumper
             Log.Info("Completed");
         }
 
-        private List<FileRecord> GetFilesystemStructure()
+        private (List<FileRecord> files, List<string> dirs) GetFilesystemStructure()
         {
             var pos = driveStream.Position;
             var buf = new byte[64 * 1024 * 1024];

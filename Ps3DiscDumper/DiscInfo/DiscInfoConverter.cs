@@ -21,7 +21,7 @@ namespace Ps3DiscDumper.DiscInfo
                     gzipStream.CopyTo(stream);
                 stream.Seek(0, SeekOrigin.Begin);
                 var reader = new CDReader(stream, true, true);
-                fsInfo = reader.GetFilesystemStructure();
+                (fsInfo, _) = reader.GetFilesystemStructure();
                 sectorSize = reader.ClusterSize;
             }
             var checksums = ird.Files.ToDictionary(f => f.Offset, f => f.Md5Checksum.ToHexString());

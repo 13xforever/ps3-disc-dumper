@@ -324,7 +324,7 @@ namespace UI.WinForms.Msil
             {
                 dumper.FindDiscKeyAsync(settings.IrdDir).Wait(dumper.Cts.Token);
             }
-            catch (Exception e)
+            catch (Exception)
             {
 //                MessageBox.Show(e.Message, "Disc check error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }

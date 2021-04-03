@@ -175,7 +175,7 @@ start:
                     Console.ResetColor();
                 }
             }
-            catch (OptionException e)
+            catch (OptionException)
             {
                 ShowHelp(options);
                 return 1;
