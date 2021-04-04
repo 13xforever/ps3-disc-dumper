@@ -59,7 +59,7 @@ namespace IrdLibraryClient
 #if DEBUG
                 const LogLevel minLevel = LogLevel.TRACE;
 #else
-                const LogLevel minLevel = LogLevel.INFO;
+                const LogLevel minLevel = LogLevel.DEBUG;
 #endif
                 if (level >= minLevel && message != null)
                 {

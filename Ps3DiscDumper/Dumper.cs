@@ -21,7 +21,7 @@ namespace Ps3DiscDumper
 {
     public class Dumper: IDisposable
     {
-        public const string Version = "3.0.10";
+        public const string Version = "3.0.11";
 
         private static readonly HashSet<char> InvalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
         private static readonly char[] MultilineSplit = {'\r', '\n'};
@@ -65,6 +65,7 @@ namespace Ps3DiscDumper
         public HashSet<DiscKeyInfo> ValidatingDiscKeys { get; } = new HashSet<DiscKeyInfo>();
         public CancellationTokenSource Cts { get; private set; }
         public bool? ValidationStatus { get; private set; }
+        public bool IsIvInitialized => sectorIV?.Length == 16;
 
         public Dumper(CancellationTokenSource cancellationTokenSource)
         {
@@ -86,19 +87,26 @@ namespace Ps3DiscDumper
         {
             var physicalDrives = new List<string>();
 #if !NATIVE
-            using var mgmtObjSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMedia");
-            var drives = mgmtObjSearcher.Get();
-            foreach (var drive in drives)
+            try
             {
-                var tag = drive.Properties["Tag"].Value as string;
-                if (tag?.IndexOf("CDROM", StringComparison.InvariantCultureIgnoreCase) > -1)
-                    physicalDrives.Add(tag);
+                using var mgmtObjSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMedia");
+                var drives = mgmtObjSearcher.Get();
+                foreach (var drive in drives)
+                {
+                    var tag = drive.Properties["Tag"].Value as string;
+                    if (tag?.IndexOf("CDROM", StringComparison.InvariantCultureIgnoreCase) > -1)
+                        physicalDrives.Add(tag);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Failed to enumerate physical media drives using WMI");
+                for (var i = 0; i < 32; i++)
+                    physicalDrives.Add($@"\\.\CDROM{i}");
             }
 #else
             for (var i = 0; i < 32; i++)
-            {
                 physicalDrives.Add($@"\\.\CDROM{i}");
-            }
 #endif
             return physicalDrives;
         }
@@ -227,25 +235,34 @@ namespace Ps3DiscDumper
         public async Task FindDiscKeyAsync(string discKeyCachePath)
         {
             // reload disc keys
-            foreach (var keyProvider in DiscKeyProviders)
+            try
             {
-                var newKeys = await keyProvider.EnumerateAsync(discKeyCachePath, ProductCode, Cts.Token).ConfigureAwait(false);
-                lock (AllKnownDiscKeys)
+                foreach (var keyProvider in DiscKeyProviders)
                 {
-                    foreach (var keyInfo in newKeys)
+                    Log.Trace($"Getting keys from {keyProvider.GetType().Name}...");
+                    var newKeys = await keyProvider.EnumerateAsync(discKeyCachePath, ProductCode, Cts.Token).ConfigureAwait(false);
+                    Log.Trace($"Got {newKeys.Count} keys");
+                    lock (AllKnownDiscKeys)
                     {
-                        try
+                        foreach (var keyInfo in newKeys)
                         {
-                            if (!AllKnownDiscKeys.TryGetValue(keyInfo.DecryptedKeyId, out var duplicates))
-                                AllKnownDiscKeys[keyInfo.DecryptedKeyId] = duplicates = new HashSet<DiscKeyInfo>();
-                            duplicates.Add(keyInfo);
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Error(e);
+                            try
+                            {
+                                if (!AllKnownDiscKeys.TryGetValue(keyInfo.DecryptedKeyId, out var duplicates))
+                                    AllKnownDiscKeys[keyInfo.DecryptedKeyId] = duplicates = new HashSet<DiscKeyInfo>();
+                                duplicates.Add(keyInfo);
+                            }
+                            catch (Exception e)
+                            {
+                                Log.Error(e);
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to load disc keys");
             }
             // check if user provided something new since the last attempt
             var untestedKeys = new HashSet<string>();
@@ -257,13 +274,23 @@ namespace Ps3DiscDumper
 
             // select physical device
             string physicalDevice = null;
-            List<string> physicalDrives;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                physicalDrives = EnumeratePhysicalDrivesWindows();
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                physicalDrives = EnumeratePhysicalDrivesLinux();
-            else
-                throw new NotImplementedException("Current OS is not supported");
+            List<string> physicalDrives = new List<string>();
+            Log.Trace("Trying to enumerate physical drives...");
+            try
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    physicalDrives = EnumeratePhysicalDrivesWindows();
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    physicalDrives = EnumeratePhysicalDrivesLinux();
+                else
+                    throw new NotImplementedException("Current OS is not supported");
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+                throw;
+            }
+            Log.Debug($"Found {physicalDrives.Count} physical drives");
 
             if (physicalDrives.Count == 0)
                 throw new InvalidOperationException("No optical drives were found");
@@ -272,15 +299,18 @@ namespace Ps3DiscDumper
             {
                 try
                 {
+                    Log.Trace($"Checking physical drive {drive}...");
                     using var discStream = File.Open(drive, FileMode.Open, FileAccess.Read, FileShare.Read);
                     var tmpDiscReader = new CDReader(discStream, true, true);
                     if (tmpDiscReader.FileExists("PS3_DISC.SFB"))
                     {
+                        Log.Trace("Found PS3_DISC.SFB, getting sector data...");
                         var discSfbInfo = tmpDiscReader.GetFileInfo("PS3_DISC.SFB");
                         if (discSfbInfo.Length == discSfbData.Length)
                         {
                             var buf = new byte[discSfbData.Length];
                             var sector = tmpDiscReader.PathToClusters(discSfbInfo.FullName).First().Offset;
+                            Log.Trace($"PS3_DISC.SFB sector number is {sector}, reading content...");
                             discStream.Seek(sector * tmpDiscReader.ClusterSize, SeekOrigin.Begin);
                             discStream.ReadExact(buf, 0, buf.Length);
                             if (buf.SequenceEqual(discSfbData))
@@ -288,7 +318,7 @@ namespace Ps3DiscDumper
                                 physicalDevice = drive;
                                 break;
                             }
-
+                            Log.Trace("SFB content check failed, skipping the drive");
                         }
                     }
                 }
@@ -300,6 +330,7 @@ namespace Ps3DiscDumper
             if (physicalDevice == null)
                 throw new AccessViolationException("Couldn't get physical access to the drive");
 
+            Log.Debug($"Selected physical drive {physicalDevice}");
             driveStream = File.Open(physicalDevice, FileMode.Open, FileAccess.Read, FileShare.Read);
 
             // find disc license file
@@ -338,6 +369,7 @@ namespace Ps3DiscDumper
             detectionSector = new byte[discReader.ClusterSize];
             detectionBytesExpected = expectedBytes;
             sectorIV = Decrypter.GetSectorIV(detectionRecord.StartSector);
+            Log.Debug($"Initialized {nameof(sectorIV)} ({sectorIV?.Length * 8} bit) for sector {detectionRecord.StartSector}: {sectorIV?.ToHexString()}");
             driveStream.ReadExact(detectionSector, 0, detectionSector.Length);
             string discKey = null;
             try

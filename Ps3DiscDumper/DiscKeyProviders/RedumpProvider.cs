@@ -68,50 +68,56 @@ namespace Ps3DiscDumper.DiscKeyProviders
 
             Log.Trace("Loading cached redump keys");
             var diff = result.Count;
-            if (Directory.Exists(discKeyCachePath))
+            try
             {
-                var matchingDiskKeys = Directory.GetFiles(discKeyCachePath, "*.dkey", SearchOption.TopDirectoryOnly)
-                                                .Concat(Directory.GetFiles(discKeyCachePath, "*.key", SearchOption.TopDirectoryOnly));
-                foreach (var dkeyFile in matchingDiskKeys)
+                if (Directory.Exists(discKeyCachePath))
                 {
-                    try
+                    var matchingDiskKeys = Directory.GetFiles(discKeyCachePath, "*.dkey", SearchOption.TopDirectoryOnly)
+                        .Concat(Directory.GetFiles(discKeyCachePath, "*.key", SearchOption.TopDirectoryOnly));
+                    foreach (var dkeyFile in matchingDiskKeys)
                     {
                         try
                         {
-                            var discKey = File.ReadAllBytes(dkeyFile);
-                            if (discKey.Length > 16)
+                            try
                             {
-                                try
+                                var discKey = File.ReadAllBytes(dkeyFile);
+                                if (discKey.Length > 16)
                                 {
-                                    discKey = Encoding.UTF8.GetString(discKey).TrimEnd().ToByteArray();
+                                    try
+                                    {
+                                        discKey = Encoding.UTF8.GetString(discKey).TrimEnd().ToByteArray();
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Log.Warn(e, $"Failed to convert {discKey.ToHexString()} from hex to binary");
+                                    }
                                 }
-                                catch (Exception e)
-                                {
-                                    Log.Warn(e, $"Failed to convert {discKey.ToHexString()} from hex to binary");
-                                }
+                                result.Add(new DiscKeyInfo(null, discKey, dkeyFile, KeyType.Redump, discKey.ToString()));
                             }
-                            result.Add(new DiscKeyInfo(null, discKey, dkeyFile, KeyType.Redump, discKey.ToString()));
-                        }
-                        catch (InvalidDataException)
-                        {
-                            File.Delete(dkeyFile);
-                            continue;
+                            catch (InvalidDataException)
+                            {
+                                File.Delete(dkeyFile);
+                                continue;
+                            }
+                            catch (Exception e)
+                            {
+                                Log.Warn(e);
+                                continue;
+                            }
                         }
                         catch (Exception e)
                         {
-                            Log.Warn(e);
-                            continue;
+                            Log.Warn(e, e.Message);
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Warn(e, e.Message);
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Log.Warn(ex, "Failed to load redump keys from local cache");
+            }
             diff = result.Count - diff;
-            if (diff > 0)
-                Log.Info($"Found {diff} cached disc keys");
+            Log.Info($"Found {diff} cached disc keys");
             return result;
         }
     }

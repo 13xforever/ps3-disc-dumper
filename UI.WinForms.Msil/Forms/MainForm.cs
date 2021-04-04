@@ -194,6 +194,7 @@ namespace UI.WinForms.Msil
                     File.Copy(discKeyPath, cacheFilename);
 
                 //todo: proper check
+                currentDumper.FindDiscKeyAsync(settings.IrdDir).GetAwaiter().GetResult();
                 if (!currentDumper.IsValidDiscKey(discKey))
                 {
                     MessageBox.Show("Selected disk key file contains incompatible file set, and cannot be used with the selected PS3 game disc.", "IRD file check", MessageBoxButtons.OK, MessageBoxIcon.Error);
