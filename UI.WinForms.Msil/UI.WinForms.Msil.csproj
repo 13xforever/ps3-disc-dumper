@@ -1,14 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ApplicationIcon>icon.ico</ApplicationIcon>
-    <PublishSingleFile Condition="'$(Configuration)'=='Release'">true</PublishSingleFile>
-    <PublishTrimmed Condition="'$(Configuration)'=='Release'">true</PublishTrimmed>
-    <PublishReadyToRun Condition="'$(Configuration)'=='Release'">false</PublishReadyToRun>
     <AssemblyName>ps3-disc-dumper</AssemblyName>
+  </PropertyGroup>
+  
+  <PropertyGroup  Condition="'$(Configuration)'=='Release'">
+    <PublishSingleFile>true</PublishSingleFile>
+    <PublishTrimmed>false</PublishTrimmed>
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +20,7 @@
       <Version>1.2.0</Version>
     </PackageReference>
     <PackageReference Include="DiscUtils.OpticalDisk">
-      <Version>0.16.8</Version>
+      <Version>0.16.13</Version>
     </PackageReference>
     <PackageReference Include="DotNetZip">
       <Version>1.15.0</Version>

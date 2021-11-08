@@ -10,7 +10,7 @@ Requirements
 * Disc must have decryption key, either in redump database or in the IRD Library
 * For binary release you might need to install .NET Core prerequisites
   * See `Supported OS versions` and `.NET Core dependencies` sections in [documentation](https://docs.microsoft.com/en-us/dotnet/core/windows-prerequisites?tabs=netcore31)
-* For source release you will need to have [.NET Core 3.1 SDK](https://www.microsoft.com/net/download) installed on your machine
+* For source release you will need to have [.NET 6.0 SDK](https://www.microsoft.com/net/download) installed on your machine
 
 How to use
 ==========
