@@ -21,7 +21,7 @@ namespace Ps3DiscDumper
 {
     public class Dumper: IDisposable
     {
-        public const string Version = "3.1.0";
+        public const string Version = "3.1.1";
 
         private static readonly HashSet<char> InvalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
         private static readonly char[] MultilineSplit = {'\r', '\n'};
@@ -228,7 +228,10 @@ namespace Ps3DiscDumper
             TotalFileSize = totalFilesize;
             TotalFileCount = DiscFilenames.Count;
 
-            OutputDir = new string(outputDirFormatter(this).ToCharArray().Where(c => !InvalidChars.Contains(c)).ToArray());
+            var path = new string(outputDirFormatter(this).ToCharArray().Where(c => !InvalidChars.Contains(c)).ToArray());
+            var separators = new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+            var pathParts = path.Split(separators, StringSplitOptions.RemoveEmptyEntries).Select(p => p.TrimEnd('.'));
+            OutputDir = string.Join(Path.DirectorySeparatorChar, pathParts);
             Log.Debug($"Output: {OutputDir}");
         }
 
