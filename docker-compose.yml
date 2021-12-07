@@ -1,0 +1,20 @@
+version: "3.5"
+
+services:
+
+  ps3dd:
+    image: ubuntu:21.04
+    volumes:
+      - .:/ps3-disc-dumper
+    # compare: https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu
+    entrypoint: >
+      bash -c "
+      apt-get update &&
+      apt-get install -y wget apt-transport-https &&
+      wget https://packages.microsoft.com/config/ubuntu/21.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb &&
+      dpkg -i packages-microsoft-prod.deb && 
+      apt-get update &&
+      apt-get install -y dotnet-sdk-6.0 &&
+      cd /ps3-disc-dumper/UI.Console &&
+      dotnet publish --configuration Release --runtime linux-x64 --self-contained true
+      "

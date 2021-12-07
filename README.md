@@ -39,3 +39,6 @@ There are different ways to get the dumper work:
   * `$ git clone https://github.com/13xforever/ps3-disc-dumper.git`
   * `$ cd UI.Console`
   * `$ dotnet run`
+* Alternative: Linux build via Docker
+  * run `docker-compose up`
+  * the executable should then be available at `./UI.Console/bin/Release/net6.0/linux-x64/ps3-disc-dumper`
