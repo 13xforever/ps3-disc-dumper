@@ -86,28 +86,27 @@ namespace Ps3DiscDumper
         private List<string> EnumeratePhysicalDrivesWindows()
         {
             var physicalDrives = new List<string>();
-#if !NATIVE
-            try
-            {
-                using var mgmtObjSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMedia");
-                var drives = mgmtObjSearcher.Get();
-                foreach (var drive in drives)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                try
                 {
-                    var tag = drive.Properties["Tag"].Value as string;
-                    if (tag?.IndexOf("CDROM", StringComparison.InvariantCultureIgnoreCase) > -1)
-                        physicalDrives.Add(tag);
+                    using var mgmtObjSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMedia");
+                    var drives = mgmtObjSearcher.Get();
+                    foreach (var drive in drives)
+                    {
+                        var tag = drive.Properties["Tag"].Value as string;
+                        if (tag?.IndexOf("CDROM", StringComparison.InvariantCultureIgnoreCase) > -1)
+                            physicalDrives.Add(tag);
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                Log.Error(e, "Failed to enumerate physical media drives using WMI");
+                catch (Exception e)
+                {
+                    Log.Error(e, "Failed to enumerate physical media drives using WMI");
+                    for (var i = 0; i < 32; i++)
+                        physicalDrives.Add($@"\\.\CDROM{i}");
+                }
+            else
                 for (var i = 0; i < 32; i++)
                     physicalDrives.Add($@"\\.\CDROM{i}");
-            }
-#else
-            for (var i = 0; i < 32; i++)
-                physicalDrives.Add($@"\\.\CDROM{i}");
-#endif
             return physicalDrives;
         }
 
@@ -513,12 +512,6 @@ namespace Ps3DiscDumper
                             Decrypter = decrypter;
                             await decrypter.CopyToAsync(outputStream, 8 * 1024 * 1024, Cts.Token).ConfigureAwait(false);
                             await outputStream.FlushAsync();
-                            outputStream.Close();
-                            _ = new FileInfo(outputFilename)
-                            {
-                                CreationTimeUtc = file.FileInfo.CreationTimeUtc,
-                                LastWriteTimeUtc = file.FileInfo.LastWriteTimeUtc
-                            };
 
                             var resultHashes = decrypter.GetHashes();
                             var resultMd5 = resultHashes["MD5"];
@@ -553,6 +546,12 @@ namespace Ps3DiscDumper
                             error = true;
                         }
                     } while (error && tries > 0 && !Cts.IsCancellationRequested);
+                    
+                    _ = new FileInfo(outputFilename)
+                    {
+                        CreationTimeUtc = file.FileInfo.CreationTimeUtc,
+                        LastWriteTimeUtc = file.FileInfo.LastWriteTimeUtc
+                    };
                 }
                 catch (Exception ex)
                 {
