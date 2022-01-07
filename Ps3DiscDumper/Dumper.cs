@@ -21,7 +21,7 @@ namespace Ps3DiscDumper
 {
     public class Dumper: IDisposable
     {
-        public const string Version = "3.2.0";
+        public const string Version = "3.2.0b2";
 
         private static readonly HashSet<char> InvalidChars = new(Path.GetInvalidFileNameChars());
         private static readonly char[] MultilineSplit = {'\r', '\n'};
@@ -85,6 +85,9 @@ namespace Ps3DiscDumper
 
         private List<string> EnumeratePhysicalDrivesWindows()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                throw new NotImplementedException("This should never happen, shut up msbuild");
+            
             var physicalDrives = new List<string>();
 #if !NATIVE
             try
@@ -347,7 +350,10 @@ namespace Ps3DiscDumper
                     {
                         var clusterRange = discReader.PathToClusters(path);
                         var fileInfo = discReader.GetFileSystemInfo(path);
-                        detectionRecord = new(path, clusterRange.Min(r => r.Offset), discReader.GetFileLength(path), fileInfo);
+                        var recordInfo = new FileRecordInfo(fileInfo.CreationTimeUtc, fileInfo.LastWriteTimeUtc);
+                        var parent = fileInfo.Parent;
+                        var parentInfo = new DirRecord(parent.FullName.TrimStart('\\'), new(parent.CreationTimeUtc, parent.LastWriteTimeUtc));
+                        detectionRecord = new(path, clusterRange.Min(r => r.Offset), discReader.GetFileLength(path), recordInfo, parentInfo);
                         expectedBytes = Detectors[path];
                         if (detectionRecord.Length == 0)
                             continue;
@@ -490,8 +496,7 @@ namespace Ps3DiscDumper
                     if (!Directory.Exists(fileDir))
                     {
                         Log.Debug("Creating directory " + fileDir);
-                        var dirInfo = Directory.CreateDirectory(fileDir);
-                        dirInfo.CreationTimeUtc = file.FileInfo.Parent.CreationTimeUtc;
+                        Directory.CreateDirectory(fileDir);
                     }
 
                     var error = false;
@@ -563,24 +568,24 @@ namespace Ps3DiscDumper
             
             Log.Info("Fixing directory modification time stamps...");
                 var fullDirectoryList = filesystemStructure
-                    .Select(f => f.FileInfo.Parent)
-                    .Concat(emptyDirStructure.Select(d => d.DirInfo))
+                    .Select(f => f.Parent)
+                    .Concat(emptyDirStructure)
                     .Distinct()
-                    .OrderByDescending(d => d.FullName, StringComparer.OrdinalIgnoreCase);
-                foreach (var dirInfo in fullDirectoryList)
+                    .OrderByDescending(d => d.TargetDirName, StringComparer.OrdinalIgnoreCase);
+                foreach (var dir in fullDirectoryList)
                 {
                     try
                     {
-                        var targetDirPath = Path.Combine(outputPathBase, dirInfo.FullName.TrimStart('\\'));
+                        var targetDirPath = Path.Combine(outputPathBase, dir.TargetDirName.TrimStart('\\'));
                         _ = new DirectoryInfo(targetDirPath)
                         {
-                            CreationTimeUtc = dirInfo.CreationTimeUtc,
-                            LastWriteTimeUtc = dirInfo.LastWriteTimeUtc
+                            CreationTimeUtc = dir.DirInfo.CreationTimeUtc,
+                            LastWriteTimeUtc = dir.DirInfo.LastWriteTimeUtc
                         };
                     }
                     catch
                     {
-                        Log.Warn($"Failed to fix timestamp for directory {dirInfo.FullName}");
+                        Log.Warn($"Failed to fix timestamp for directory {dir.TargetDirName}");
                     }
                 }
                 Log.Info("Completed");

@@ -49,7 +49,8 @@ namespace IrdLibraryClient.IrdFormat
             var dirNamesWithFiles = filenames.Select(Path.GetDirectoryName).Distinct().ToList();
             var dirList = dirNames.Except(dirNamesWithFiles)
                 .OrderBy(d => d, StringComparer.OrdinalIgnoreCase)
-                .Select(dir => new DirRecord(dir.TrimStart('\\'), reader.GetDirectoryInfo(dir)))
+                .Select(dir => (dir: dir.TrimStart('\\'), info: reader.GetDirectoryInfo(dir)))
+                .Select(di => new DirRecord(di.dir, new(di.info.CreationTimeUtc, di.info.LastWriteTimeUtc)))
                 .ToList();
 
             var fileList = new List<FileRecord>();
@@ -67,7 +68,10 @@ namespace IrdLibraryClient.IrdFormat
                 var startSector = clusterRange.Min(r => r.Offset);
                 var length = reader.GetFileLength(filename);
                 var fileInfo = reader.GetFileSystemInfo(filename);
-                fileList.Add(new(targetFilename, startSector, length, fileInfo));
+                var recordInfo = new FileRecordInfo(fileInfo.CreationTimeUtc, fileInfo.LastWriteTimeUtc);
+                var parent = fileInfo.Parent;
+                var parentInfo = new DirRecord(parent.FullName.TrimStart('\\'), new(parent.CreationTimeUtc, parent.LastWriteTimeUtc));
+                fileList.Add(new(targetFilename, startSector, length, recordInfo, parentInfo));
             }
             fileList = fileList.OrderBy(r => r.StartSector).ToList();
             
@@ -98,7 +102,9 @@ namespace IrdLibraryClient.IrdFormat
         }
     }
 
-    public record FileRecord(string TargetFileName, long StartSector, long Length, DiscFileSystemInfo FileInfo);
+    public record FileRecord(string TargetFileName, long StartSector, long Length, FileRecordInfo FileInfo, DirRecord Parent);
 
-    public record DirRecord(string TargetDirName, DiscDirectoryInfo DirInfo);
+    public record FileRecordInfo(DateTime CreationTimeUtc, DateTime LastWriteTimeUtc);
+
+    public record DirRecord(string TargetDirName, FileRecordInfo DirInfo);
 }
