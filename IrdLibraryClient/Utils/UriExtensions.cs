@@ -9,12 +9,12 @@ namespace IrdLibraryClient
 {
     public static class UriExtensions
     {
-        private static readonly Uri FakeHost = new Uri("sc://q"); // s:// will be parsed as file:///s:// for some reason
+        private static readonly Uri FakeHost = new("sc://q"); // s:// will be parsed as file:///s:// for some reason
 
         public static NameValueCollection ParseQueryString(Uri uri)
         {
             if (!uri.IsAbsoluteUri)
-                uri = new Uri(FakeHost, uri);
+                uri = new(FakeHost, uri);
             return uri.ParseQueryString();
         }
 
@@ -94,16 +94,16 @@ namespace IrdLibraryClient
             if (isAbsolute)
             {
                 var builder = new UriBuilder(uri) { Query = value };
-                return new Uri(builder.ToString());
+                return new(builder.ToString());
             }
             else
             {
                 var startWithSlash = uri.OriginalString.StartsWith("/");
-                uri = new Uri(FakeHost, uri);
+                uri = new(FakeHost, uri);
                 var builder = new UriBuilder(uri) { Query = value };
                 var additionalStrip = startWithSlash ? 0 : 1;
                 var newUri = builder.ToString().Substring(FakeHost.OriginalString.Length + additionalStrip);
-                return new Uri(newUri, UriKind.Relative);
+                return new(newUri, UriKind.Relative);
             }
         }
     }

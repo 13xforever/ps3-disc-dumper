@@ -25,7 +25,7 @@ namespace Ps3DiscDumper.DiscInfo
                 sectorSize = reader.ClusterSize;
             }
             var checksums = ird.Files.ToDictionary(f => f.Offset, f => f.Md5Checksum.ToHexString());
-            return new DiscInfo
+            return new()
             {
                 ProductCode = ird.ProductCode,
                 DiscVersion = ird.GameVersion,
@@ -37,7 +37,7 @@ namespace Ps3DiscDumper.DiscInfo
                     {
                         Offset = f.StartSector * sectorSize,
                         Size = f.Length,
-                        Hashes = new Dictionary<string, string>
+                        Hashes = new()
                         {
                             ["MD5"] = checksums[f.StartSector],
                         }

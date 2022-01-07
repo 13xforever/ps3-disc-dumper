@@ -38,19 +38,19 @@ namespace UIConsole
                     {
                         if (proc.ExitCode != 0)
                         {
-                            startInfo = new ProcessStartInfo("xdg-terminal", launchArgs);
+                            startInfo = new("xdg-terminal", launchArgs);
                             using var proc2 = Process.Start(startInfo);
                             if (proc2.WaitForExit(1_000))
                             {
                                 if (proc2.ExitCode != 0)
                                 {
-                                    startInfo = new ProcessStartInfo("gnome-terminal", launchArgs);
+                                    startInfo = new("gnome-terminal", launchArgs);
                                     using var proc3 = Process.Start(startInfo);
                                     if (proc3.WaitForExit(1_000))
                                     {
                                         if (proc3.ExitCode != 0)
                                         {
-                                            startInfo = new ProcessStartInfo("konsole", launchArgs);
+                                            startInfo = new("konsole", launchArgs);
                                             using var _ = Process.Start(startInfo);
                                         }
                                     }

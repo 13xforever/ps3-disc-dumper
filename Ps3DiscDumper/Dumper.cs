@@ -23,14 +23,14 @@ namespace Ps3DiscDumper
     {
         public const string Version = "3.1.1";
 
-        private static readonly HashSet<char> InvalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
+        private static readonly HashSet<char> InvalidChars = new(Path.GetInvalidFileNameChars());
         private static readonly char[] MultilineSplit = {'\r', '\n'};
         private long currentSector;
         private static readonly IDiscKeyProvider[] DiscKeyProviders = {new IrdProvider(), new RedumpProvider(),};
-        private static readonly Dictionary<string, HashSet<DiscKeyInfo>> AllKnownDiscKeys = new Dictionary<string, HashSet<DiscKeyInfo>>();
-        private readonly HashSet<string> TestedDiscKeys = new HashSet<string>();
+        private static readonly Dictionary<string, HashSet<DiscKeyInfo>> AllKnownDiscKeys = new();
+        private readonly HashSet<string> TestedDiscKeys = new();
         private byte[] discSfbData;
-        private static readonly Dictionary<string, byte[]> Detectors = new Dictionary<string, byte[]>
+        private static readonly Dictionary<string, byte[]> Detectors = new()
         {
             [@"\PS3_GAME\LICDIR\LIC.DAT"] = Encoding.UTF8.GetBytes("PS3LICDA"),
             [@"\PS3_GAME\USRDIR\EBOOT.BIN"] = Encoding.UTF8.GetBytes("SCE").Concat(new byte[] { 0, 0, 0, 0, 2 }).ToArray(),
@@ -61,8 +61,8 @@ namespace Ps3DiscDumper
         public long TotalFileSize { get; private set; }
         public long SectorSize { get; private set; }
         private List<string> DiscFilenames { get; set; }
-        public List<(string filename, string error)> BrokenFiles { get; } = new List<(string filename, string error)>();
-        public HashSet<DiscKeyInfo> ValidatingDiscKeys { get; } = new HashSet<DiscKeyInfo>();
+        public List<(string filename, string error)> BrokenFiles { get; } = new();
+        public HashSet<DiscKeyInfo> ValidatingDiscKeys { get; } = new();
         public CancellationTokenSource Cts { get; private set; }
         public bool? ValidationStatus { get; private set; }
         public bool IsIvInitialized => sectorIV?.Length == 16;
@@ -217,7 +217,7 @@ namespace Ps3DiscDumper
 
             // todo: maybe use discutils instead to read TOC as one block
             var files = IOEx.GetFilepaths(input, "*", SearchOption.AllDirectories);
-            DiscFilenames = new List<string>();
+            DiscFilenames = new();
             var totalFilesize = 0L;
             var rootLength = input.Length;
             foreach (var f in files)
@@ -252,7 +252,7 @@ namespace Ps3DiscDumper
                             try
                             {
                                 if (!AllKnownDiscKeys.TryGetValue(keyInfo.DecryptedKeyId, out var duplicates))
-                                    AllKnownDiscKeys[keyInfo.DecryptedKeyId] = duplicates = new HashSet<DiscKeyInfo>();
+                                    AllKnownDiscKeys[keyInfo.DecryptedKeyId] = duplicates = new();
                                 duplicates.Add(keyInfo);
                             }
                             catch (Exception e)
@@ -337,7 +337,7 @@ namespace Ps3DiscDumper
             driveStream = File.Open(physicalDevice, FileMode.Open, FileAccess.Read, FileShare.Read);
 
             // find disc license file
-            discReader = new CDReader(driveStream, true, true);
+            discReader = new(driveStream, true, true);
             FileRecord detectionRecord = null;
             byte[] expectedBytes = null;
             try
@@ -503,9 +503,9 @@ namespace Ps3DiscDumper
                         try
                         {
                             tries--;
-                            using var outputStream = File.Open(outputFilename, FileMode.Create, FileAccess.Write, FileShare.Read);
-                            using var inputStream = File.Open(inputFilename, FileMode.Open, FileAccess.Read, FileShare.Read);
-                            using var decrypter = new Decrypter(inputStream, driveStream, decryptionKey, file.StartSector, sectorSize, unprotectedRegions);
+                            await using var outputStream = File.Open(outputFilename, FileMode.Create, FileAccess.Write, FileShare.Read);
+                            await using var inputStream = File.Open(inputFilename, FileMode.Open, FileAccess.Read, FileShare.Read);
+                            await using var decrypter = new Decrypter(inputStream, driveStream, decryptionKey, file.StartSector, sectorSize, unprotectedRegions);
                             Decrypter = decrypter;
                             await decrypter.CopyToAsync(outputStream, 8 * 1024 * 1024, Cts.Token).ConfigureAwait(false);
                             outputStream.Flush();

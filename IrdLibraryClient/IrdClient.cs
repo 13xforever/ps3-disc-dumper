@@ -23,7 +23,7 @@ namespace IrdLibraryClient
 
         private readonly HttpClient client;
         private readonly MediaTypeFormatterCollection underscoreFormatters;
-        private static readonly Regex IrdFilename = new Regex(@"ird/(?<filename>\w{4}\d{5}-[A-F0-9]+\.ird)", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
+        private static readonly Regex IrdFilename = new(@"ird/(?<filename>\w{4}\d{5}-[A-F0-9]+\.ird)", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
         public IrdClient()
         {
@@ -34,8 +34,8 @@ namespace IrdLibraryClient
                 NullValueHandling = NullValueHandling.Ignore
             };
             var mediaTypeFormatter = new JsonMediaTypeFormatter { SerializerSettings = underscoreSettings };
-            mediaTypeFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
-            underscoreFormatters = new MediaTypeFormatterCollection(new[] { mediaTypeFormatter });
+            mediaTypeFormatter.SupportedMediaTypes.Add(new("text/html"));
+            underscoreFormatters = new(new[] { mediaTypeFormatter });
         }
 
         public static string GetDownloadLink(string irdFilename) => $"{BaseUrl}/ird/{irdFilename}";
@@ -180,10 +180,10 @@ namespace IrdLibraryClient
                 var json = JObject.Load(jsonReader);
                 result.RecordsFiltered = (int?)json["recordsFiltered"] ?? 0;
                 result.RecordsTotal = (int?)json["recordsTotal"] ?? 0;
-                result.Data = new List<SearchResultItem>();
+                result.Data = new();
                 foreach (JObject obj in json["data"])
                 {
-                    result.Data.Add(new SearchResultItem
+                    result.Data.Add(new()
                     {
                         Id = (string)obj["id"],
                         AppVersion = (string)obj["app_version"],

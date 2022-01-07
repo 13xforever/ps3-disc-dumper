@@ -18,7 +18,7 @@ namespace Tests
     [TestFixture]
     public class IrdTests
     {
-        private static readonly IrdClient Client = new IrdClient();
+        private static readonly IrdClient Client = new();
 
         [TestCase("BLES00932", 12721)]
         public async Task FileStructureParseTest(string productCode, int expectedFileCount)

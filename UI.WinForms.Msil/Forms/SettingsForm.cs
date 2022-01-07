@@ -7,8 +7,8 @@ namespace UI.WinForms.Msil
 {
     public partial class SettingsForm : Form
     {
-        private readonly Settings Settings = new Settings();
-        private static readonly NameValueCollection TestItems = new NameValueCollection
+        private readonly Settings Settings = new();
+        private static readonly NameValueCollection TestItems = new()
         {
             [Patterns.ProductCode] = "BLUS12345",
             [Patterns.ProductCodeLetters] = "BLUS",

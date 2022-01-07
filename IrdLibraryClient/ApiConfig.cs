@@ -7,7 +7,7 @@ namespace IrdLibraryClient
 {
     public static class ApiConfig
     {
-        public static readonly CancellationTokenSource Cts = new CancellationTokenSource();
+        public static readonly CancellationTokenSource Cts = new();
         public static readonly string IrdCachePath = "./ird/";
 
         static ApiConfig()

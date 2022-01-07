@@ -48,7 +48,7 @@ namespace Ps3DiscDumper.DiscKeyProviders
 
                         try
                         {
-                            result.Add(new DiscKeyInfo(null, discKey, zipEntry.FullName, KeyType.Redump, discKey.ToHexString()));
+                            result.Add(new(null, discKey, zipEntry.FullName, KeyType.Redump, discKey.ToHexString()));
                         }
                         catch (Exception e)
                         {
@@ -92,7 +92,7 @@ namespace Ps3DiscDumper.DiscKeyProviders
                                         Log.Warn(e, $"Failed to convert {discKey.ToHexString()} from hex to binary");
                                     }
                                 }
-                                result.Add(new DiscKeyInfo(null, discKey, dkeyFile, KeyType.Redump, discKey.ToString()));
+                                result.Add(new(null, discKey, dkeyFile, KeyType.Redump, discKey.ToString()));
                             }
                             catch (InvalidDataException)
                             {

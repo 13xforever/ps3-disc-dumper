@@ -52,11 +52,11 @@ namespace IrdLibraryClient.IrdFormat
                 result.FooterLength = reader.ReadInt32();
                 result.Footer = reader.ReadBytes(result.FooterLength);
                 result.RegionCount = reader.ReadByte();
-                result.RegionMd5Checksums = new List<byte[]>(result.RegionCount);
+                result.RegionMd5Checksums = new(result.RegionCount);
                 for (var i = 0; i < result.RegionCount; i++)
                     result.RegionMd5Checksums.Add(reader.ReadBytes(16));
                 result.FileCount = reader.ReadInt32();
-                result.Files = new List<IrdFile>(result.FileCount);
+                result.Files = new(result.FileCount);
                 for (var i = 0; i < result.FileCount; i++)
                 {
                     var file = new IrdFile();

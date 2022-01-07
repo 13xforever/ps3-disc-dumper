@@ -12,7 +12,7 @@ namespace Ps3DiscDumper.DiscKeyProviders
 {
     public class IrdProvider : IDiscKeyProvider
     {
-        private static readonly IrdClient Client = new IrdClient();
+        private static readonly IrdClient Client = new();
 
         public async Task<HashSet<DiscKeyInfo>> EnumerateAsync(string discKeyCachePath, string ProductCode, CancellationToken cancellationToken)
         {
@@ -30,7 +30,7 @@ namespace Ps3DiscDumper.DiscKeyProviders
                         try
                         {
                             var ird = IrdParser.Parse(File.ReadAllBytes(irdFile));
-                            result.Add(new DiscKeyInfo(ird.Data1, null, irdFile, KeyType.Ird, ird.Crc32.ToString("x8")));
+                            result.Add(new(ird.Data1, null, irdFile, KeyType.Ird, ird.Crc32.ToString("x8")));
                             knownFilenames.Add(Path.GetFileName(irdFile));
                         }
                         catch (InvalidDataException)
@@ -64,7 +64,7 @@ namespace Ps3DiscDumper.DiscKeyProviders
                 foreach (var irdInfo in irdList)
                 {
                     var ird = await Client.DownloadAsync(irdInfo, discKeyCachePath, cancellationToken).ConfigureAwait(false);
-                    result.Add(new DiscKeyInfo(ird.Data1, null, Path.Combine(discKeyCachePath, irdInfo.Filename), KeyType.Ird, ird.Crc32.ToString("x8")));
+                    result.Add(new(ird.Data1, null, Path.Combine(discKeyCachePath, irdInfo.Filename), KeyType.Ird, ird.Crc32.ToString("x8")));
                     knownFilenames.Add(irdInfo.Filename);
                 }
             }

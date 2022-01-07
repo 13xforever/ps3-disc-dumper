@@ -27,7 +27,7 @@ namespace Ps3DiscDumper.Sfo
             stream.Seek(0, SeekOrigin.Begin);
             var result = new ParamSfo();
             using var reader = new BinaryReader(stream, new UTF8Encoding(false), true);
-            result.Magic = new string(reader.ReadChars(4));
+            result.Magic = new(reader.ReadChars(4));
             if (result.Magic != "\0PSF")
                 throw new FormatException("Not a valid SFO file");
 
@@ -37,7 +37,7 @@ namespace Ps3DiscDumper.Sfo
             result.KeysOffset = reader.ReadInt32();
             result.ValuesOffset = reader.ReadInt32();
             result.ItemCount = reader.ReadInt32();
-            result.Items = new List<ParamSfoEntry>(result.ItemCount);
+            result.Items = new(result.ItemCount);
 
             for (var i = 0; i < result.ItemCount; i++)
                 result.Items.Add(ParamSfoEntry.Read(reader, result, i));

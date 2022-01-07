@@ -23,7 +23,7 @@ namespace IrdLibraryClient
                     Directory.CreateDirectory(folder);
                 var filestream = File.Open(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
                 filestream.Seek(0, SeekOrigin.End);
-                FileLog = new StreamWriter(filestream, new UTF8Encoding(false));
+                FileLog = new(filestream, new UTF8Encoding(false));
             }
             catch (Exception e)
             {

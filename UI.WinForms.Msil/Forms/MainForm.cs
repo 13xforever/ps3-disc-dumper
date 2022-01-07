@@ -17,7 +17,7 @@ namespace UI.WinForms.Msil
 {
     public partial class MainForm : Form
     {
-        private readonly Settings settings = new Settings();
+        private readonly Settings settings = new();
         private BackgroundWorker discBackgroundWorker;
         private Dumper currentDumper;
 
@@ -31,7 +31,7 @@ namespace UI.WinForms.Msil
         private const int DBTF_MEDIA = 0x0001;
         private const int DBTF_MOUNT_ISO = 0x001b0000; // ???????
 
-        private static readonly NameValueCollection RegionMapping = new NameValueCollection
+        private static readonly NameValueCollection RegionMapping = new()
         {
             ["A"] = "ASIA",
             ["E"] = "EU",
@@ -128,7 +128,7 @@ namespace UI.WinForms.Msil
 
             currentDumper = null;
             discBackgroundWorker?.Dispose();
-            discBackgroundWorker = new BackgroundWorker { WorkerSupportsCancellation = true, WorkerReportsProgress = true };
+            discBackgroundWorker = new() { WorkerSupportsCancellation = true, WorkerReportsProgress = true };
             discBackgroundWorker.DoWork += DetectPs3DiscGame;
             discBackgroundWorker.RunWorkerCompleted += DetectPs3DiscGameFinished;
 
@@ -184,10 +184,10 @@ namespace UI.WinForms.Msil
                 if (discKey.Length > 256 / 8)
                 {
                     var ird = IrdParser.Parse(discKey);
-                    keyInfo = new DiscKeyInfo(ird.Data1, null, discKeyPath, KeyType.Ird, ird.Crc32.ToString("x8"));
+                    keyInfo = new(ird.Data1, null, discKeyPath, KeyType.Ird, ird.Crc32.ToString("x8"));
                 }
                 else
-                    keyInfo = new DiscKeyInfo(null, discKey, discKeyPath, KeyType.Redump, discKey.ToHexString());
+                    keyInfo = new(null, discKey, discKeyPath, KeyType.Redump, discKey.ToHexString());
                 var discKeyFilename = Path.GetFileName(discKeyPath);
                 var cacheFilename = Path.Combine(settings.IrdDir, discKeyFilename);
                 if (!File.Exists(cacheFilename))
@@ -203,7 +203,7 @@ namespace UI.WinForms.Msil
 
                 selectIrdButton.Visible = false;
                 selectIrdButton.Enabled = false;
-                FindMatchingIrdFinished(sender, new RunWorkerCompletedEventArgs(currentDumper, null, currentDumper?.Cts.IsCancellationRequested ?? true));
+                FindMatchingIrdFinished(sender, new(currentDumper, null, currentDumper?.Cts.IsCancellationRequested ?? true));
             }
             catch (Exception ex)
             {
@@ -260,7 +260,7 @@ namespace UI.WinForms.Msil
             settingsButton.Enabled = false;
             rescanDiscsButton.Enabled = false;
             step1Label.Text = "Checking inserted disc...";
-            currentDumper = new Dumper(new CancellationTokenSource());
+            currentDumper = new(new());
             discBackgroundWorker.RunWorkerAsync(currentDumper);
         }
 
