@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -41,7 +40,7 @@ namespace IrdLibraryClient
         public static string GetDownloadLink(string irdFilename) => $"{BaseUrl}/ird/{irdFilename}";
         public static string GetInfoLink(string irdFilename) => $"{BaseUrl}/info.php?file=ird/{irdFilename}";
 
-        public async Task<SearchResult> SearchAsync(string query, CancellationToken cancellationToken)
+        public async Task<SearchResult?> SearchAsync(string query, CancellationToken cancellationToken)
         {
             try
             {
@@ -75,19 +74,18 @@ namespace IrdLibraryClient
                     });
                     try
                     {
-                        var responseBytes = await client.GetByteArrayAsync(requestUri).ConfigureAwait(false);
+                        var responseBytes = await client.GetByteArrayAsync(requestUri, cancellationToken).ConfigureAwait(false);
                         var result = Deserialize(responseBytes);
-                        result.Data = result.Data ?? new List<SearchResultItem>(0);
                         foreach (var item in result.Data)
                         {
-                            item.Filename = GetIrdFilename(item.Filename);
+                            item.Filename = GetIrdFilename(item.Filename) ?? $"{item.Id}.ird";
                             item.Title = GetTitle(item.Title);
                         }
                         return result;
                     }
                     catch (Exception e)
                     {
-                        Log.Error(e, "Failed to make API call to IRD Library");
+                        Log.Warn(e, "Failed to make API call to IRD Library");
                         return null;
                     }
             }
@@ -98,9 +96,9 @@ namespace IrdLibraryClient
             }
         }
 
-        public async Task<Ird> DownloadAsync(SearchResultItem irdInfo, string localCachePath, CancellationToken cancellationToken)
+        public async Task<Ird?> DownloadAsync(SearchResultItem irdInfo, string localCachePath, CancellationToken cancellationToken)
         {
-            Ird result = null;
+            Ird? result = null;
             try
             {
                 var localCacheFilename = Path.Combine(localCachePath, irdInfo.Filename);
@@ -108,7 +106,7 @@ namespace IrdLibraryClient
                 try
                 {
                     if (File.Exists(localCacheFilename))
-                        return IrdParser.Parse(File.ReadAllBytes(localCacheFilename));
+                        return IrdParser.Parse(await File.ReadAllBytesAsync(localCacheFilename, cancellationToken).ConfigureAwait(false));
                 }
                 catch (Exception e)
                 {
@@ -116,13 +114,13 @@ namespace IrdLibraryClient
                 }
                 try
                 {
-                    var resultBytes = await client.GetByteArrayAsync(GetDownloadLink(irdInfo.Filename)).ConfigureAwait(false);
+                    var resultBytes = await client.GetByteArrayAsync(GetDownloadLink(irdInfo.Filename), cancellationToken).ConfigureAwait(false);
                     result = IrdParser.Parse(resultBytes);
                     try
                     {
                         if (!Directory.Exists(localCachePath))
                             Directory.CreateDirectory(localCachePath);
-                        File.WriteAllBytes(localCacheFilename, resultBytes);
+                        await File.WriteAllBytesAsync(localCacheFilename, resultBytes, cancellationToken);
                     }
                     catch (Exception ex)
                     {
@@ -142,7 +140,7 @@ namespace IrdLibraryClient
             }
         }
 
-        private static string GetIrdFilename(string html)
+        private static string? GetIrdFilename(string? html)
         {
             if (string.IsNullOrEmpty(html))
                 return null;
@@ -157,13 +155,13 @@ namespace IrdLibraryClient
             return matches[0].Groups["filename"]?.Value;
         }
 
-        private static string GetTitle(string html)
+        private static string? GetTitle(string? html)
         {
             if (string.IsNullOrEmpty(html))
                 return null;
 
-            var idx = html.LastIndexOf("</span>");
-            var result = html.Substring(idx + 7).Trim();
+            var idx = html.LastIndexOf("</span>", StringComparison.OrdinalIgnoreCase);
+            var result = html[(idx + 7)..].Trim();
             if (string.IsNullOrEmpty(result))
                 return null;
 
@@ -173,26 +171,24 @@ namespace IrdLibraryClient
         private static SearchResult Deserialize(byte[] content)
         {
             var result = new SearchResult();
-            using (var stream = new MemoryStream(content))
-            using (var reader = new StreamReader(stream, Encoding.UTF8))
-            using (var jsonReader = new JsonTextReader(reader))
+            using var stream = new MemoryStream(content);
+            using var reader = new StreamReader(stream, Encoding.UTF8);
+            using var jsonReader = new JsonTextReader(reader);
+            var json = JObject.Load(jsonReader);
+            result.RecordsFiltered = (int?)json["recordsFiltered"] ?? 0;
+            result.RecordsTotal = (int?)json["recordsTotal"] ?? 0;
+            result.Data = new();
+            foreach (JObject obj in json["data"])
             {
-                var json = JObject.Load(jsonReader);
-                result.RecordsFiltered = (int?)json["recordsFiltered"] ?? 0;
-                result.RecordsTotal = (int?)json["recordsTotal"] ?? 0;
-                result.Data = new();
-                foreach (JObject obj in json["data"])
+                result.Data.Add(new()
                 {
-                    result.Data.Add(new()
-                    {
-                        Id = (string)obj["id"],
-                        AppVersion = (string)obj["app_version"],
-                        UpdateVersion = (string)obj["update_version"],
-                        GameVersion = (string)obj["game_version"],
-                        Title = (string)obj["title"],
-                        Filename = (string)obj["filename"],
-                    });
-                }
+                    Id = (string)obj["id"],
+                    AppVersion = (string?)obj["app_version"],
+                    UpdateVersion = (string?)obj["update_version"],
+                    GameVersion = (string?)obj["game_version"],
+                    Title = (string)obj["title"],
+                    Filename = (string)obj["filename"],
+                });
             }
             return result;
         }

@@ -1,4 +1,13 @@
 #!/usr/bin/pwsh
+Clear-Host
+
+if ($PSVersionTable.PSVersion.Major -lt 6)
+{
+    Write-Host 'Restarting using pwsh...'
+    &pwsh $PSCommandPath
+    return
+}
+
 Write-Host 'Clearing bin/obj...' -ForegroundColor Cyan
 Remove-Item -LiteralPath UI.WinForms.Msil/bin -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath UI.WinForms.Msil/obj -Recurse -Force -ErrorAction SilentlyContinue
@@ -12,7 +21,7 @@ if (($PSVersionTable.Platform -eq 'Win32NT') -or $IsWindows)
 
 Write-Host 'Building Linux binary...' -ForegroundColor Cyan
 &dotnet build -v:q -c Release -r linux-x64 --self-contained true UI.Console/UI.Console.csproj
-&dotnet publish -v:q -r linux-x64 --self-contained true -c Release -o distrib/cli/lin/ UI.Console/UI.Console.csproj /p:PublishTrimmed=true /p:PublishSingleFile=true
+&dotnet publish -v:q -r linux-x64 --self-contained true -c Release -o distrib/cli/lin/ UI.Console/UI.Console.csproj /p:PublishTrimmed=false /p:PublishSingleFile=true
 if (($LASTEXITCODE -eq 0) -and (($PSVersionTable.Platform -eq 'Unix') -or $IsLinux))
 {
     chmod +x distrib/cli/lin/ps3-disc-dumper

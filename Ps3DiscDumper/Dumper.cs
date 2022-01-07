@@ -21,7 +21,7 @@ namespace Ps3DiscDumper
 {
     public class Dumper: IDisposable
     {
-        public const string Version = "3.2.0b2";
+        public const string Version = "3.2.0b3";
 
         private static readonly HashSet<char> InvalidChars = new(Path.GetInvalidFileNameChars());
         private static readonly char[] MultilineSplit = {'\r', '\n'};
@@ -461,7 +461,7 @@ namespace Ps3DiscDumper
                     var outputName = Path.Combine(outputPathBase, convertedName);
                     if (!Directory.Exists(outputName))
                     {
-                        Log.Debug("Creating empty directory " + outputName); 
+                        Log.Debug("Creating empty directory " + outputName);
                         Directory.CreateDirectory(outputName);
                     }
                 }
@@ -471,7 +471,7 @@ namespace Ps3DiscDumper
                     BrokenFiles.Add((dir.TargetDirName, "Unexpected error: " + ex.Message));
                 }
             }
-            
+
             foreach (var file in filesystemStructure)
             {
                 try
@@ -552,7 +552,7 @@ namespace Ps3DiscDumper
                             error = true;
                         }
                     } while (error && tries > 0 && !Cts.IsCancellationRequested);
-                    
+
                     _ = new FileInfo(outputFilename)
                     {
                         CreationTimeUtc = file.FileInfo.CreationTimeUtc,
@@ -565,30 +565,30 @@ namespace Ps3DiscDumper
                     BrokenFiles.Add((file.TargetFileName, "Unexpected error: " + ex.Message));
                 }
             }
-            
+
             Log.Info("Fixing directory modification time stamps...");
-                var fullDirectoryList = filesystemStructure
-                    .Select(f => f.Parent)
-                    .Concat(emptyDirStructure)
-                    .Distinct()
-                    .OrderByDescending(d => d.TargetDirName, StringComparer.OrdinalIgnoreCase);
-                foreach (var dir in fullDirectoryList)
+            var fullDirectoryList = filesystemStructure
+                .Select(f => f.Parent)
+                .Concat(emptyDirStructure)
+                .Distinct()
+                .OrderByDescending(d => d.TargetDirName, StringComparer.OrdinalIgnoreCase);
+            foreach (var dir in fullDirectoryList)
+            {
+                try
                 {
-                    try
+                    var targetDirPath = Path.Combine(outputPathBase, dir.TargetDirName.TrimStart('\\'));
+                    _ = new DirectoryInfo(targetDirPath)
                     {
-                        var targetDirPath = Path.Combine(outputPathBase, dir.TargetDirName.TrimStart('\\'));
-                        _ = new DirectoryInfo(targetDirPath)
-                        {
-                            CreationTimeUtc = dir.DirInfo.CreationTimeUtc,
-                            LastWriteTimeUtc = dir.DirInfo.LastWriteTimeUtc
-                        };
-                    }
-                    catch
-                    {
-                        Log.Warn($"Failed to fix timestamp for directory {dir.TargetDirName}");
-                    }
+                        CreationTimeUtc = dir.DirInfo.CreationTimeUtc,
+                        LastWriteTimeUtc = dir.DirInfo.LastWriteTimeUtc
+                    };
                 }
-                Log.Info("Completed");
+                catch (Exception e)
+                {
+                    Log.Warn(e, $"Failed to fix timestamp for directory {dir.TargetDirName}");
+                }
+            }
+            Log.Info("Completed");
         }
 
         private (List<FileRecord> files, List<DirRecord> dirs) GetFilesystemStructure()
