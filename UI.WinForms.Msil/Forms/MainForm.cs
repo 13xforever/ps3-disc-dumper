@@ -127,6 +127,7 @@ namespace UI.WinForms.Msil
             step4Label.Enabled = false;
 
             currentDumper = null;
+            discBackgroundWorker?.CancelAsync();
             discBackgroundWorker?.Dispose();
             discBackgroundWorker = new() { WorkerSupportsCancellation = true, WorkerReportsProgress = true };
             discBackgroundWorker.DoWork += DetectPs3DiscGame;
@@ -207,6 +208,7 @@ namespace UI.WinForms.Msil
             }
             catch (Exception ex)
             {
+                Log.Warn(ex, "Failed to check IRD");
                 MessageBox.Show(ex.Message, "IRD Check Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -290,6 +292,8 @@ namespace UI.WinForms.Msil
         private void DetectPs3DiscGameFinished(object sender, RunWorkerCompletedEventArgs e)
         {
             var dumper = (Dumper)e.Result;
+            discBackgroundWorker.DoWork -= DetectPs3DiscGame;
+            discBackgroundWorker.RunWorkerCompleted -= DetectPs3DiscGameFinished;
             if (e.Cancelled || dumper.Cts.IsCancellationRequested)
                 return;
 
@@ -311,8 +315,6 @@ namespace UI.WinForms.Msil
             discSizeLabel.Text = $"{dumper.TotalFileSize.AsStorageUnit()} ({dumper.TotalFileCount} files)";
             //irdMatchLabel.Text = string.IsNullOrEmpty(dumper.DiscKeyFilename) ? "❌" : "✔";
 
-            discBackgroundWorker.DoWork -= DetectPs3DiscGame;
-            discBackgroundWorker.RunWorkerCompleted -= DetectPs3DiscGameFinished;
             discBackgroundWorker.DoWork += FindMatchingIrd;
             discBackgroundWorker.RunWorkerCompleted += FindMatchingIrdFinished;
             discBackgroundWorker.RunWorkerAsync(dumper);
@@ -325,9 +327,11 @@ namespace UI.WinForms.Msil
             {
                 dumper.FindDiscKeyAsync(settings.IrdDir).Wait(dumper.Cts.Token);
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Log.Error(e, "Failed to find matching key");
 //                MessageBox.Show(e.Message, "Disc check error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                dumper.Cts.Cancel();
             }
             doWorkEventArgs.Result = dumper;
         }
@@ -335,8 +339,13 @@ namespace UI.WinForms.Msil
         private void FindMatchingIrdFinished(object sender, RunWorkerCompletedEventArgs e)
         {
             var dumper = (Dumper)e.Result;
+            discBackgroundWorker.DoWork -= FindMatchingIrd;
+            discBackgroundWorker.RunWorkerCompleted -= FindMatchingIrdFinished;
             if (e.Cancelled || dumper.Cts.IsCancellationRequested)
+            {
+                cancelDiscDumpButton_Click(null, null);
                 return;
+            }
 
             settingsButton.Enabled = true;
             if (dumper.DiscKeyFilename == null)
@@ -360,8 +369,6 @@ namespace UI.WinForms.Msil
                 rescanDiscsButton.Enabled = false;
                 startDumpingButton.Enabled = true;
                 startDumpingButton.Visible = true;
-                discBackgroundWorker.DoWork -= FindMatchingIrd;
-                discBackgroundWorker.RunWorkerCompleted -= FindMatchingIrdFinished;
             }
         }
 
@@ -395,7 +402,9 @@ namespace UI.WinForms.Msil
             }
             catch (Exception e)
             {
+                Log.Error(e, "Failed to dump the disc");
                 MessageBox.Show(e.Message, "Disc dumping error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                dumper.Cts.Cancel();
             }
             doWorkEventArgs.Result = dumper;
         }
@@ -403,8 +412,15 @@ namespace UI.WinForms.Msil
         private void DumpDiscFinished(object sender, RunWorkerCompletedEventArgs e)
         {
             var dumper = (Dumper)e.Result;
+            discBackgroundWorker.DoWork -= DumpDisc;
+            discBackgroundWorker.RunWorkerCompleted -= DumpDiscFinished;
+            discBackgroundWorker.ProgressChanged -= DiscDumpUpdateProgress;
+
             if (e.Cancelled || dumper.Cts.IsCancellationRequested)
+            {
+                ResetForm();
                 return;
+            }
 
             settingsButton.Enabled = true;
             cancelDiscDumpButton.Visible = false;
@@ -435,9 +451,6 @@ namespace UI.WinForms.Msil
                 step4StatusLabel.Text = "❔";
                 step4Label.Text = "No validation info available";
             }
-            discBackgroundWorker.DoWork -= DumpDisc;
-            discBackgroundWorker.RunWorkerCompleted -= DumpDiscFinished;
-            discBackgroundWorker.ProgressChanged -= DiscDumpUpdateProgress;
         }
 
         private void DiscDumpUpdateProgress(object sender, ProgressChangedEventArgs e)

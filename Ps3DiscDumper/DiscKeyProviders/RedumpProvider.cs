@@ -27,13 +27,13 @@ namespace Ps3DiscDumper.DiscKeyProviders
                     Log.Warn("No embedded redump keys found");
                 foreach (var res in embeddedResources)
                 {
-                    using var resStream = assembly.GetManifestResourceStream(res);
+                    await using var resStream = assembly.GetManifestResourceStream(res);
                     using var zip = new ZipArchive(resStream, ZipArchiveMode.Read);
                     foreach (var zipEntry in zip.Entries.Where(e => e.Name.EndsWith(".dkey", StringComparison.InvariantCultureIgnoreCase)
                                                                     || e.Name.EndsWith(".key", StringComparison.InvariantCultureIgnoreCase)))
                     {
-                        using var keyStream = zipEntry.Open();
-                        using var memStream = new MemoryStream();
+                        await using var keyStream = zipEntry.Open();
+                        await using var memStream = new MemoryStream();
                         await keyStream.CopyToAsync(memStream, cancellationToken).ConfigureAwait(false);
                         var discKey = memStream.ToArray();
                         if (zipEntry.Length > 256/8*2)

@@ -86,27 +86,28 @@ namespace Ps3DiscDumper
         private List<string> EnumeratePhysicalDrivesWindows()
         {
             var physicalDrives = new List<string>();
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                try
+#if !NATIVE
+            try
+            {
+                using var mgmtObjSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMedia");
+                var drives = mgmtObjSearcher.Get();
+                foreach (var drive in drives)
                 {
-                    using var mgmtObjSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMedia");
-                    var drives = mgmtObjSearcher.Get();
-                    foreach (var drive in drives)
-                    {
-                        var tag = drive.Properties["Tag"].Value as string;
-                        if (tag?.IndexOf("CDROM", StringComparison.InvariantCultureIgnoreCase) > -1)
-                            physicalDrives.Add(tag);
-                    }
+                    var tag = drive.Properties["Tag"].Value as string;
+                    if (tag?.IndexOf("CDROM", StringComparison.InvariantCultureIgnoreCase) > -1)
+                        physicalDrives.Add(tag);
                 }
-                catch (Exception e)
-                {
-                    Log.Error(e, "Failed to enumerate physical media drives using WMI");
-                    for (var i = 0; i < 32; i++)
-                        physicalDrives.Add($@"\\.\CDROM{i}");
-                }
-            else
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Failed to enumerate physical media drives using WMI");
                 for (var i = 0; i < 32; i++)
                     physicalDrives.Add($@"\\.\CDROM{i}");
+            }
+#else
+            for (var i = 0; i < 32; i++)
+                physicalDrives.Add($@"\\.\CDROM{i}");
+#endif
             return physicalDrives;
         }
 
@@ -302,7 +303,7 @@ namespace Ps3DiscDumper
                 try
                 {
                     Log.Trace($"Checking physical drive {drive}...");
-                    using var discStream = File.Open(drive, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    await using var discStream = File.Open(drive, FileMode.Open, FileAccess.Read, FileShare.Read);
                     var tmpDiscReader = new CDReader(discStream, true, true);
                     if (tmpDiscReader.FileExists("PS3_DISC.SFB"))
                     {

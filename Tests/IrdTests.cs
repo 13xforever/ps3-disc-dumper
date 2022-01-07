@@ -30,7 +30,7 @@ namespace Tests
             Assert.That(ird, Is.Not.Null);
             Assert.That(ird.FileCount, Is.EqualTo(expectedFileCount));
 
-            using (var decompressedStream = GetDecompressHeader(ird))
+            await using (var decompressedStream = GetDecompressHeader(ird))
             {
                 var reader = new CDReader(decompressedStream, true, true);
                 var (files, _) = reader.GetFilesystemStructure();
@@ -71,7 +71,7 @@ namespace Tests
             {
                 var bytes = await File.ReadAllBytesAsync(f).ConfigureAwait(false);
                 var ird = IrdParser.Parse(bytes);
-                using (var header = GetDecompressHeader(ird))
+                await using (var header = GetDecompressHeader(ird))
                     result.Add((Path.GetFileName(f), header.Length));
             }
             Assert.That(result.Count, Is.GreaterThan(0));
