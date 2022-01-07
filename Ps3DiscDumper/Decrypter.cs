@@ -22,7 +22,7 @@ namespace Ps3DiscDumper
         private readonly SHA256 sha256;
         private readonly Aes aes;
         private byte[] bufferedSector, tmpSector;
-        private Dictionary<string, string> hashes = new Dictionary<string, string>(3);
+        private Dictionary<string, string> hashes = new(3);
         private readonly List<(int start, int end)> unprotectedSectorRanges;
 
         public static byte[] DecryptDiscKey(byte[] data1)

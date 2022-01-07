@@ -21,7 +21,7 @@ namespace Ps3DiscDumper
 {
     public class Dumper: IDisposable
     {
-        public const string Version = "3.1.1";
+        public const string Version = "3.2.0";
 
         private static readonly HashSet<char> InvalidChars = new(Path.GetInvalidFileNameChars());
         private static readonly char[] MultilineSplit = {'\r', '\n'};
@@ -49,7 +49,7 @@ namespace Ps3DiscDumper
         public char Drive { get; set; }
         private string input;
         private List<FileRecord> filesystemStructure;
-        private List<string> emptyDirStructure;
+        private List<DirRecord> emptyDirStructure;
         private CDReader discReader;
         private HashSet<DiscKeyInfo> allMatchingKeys;
         public KeyType DiscKeyType { get; set; }
@@ -346,7 +346,8 @@ namespace Ps3DiscDumper
                     if (discReader.FileExists(path))
                     {
                         var clusterRange = discReader.PathToClusters(path);
-                        detectionRecord = new FileRecord(path, clusterRange.Min(r => r.Offset), discReader.GetFileLength(path));
+                        var fileInfo = discReader.GetFileSystemInfo(path);
+                        detectionRecord = new(path, clusterRange.Min(r => r.Offset), discReader.GetFileLength(path), fileInfo);
                         expectedBytes = Detectors[path];
                         if (detectionRecord.Length == 0)
                             continue;
@@ -428,7 +429,7 @@ namespace Ps3DiscDumper
             foreach (var dir in emptyDirStructure)
                 Log.Trace($"Empty dir: {dir}");
             foreach (var file in filesystemStructure)
-                Log.Trace($"0x{file.StartSector:x8}: {file.Filename} ({file.Length})");
+                Log.Trace($"0x{file.StartSector:x8}: {file.TargetFileName} ({file.Length}, {file.FileInfo.CreationTimeUtc:u})");
             var outputPathBase = Path.Combine(output, OutputDir);
             if (!Directory.Exists(outputPathBase))
                 Directory.CreateDirectory(outputPathBase);
@@ -448,18 +449,20 @@ namespace Ps3DiscDumper
                     if (Cts.IsCancellationRequested)
                         return;
 
-                    var convertedName = Path.DirectorySeparatorChar == '\\' ? dir : dir.Replace('\\', Path.DirectorySeparatorChar);
+                    var convertedName = dir.TargetDirName;
+                    if (Path.DirectorySeparatorChar != '\\')
+                        convertedName = convertedName.Replace('\\', Path.DirectorySeparatorChar);
                     var outputName = Path.Combine(outputPathBase, convertedName);
                     if (!Directory.Exists(outputName))
                     {
-                        Log.Debug("Creating empty directory " + outputName);
+                        Log.Debug("Creating empty directory " + outputName); 
                         Directory.CreateDirectory(outputName);
                     }
                 }
                 catch (Exception ex)
                 {
                     Log.Error(ex);
-                    BrokenFiles.Add((dir, "Unexpected error: " + ex.Message));
+                    BrokenFiles.Add((dir.TargetDirName, "Unexpected error: " + ex.Message));
                 }
             }
             
@@ -470,15 +473,15 @@ namespace Ps3DiscDumper
                     if (Cts.IsCancellationRequested)
                         return;
 
-                    Log.Info($"Reading {file.Filename} ({file.Length.AsStorageUnit()})");
+                    Log.Info($"Reading {file.TargetFileName} ({file.Length.AsStorageUnit()})");
                     CurrentFileNumber++;
-                    var convertedFilename = Path.DirectorySeparatorChar == '\\' ? file.Filename : file.Filename.Replace('\\', Path.DirectorySeparatorChar);
+                    var convertedFilename = Path.DirectorySeparatorChar == '\\' ? file.TargetFileName : file.TargetFileName.Replace('\\', Path.DirectorySeparatorChar);
                     var inputFilename = Path.Combine(input, convertedFilename);
 
                     if (!File.Exists(inputFilename))
                     {
-                        Log.Error($"Missing {file.Filename}");
-                        BrokenFiles.Add((file.Filename, "missing"));
+                        Log.Error($"Missing {file.TargetFileName}");
+                        BrokenFiles.Add((file.TargetFileName, "missing"));
                         continue;
                     }
 
@@ -487,14 +490,15 @@ namespace Ps3DiscDumper
                     if (!Directory.Exists(fileDir))
                     {
                         Log.Debug("Creating directory " + fileDir);
-                        Directory.CreateDirectory(fileDir);
+                        var dirInfo = Directory.CreateDirectory(fileDir);
+                        dirInfo.CreationTimeUtc = file.FileInfo.Parent.CreationTimeUtc;
                     }
 
                     var error = false;
                     var expectedHashes = (
                         from v in validators
-                        where v.Files.ContainsKey(file.Filename)
-                        select v.Files[file.Filename].Hashes
+                        where v.Files.ContainsKey(file.TargetFileName)
+                        select v.Files[file.TargetFileName].Hashes
                     ).ToList();
                     var lastHash = "";
                     var tries = 2;
@@ -508,13 +512,20 @@ namespace Ps3DiscDumper
                             await using var decrypter = new Decrypter(inputStream, driveStream, decryptionKey, file.StartSector, sectorSize, unprotectedRegions);
                             Decrypter = decrypter;
                             await decrypter.CopyToAsync(outputStream, 8 * 1024 * 1024, Cts.Token).ConfigureAwait(false);
-                            outputStream.Flush();
+                            await outputStream.FlushAsync();
+                            outputStream.Close();
+                            _ = new FileInfo(outputFilename)
+                            {
+                                CreationTimeUtc = file.FileInfo.CreationTimeUtc,
+                                LastWriteTimeUtc = file.FileInfo.LastWriteTimeUtc
+                            };
+
                             var resultHashes = decrypter.GetHashes();
                             var resultMd5 = resultHashes["MD5"];
                             if (decrypter.WasEncrypted && decrypter.WasUnprotected)
-                                Log.Debug("Partially decrypted " + file.Filename);
+                                Log.Debug("Partially decrypted " + file.TargetFileName);
                             else if (decrypter.WasEncrypted)
-                                Log.Debug("Decrypted " + file.Filename);
+                                Log.Debug("Decrypted " + file.TargetFileName);
 
                             if (!expectedHashes.Any())
                             {
@@ -528,7 +539,7 @@ namespace Ps3DiscDumper
                                 if (resultMd5 == lastHash || decrypter.LastBlockCorrupted)
                                 {
                                     Log.Error(msg);
-                                    BrokenFiles.Add((file.Filename, "corrupted"));
+                                    BrokenFiles.Add((file.TargetFileName, "corrupted"));
                                     break;
                                 }
                                 Log.Warn(msg + ", retrying");
@@ -546,13 +557,36 @@ namespace Ps3DiscDumper
                 catch (Exception ex)
                 {
                     Log.Error(ex);
-                    BrokenFiles.Add((file.Filename, "Unexpected error: " + ex.Message));
+                    BrokenFiles.Add((file.TargetFileName, "Unexpected error: " + ex.Message));
                 }
             }
-            Log.Info("Completed");
+            
+            Log.Info("Fixing directory modification time stamps...");
+                var fullDirectoryList = filesystemStructure
+                    .Select(f => f.FileInfo.Parent)
+                    .Concat(emptyDirStructure.Select(d => d.DirInfo))
+                    .Distinct()
+                    .OrderByDescending(d => d.FullName, StringComparer.OrdinalIgnoreCase);
+                foreach (var dirInfo in fullDirectoryList)
+                {
+                    try
+                    {
+                        var targetDirPath = Path.Combine(outputPathBase, dirInfo.FullName.TrimStart('\\'));
+                        _ = new DirectoryInfo(targetDirPath)
+                        {
+                            CreationTimeUtc = dirInfo.CreationTimeUtc,
+                            LastWriteTimeUtc = dirInfo.LastWriteTimeUtc
+                        };
+                    }
+                    catch
+                    {
+                        Log.Warn($"Failed to fix timestamp for directory {dirInfo.FullName}");
+                    }
+                }
+                Log.Info("Completed");
         }
 
-        private (List<FileRecord> files, List<string> dirs) GetFilesystemStructure()
+        private (List<FileRecord> files, List<DirRecord> dirs) GetFilesystemStructure()
         {
             var pos = driveStream.Position;
             var buf = new byte[64 * 1024 * 1024];

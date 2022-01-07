@@ -32,7 +32,7 @@ namespace Ps3DiscDumper.DiscInfo
                 DiscKeyRawData = ird.Data1.ToHexString(),
                 DiscKey = Decrypter.DecryptDiscKey(ird.Data1).ToHexString(),
                 Files = fsInfo.ToDictionary(
-                    f => f.Filename,
+                    f => f.TargetFileName,
                     f => new FileInfo
                     {
                         Offset = f.StartSector * sectorSize,

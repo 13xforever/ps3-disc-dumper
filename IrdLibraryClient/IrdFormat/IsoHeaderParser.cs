@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using DiscUtils;
 using DiscUtils.Iso9660;
 using DiscUtils.Streams;
 
@@ -8,7 +10,7 @@ namespace IrdLibraryClient.IrdFormat
 {
     public static class IsoHeaderParser
     {
-        public static (List<FileRecord> files, List<string> dirs) GetFilesystemStructure(this CDReader reader)
+        public static (List<FileRecord> files, List<DirRecord> dirs) GetFilesystemStructure(this CDReader reader)
         {
             var fsObjects = reader.GetFileSystemEntries(reader.Root.FullName).ToList();
             var nextLevel = new List<string>();
@@ -32,33 +34,45 @@ namespace IrdLibraryClient.IrdFormat
                 nextLevel.Clear();
             }
             
-            var filenames = filePaths.Distinct().Select(n => n.TrimStart('\\')).ToList();
-            var dirnames = dirPaths.Distinct().Select(n => n.TrimStart('\\')).OrderByDescending(n => n.Length).ToList();
-            var deepestDirnames = new List<string>();
-            foreach (var dirname in dirnames)
+            var filenames = filePaths.Distinct().ToList();
+            var dirNames = dirPaths.Distinct().OrderByDescending(n => n.Length).ToList();
+            var deepestDirNames = new List<string>();
+            foreach (var dirname in dirNames)
             {
                 var tmp = dirname + "\\";
-                if (deepestDirnames.Any(n => n.StartsWith(tmp)))
+                if (deepestDirNames.Any(n => n.StartsWith(tmp)))
                     continue;
                 
-                deepestDirnames.Add(dirname);
+                deepestDirNames.Add(dirname);
             }
-            dirnames = deepestDirnames.OrderBy(n => n).ToList();
-            var dirnamesWithFiles = filenames.Select(Path.GetDirectoryName).Distinct().ToList();
-            var emptydirs = dirnames.Except(dirnamesWithFiles).ToList();
+            dirNames = deepestDirNames.OrderBy(n => n).ToList();
+            var dirNamesWithFiles = filenames.Select(Path.GetDirectoryName).Distinct().ToList();
+            var dirList = dirNames.Except(dirNamesWithFiles)
+                .OrderBy(d => d, StringComparer.OrdinalIgnoreCase)
+                .Select(dir => new DirRecord(dir.TrimStart('\\'), reader.GetDirectoryInfo(dir)))
+                .ToList();
 
             var fileList = new List<FileRecord>();
             foreach (var filename in filenames)
             {
+                var targetFilename = filename.TrimStart('\\');
+                if (targetFilename.EndsWith("."))
+                {
+                    Log.Warn($"Fixing potential mastering error in {filename}");
+                    targetFilename = targetFilename.TrimEnd('.');
+                }
                 var clusterRange = reader.PathToClusters(filename);
                 if (clusterRange.Length != 1)
-                    Log.Warn($"{filename} is split in {clusterRange.Length} ranges");
-                if (filename.EndsWith("."))
-                    Log.Warn($"Fixing potential mastering error in {filename}");
-                fileList.Add(new FileRecord(filename.TrimEnd('.'), clusterRange.Min(r => r.Offset), reader.GetFileLength(filename)));
+                    Log.Warn($"{targetFilename} is split in {clusterRange.Length} ranges");
+                var startSector = clusterRange.Min(r => r.Offset);
+                var length = reader.GetFileLength(filename);
+                var fileInfo = reader.GetFileSystemInfo(filename);
+                fileList.Add(new(targetFilename, startSector, length, fileInfo));
             }
             fileList = fileList.OrderBy(r => r.StartSector).ToList();
-            return (files: fileList, dirs: emptydirs);
+            
+            
+            return (files: fileList, dirs: dirList);
         }
 
         public static List<(int start, int end)> GetUnprotectedRegions(this Stream discStream)
@@ -84,17 +98,7 @@ namespace IrdLibraryClient.IrdFormat
         }
     }
 
-    public class FileRecord
-    {
-        public FileRecord(string filename, long startSector, long length)
-        {
-            Filename = filename;
-            StartSector = startSector;
-            Length = length;
-        }
+    public record FileRecord(string TargetFileName, long StartSector, long Length, DiscFileSystemInfo FileInfo);
 
-        public string Filename { get; }
-        public long StartSector { get; }
-        public long Length { get; }
-    }
+    public record DirRecord(string TargetDirName, DiscDirectoryInfo DirInfo);
 }
