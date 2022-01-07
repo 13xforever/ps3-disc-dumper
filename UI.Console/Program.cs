@@ -13,7 +13,7 @@ namespace UIConsole
 {
     internal static class Program
     {
-        static async Task<int> Main(string[] args)
+        internal static async Task<int> Main(string[] args)
         {
             Log.Info("PS3 Disc Dumper v" + Dumper.Version);
 
@@ -28,7 +28,7 @@ namespace UIConsole
                         using var currentProcess = Process.GetCurrentProcess();
                         var pid = currentProcess.Id;
                         var procCmdlinePath = Path.Combine("/proc", pid.ToString(), "cmdline");
-                        launchArgs = File.ReadAllLines(procCmdlinePath).FirstOrDefault()?.TrimEnd('\0');
+                        launchArgs = (await File.ReadAllLinesAsync(procCmdlinePath)).FirstOrDefault()?.TrimEnd('\0');
                     }
                     Log.Debug($"Using cmdline '{launchArgs}'");
                     launchArgs = $"-e bash -c {launchArgs}";
@@ -73,6 +73,7 @@ start:
             var output = ".";
             var inDir = "";
             var showHelp = false;
+            var interactive = true;
             var options = new OptionSet
             {
                 {
@@ -88,6 +89,13 @@ start:
                         if (v is string outd)
                             output = outd;
                     }
+                },
+                {
+                    "i|interactive=", "Specify interactive mode (true/false), default is true", v =>
+                    {
+                        if (bool.TryParse(v, out var im) && !im)
+                            interactive = false;
+                    }  
                 },
                 {
                     "?|h|help", "Show help", v =>
@@ -184,15 +192,20 @@ start:
             {
                 Log.Error(e, e.Message);
             }
-            Console.WriteLine("Press X or Ctrl-C to exit, any other key to start again...");
-            var key = Console.ReadKey(true);
-            switch (key.Key)
+            if (interactive)
             {
-                case ConsoleKey.X:
-                    return 0;
-                default:
-                    goto start;
+                Console.WriteLine("Press X or Ctrl-C to exit, any other key to start again...");
+                var key = Console.ReadKey(true);
+                switch (key.Key)
+                {
+                    case ConsoleKey.X:
+                        return 0;
+                    default:
+                        goto start;
+                }
             }
+            else
+                return 0;
         }
 
         private static void ShowHelp(OptionSet options)

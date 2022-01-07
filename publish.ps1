@@ -1,4 +1,5 @@
 #!/usr/bin/pwsh
+Clear-Host
 Write-Host 'Clearing bin/obj...' -ForegroundColor Cyan
 Remove-Item -LiteralPath UI.WinForms.Msil/bin -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath UI.WinForms.Msil/obj -Recurse -Force -ErrorAction SilentlyContinue
