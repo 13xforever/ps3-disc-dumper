@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -18,7 +19,7 @@ namespace IrdLibraryClient
             return uri.ParseQueryString();
         }
 
-        public static string GetQueryParameter(this Uri uri, string name)
+        public static string? GetQueryParameter(this Uri uri, string name)
         {
             var parameters = ParseQueryString(uri);
             return parameters[name];
@@ -61,7 +62,7 @@ namespace IrdLibraryClient
 
         public static string FormatUriParams(NameValueCollection parameters)
         {
-            if (parameters == null || parameters.Count == 0)
+            if (parameters.Count == 0)
                 return "";
 
             var result = new StringBuilder();
@@ -71,7 +72,7 @@ namespace IrdLibraryClient
                 if (value == null)
                     continue;
 
-                result.AppendFormat("&{0}={1}", Uri.EscapeDataString(key), Uri.EscapeDataString(value));
+                result.Append($"&{Uri.EscapeDataString(key!)}={Uri.EscapeDataString(value)}");
             }
             if (result.Length == 0)
                 return "";

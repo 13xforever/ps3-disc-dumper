@@ -30,7 +30,7 @@ namespace IrdLibraryClient.Compression
             return false;
         }
 
-        protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
+        protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));

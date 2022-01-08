@@ -49,7 +49,7 @@ namespace IrdLibraryClient.IrdFormat
             var dirNamesWithFiles = filenames.Select(Path.GetDirectoryName).Distinct().ToList();
             var dirList = dirNames.Except(dirNamesWithFiles)
                 .OrderBy(d => d, StringComparer.OrdinalIgnoreCase)
-                .Select(dir => (dir: dir.TrimStart('\\').Replace('\\', Path.DirectorySeparatorChar), info: reader.GetDirectoryInfo(dir)))
+                .Select(dir => (dir: dir!.TrimStart('\\').Replace('\\', Path.DirectorySeparatorChar), info: reader.GetDirectoryInfo(dir)))
                 .Select(di => new DirRecord(di.dir, new(di.info.CreationTimeUtc, di.info.LastWriteTimeUtc)))
                 .ToList();
 

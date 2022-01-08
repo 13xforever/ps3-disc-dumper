@@ -9,8 +9,7 @@ namespace IrdLibraryClient
     {
         private readonly Func<string, string> propertyNameResolver;
 
-        public JsonContractResolver()
-            : this(NamingStyles.Dashed)
+        public JsonContractResolver(): this(NamingStyles.Dashed)
         {
         }
 
@@ -25,7 +24,7 @@ namespace IrdLibraryClient
         protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
         {
             var property = base.CreateProperty(member, memberSerialization);
-            property.PropertyName = propertyNameResolver(property.PropertyName);
+            property.PropertyName = propertyNameResolver(property.PropertyName!);
             return property;
         }
     }

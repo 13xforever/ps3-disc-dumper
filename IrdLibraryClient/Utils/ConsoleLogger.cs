@@ -5,13 +5,13 @@ namespace IrdLibraryClient.Utils
 {
     public static class ConsoleLogger
     {
-        public static void PrintError(Exception e, HttpResponseMessage response, bool isError = true)
+        public static void PrintError(Exception e, HttpResponseMessage? response, bool isError = true)
         {
             if (isError)
                 Log.Error(e, "HTTP error");
             else
                 Log.Warn(e, "HTTP error");
-            if (response == null)
+            if (response?.RequestMessage?.RequestUri is null)
                 return;
 
             try

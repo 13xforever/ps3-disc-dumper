@@ -15,7 +15,7 @@ namespace IrdLibraryClient.Utils
                 return str;
 
             if (str.Length > maxLength)
-                return str.Substring(0, maxLength - 3) + "...";
+                return str[..(maxLength - 3)] + "...";
 
             return str;
         }
@@ -28,10 +28,10 @@ namespace IrdLibraryClient.Utils
             if (string.IsNullOrEmpty(str) || str.Length <= maxLength)
                 return str;
 
-            return str.Substring(0, maxLength);
+            return str[..maxLength];
         }
 
-        public static string Sanitize(this string str)
+        public static string? Sanitize(this string? str)
         {
             return str?.Replace("`", "`\u200d").Replace("@", "@\u200d");
         }

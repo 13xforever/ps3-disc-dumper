@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Text;
@@ -178,16 +179,19 @@ namespace IrdLibraryClient
             result.RecordsFiltered = (int?)json["recordsFiltered"] ?? 0;
             result.RecordsTotal = (int?)json["recordsTotal"] ?? 0;
             result.Data = new();
-            foreach (JObject obj in json["data"])
+            if (json["data"] is not { } jsonData)
+                return result;
+            
+            foreach (var obj in jsonData.Where(t => t is JObject).Cast<JObject>())
             {
                 result.Data.Add(new()
                 {
-                    Id = (string)obj["id"],
+                    Id = (string?)obj["id"] ?? "<invalid product code>",
                     AppVersion = (string?)obj["app_version"],
                     UpdateVersion = (string?)obj["update_version"],
                     GameVersion = (string?)obj["game_version"],
-                    Title = (string)obj["title"],
-                    Filename = (string)obj["filename"],
+                    Title = (string?)obj["title"] ?? "<invalid product title>",
+                    Filename = (string?)obj["filename"] ?? "<invalid filename>",
                 });
             }
             return result;

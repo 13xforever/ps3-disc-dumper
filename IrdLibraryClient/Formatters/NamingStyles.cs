@@ -13,26 +13,16 @@ namespace IrdLibraryClient
             if (value.Length > 0)
             {
                 if (char.IsUpper(value[0]))
-                    value = char.ToLower(value[0]) + value.Substring(1);
+                    value = char.ToLower(value[0]) + value[1..];
             }
             return value;
         }
 
-        public static string Dashed(string value)
-        {
-            return Delimitied(value, '-');
-        }
+        public static string Dashed(string value) => Delimited(value, '-');
+        public static string Underscore(string value) => Delimited(value, '_');
 
-        public static string Underscore(string value)
+        private static string Delimited(string value, char separator)
         {
-            return Delimitied(value, '_');
-        }
-
-        private static string Delimitied(string value, char separator)
-        {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-
             if (value.Length == 0)
                 return value;
 
