@@ -49,7 +49,7 @@ namespace IrdLibraryClient.IrdFormat
             var dirNamesWithFiles = filenames.Select(Path.GetDirectoryName).Distinct().ToList();
             var dirList = dirNames.Except(dirNamesWithFiles)
                 .OrderBy(d => d, StringComparer.OrdinalIgnoreCase)
-                .Select(dir => (dir: dir.TrimStart('\\'), info: reader.GetDirectoryInfo(dir)))
+                .Select(dir => (dir: dir.TrimStart('\\').Replace('\\', Path.DirectorySeparatorChar), info: reader.GetDirectoryInfo(dir)))
                 .Select(di => new DirRecord(di.dir, new(di.info.CreationTimeUtc, di.info.LastWriteTimeUtc)))
                 .ToList();
 
@@ -62,6 +62,7 @@ namespace IrdLibraryClient.IrdFormat
                     Log.Warn($"Fixing potential mastering error in {filename}");
                     targetFilename = targetFilename.TrimEnd('.');
                 }
+                targetFilename = targetFilename.Replace('\\', Path.DirectorySeparatorChar);
                 var clusterRange = reader.PathToClusters(filename);
                 if (clusterRange.Length != 1)
                     Log.Warn($"{targetFilename} is split in {clusterRange.Length} ranges");
@@ -70,7 +71,7 @@ namespace IrdLibraryClient.IrdFormat
                 var fileInfo = reader.GetFileSystemInfo(filename);
                 var recordInfo = new FileRecordInfo(fileInfo.CreationTimeUtc, fileInfo.LastWriteTimeUtc);
                 var parent = fileInfo.Parent;
-                var parentInfo = new DirRecord(parent.FullName.TrimStart('\\'), new(parent.CreationTimeUtc, parent.LastWriteTimeUtc));
+                var parentInfo = new DirRecord(parent.FullName.TrimStart('\\').Replace('\\', Path.DirectorySeparatorChar), new(parent.CreationTimeUtc, parent.LastWriteTimeUtc));
                 fileList.Add(new(targetFilename, startSector, length, recordInfo, parentInfo));
             }
             fileList = fileList.OrderBy(r => r.StartSector).ToList();
