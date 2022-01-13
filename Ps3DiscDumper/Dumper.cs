@@ -21,7 +21,7 @@ namespace Ps3DiscDumper
 {
     public class Dumper: IDisposable
     {
-        public const string Version = "3.2.0";
+        public const string Version = "3.2.1";
 
         private static readonly HashSet<char> InvalidChars = new(Path.GetInvalidFileNameChars());
         private static readonly char[] MultilineSplit = {'\r', '\n'};
@@ -193,11 +193,12 @@ namespace Ps3DiscDumper
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                if (string.IsNullOrEmpty(inDir))
-                    inDir = "/media";
-                discSfbPath = IOEx.GetFilepaths(inDir, "PS3_DISC.SFB", 2).FirstOrDefault();
+                var mountList = inDir is { Length: > 0 }
+                    ? new[] { inDir }
+                    : DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.CDRom).Select(d => d.RootDirectory.FullName); 
+                discSfbPath = mountList.SelectMany(mp => IOEx.GetFilepaths(mp, "PS3_DISC.SFB", 2)) .FirstOrDefault();
                 if (!string.IsNullOrEmpty(discSfbPath))
-                    input = Path.GetDirectoryName(discSfbPath);
+                    input = Path.GetDirectoryName(discSfbPath)!;
             }
             else
                 throw new NotImplementedException("Current OS is not supported");
@@ -235,7 +236,7 @@ namespace Ps3DiscDumper
             var separators = new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
             var pathParts = path.Split(separators, StringSplitOptions.RemoveEmptyEntries).Select(p => p.TrimEnd('.'));
             OutputDir = string.Join(Path.DirectorySeparatorChar, pathParts);
-            Log.Debug($"Output: {OutputDir}");
+            Log.Debug($"Dump folder name: {OutputDir}");
         }
 
         public async Task FindDiscKeyAsync(string discKeyCachePath)
@@ -420,8 +421,11 @@ namespace Ps3DiscDumper
             var validators = GetValidationInfo();
             if (!string.IsNullOrEmpty(dumpPath))
             {
-                var root = Path.GetPathRoot(Path.GetFullPath(output));
-                var drive = DriveInfo.GetDrives().FirstOrDefault(d => d?.RootDirectory.FullName.StartsWith(root) ?? false);
+                var fullOutputPath = Path.GetFullPath(output);
+                var drive = DriveInfo.GetDrives()
+                    .OrderByDescending(d => d.RootDirectory.FullName.Length)
+                    .ThenBy(d => d.RootDirectory.FullName, StringComparer.Ordinal)
+                    .FirstOrDefault(d => fullOutputPath.StartsWith(d.RootDirectory.FullName));
                 if (drive != null)
                 {
                     var spaceAvailable = drive.AvailableFreeSpace;
@@ -437,6 +441,7 @@ namespace Ps3DiscDumper
             foreach (var file in filesystemStructure)
                 Log.Trace($"0x{file.StartSector:x8}: {file.TargetFileName} ({file.Length}, {file.FileInfo.CreationTimeUtc:u})");
             var outputPathBase = Path.Combine(output, OutputDir);
+            Log.Debug($"Output path: {outputPathBase}");
             if (!Directory.Exists(outputPathBase))
                 Directory.CreateDirectory(outputPathBase);
 
