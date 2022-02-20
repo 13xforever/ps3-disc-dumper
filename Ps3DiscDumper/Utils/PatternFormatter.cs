@@ -7,6 +7,12 @@ namespace Ps3DiscDumper.Utils
 {
     public static class PatternFormatter
     {
+        private static readonly char[] InvalidChars = Path.GetInvalidFileNameChars()
+            .Concat(Path.GetInvalidPathChars())
+            .Concat(new[] { ':', '/', '\\', '?', '*', '<', '>', '|' })
+            .Distinct()
+            .ToArray();
+        
         public static string Format(string pattern, NameValueCollection items)
         {
             if (string.IsNullOrEmpty(pattern))
@@ -26,7 +32,7 @@ namespace Ps3DiscDumper.Utils
 
         private static string ReplaceInvalidChars(string dirName)
         {
-            foreach (var invalidChar in Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()).Distinct())
+            foreach (var invalidChar in InvalidChars)
                 dirName = dirName.Replace(invalidChar, '_');
             return dirName;
         }

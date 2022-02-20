@@ -24,7 +24,7 @@ namespace Ps3DiscDumper
     {
         public const string Version = "3.2.2";
 
-        private static readonly HashSet<char> InvalidChars = new(Path.GetInvalidFileNameChars());
+        private static readonly HashSet<char> InvalidChars = new(Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()));
         private static readonly char[] MultilineSplit = {'\r', '\n'};
         private long currentSector;
         private static readonly IDiscKeyProvider[] DiscKeyProviders = {new IrdProvider(), new RedumpProvider(),};
