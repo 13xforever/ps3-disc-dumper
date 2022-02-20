@@ -1,4 +1,5 @@
 ﻿using System.Configuration;
+using Ps3DiscDumper.Utils;
 
 namespace UI.WinForms.Msil
 {
@@ -10,7 +11,7 @@ namespace UI.WinForms.Msil
         [UserScopedSetting, DefaultSettingValue(@".\ird")]
         public string IrdDir { get => (string)this[nameof(IrdDir)]; set => this[nameof(IrdDir)] = value; }
 
-        [UserScopedSetting, DefaultSettingValue("%" + Patterns.Title + "% [%" + Patterns.ProductCode + "%]")]
+        [UserScopedSetting, DefaultSettingValue($"%{Patterns.Title}% [%{Patterns.ProductCode}%]")]
         public string DumpNameTemplate { get => (string)this[nameof(DumpNameTemplate)]; set => this[nameof(DumpNameTemplate)] = value; }
 
         [UserScopedSetting, DefaultSettingValue("false")]

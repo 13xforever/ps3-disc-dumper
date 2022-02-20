@@ -1,6 +1,6 @@
-﻿namespace UI.WinForms.Msil
+﻿namespace Ps3DiscDumper.Utils
 {
-    internal static class Patterns
+    public static class Patterns
     {
         public const string ProductCode = "product_code";
         public const string ProductCodeLetters = "product_code_letters";

@@ -2,6 +2,7 @@
 using System.Collections.Specialized;
 using System.IO;
 using System.Windows.Forms;
+using Ps3DiscDumper.Utils;
 
 namespace UI.WinForms.Msil
 {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Management;
@@ -21,7 +22,7 @@ namespace Ps3DiscDumper
 {
     public class Dumper: IDisposable
     {
-        public const string Version = "3.2.1";
+        public const string Version = "3.2.2";
 
         private static readonly HashSet<char> InvalidChars = new(Path.GetInvalidFileNameChars());
         private static readonly char[] MultilineSplit = {'\r', '\n'};
@@ -163,7 +164,11 @@ namespace Ps3DiscDumper
 
         public void DetectDisc(string inDir = "", Func<Dumper, string> outputDirFormatter = null)
         {
-            outputDirFormatter ??= d => $"[{d.ProductCode}] {d.Title}";
+            outputDirFormatter ??= d => PatternFormatter.Format($"%{Patterns.Title}% [%{Patterns.ProductCode}%]", new()
+            {
+                [Patterns.ProductCode] = d.ProductCode,
+                [Patterns.Title] = d.Title,
+            });
             string discSfbPath = null;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
