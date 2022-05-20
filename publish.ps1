@@ -15,13 +15,13 @@ Remove-Item -LiteralPath UI.WinForms.Msil/obj -Recurse -Force -ErrorAction Silen
 if (($PSVersionTable.Platform -eq 'Win32NT') -or $IsWindows)
 {
     Write-Host 'Building Windows binary...' -ForegroundColor Cyan
-    &dotnet build -v:q -c Release -r win-x64 --self-contained true UI.WinForms.Msil/UI.WinForms.Msil.csproj
-    &dotnet publish -v:q -r win-x64 --self-contained true -c Release -o distrib/gui/win/ UI.WinForms.Msil/UI.WinForms.Msil.csproj /p:PublishTrimmed=false /p:PublishSingleFile=true
+    &dotnet build -v:q -r win-x64 --self-contained -c Release UI.WinForms.Msil/UI.WinForms.Msil.csproj
+    &dotnet publish -v:q -r win-x64 --self-contained -c Release -o distrib/gui/win/ UI.WinForms.Msil/UI.WinForms.Msil.csproj /p:PublishTrimmed=false /p:PublishSingleFile=true
 }
 
 Write-Host 'Building Linux binary...' -ForegroundColor Cyan
-&dotnet build -v:q -c Release -r linux-x64 --self-contained true UI.Console/UI.Console.csproj
-&dotnet publish -v:q -r linux-x64 --self-contained true -c Release -o distrib/cli/lin/ UI.Console/UI.Console.csproj /p:PublishTrimmed=false /p:PublishSingleFile=true
+&dotnet build -v:q -r linux-x64 --self-contained -c Release UI.Console/UI.Console.csproj
+&dotnet publish -v:q -r linux-x64 --self-contained -c Release -o distrib/cli/lin/ UI.Console/UI.Console.csproj /p:PublishTrimmed=false /p:PublishSingleFile=true
 if (($LASTEXITCODE -eq 0) -and (($PSVersionTable.Platform -eq 'Unix') -or $IsLinux))
 {
     chmod +x distrib/cli/lin/ps3-disc-dumper
