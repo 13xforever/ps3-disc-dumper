@@ -562,7 +562,10 @@ namespace Ps3DiscDumper
                             Log.Error(e, e.Message);
                             error = true;
                             if (tries == 0)
+                            {
                                 BrokenFiles.Add((file.TargetFileName, "failed to read"));
+                                ValidationStatus = false;
+                            }
                         }
                     } while (error && tries > 0 && !Cts.IsCancellationRequested);
 
