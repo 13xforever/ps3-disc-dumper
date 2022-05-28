@@ -439,7 +439,10 @@ namespace UI.WinForms.Msil
             if (dumper.ValidationStatus == false)
             {
                 step4StatusLabel.Text = "❌";
-                step4Label.Text = "Dump is corrupted";
+                if (dumper.BrokenFiles.Count > 0)
+                    step4Label.Text = $"{dumper.BrokenFiles.Count} invalid file{(dumper.BrokenFiles.Count == 1 ? "" : "s")}";
+                else
+                    step4Label.Text = "Dump is corrupted";
             }
             else if (dumper.ValidationStatus == true)
             {

@@ -101,7 +101,7 @@ namespace Ps3DiscDumper
             SectorPosition = startSector;
         }
 
-        public override int Read( byte[] buffer, int offset, int count)
+        public override int Read(byte[] buffer, int offset, int count)
         {
             if (Position == inputStream.Length)
                 return 0;

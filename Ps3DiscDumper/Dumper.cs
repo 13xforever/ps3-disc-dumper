@@ -22,7 +22,7 @@ namespace Ps3DiscDumper
 {
     public class Dumper: IDisposable
     {
-        public const string Version = "3.2.2";
+        public const string Version = "3.2.3";
 
         private static readonly HashSet<char> InvalidChars = new(Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()));
         private static readonly char[] MultilineSplit = {'\r', '\n'};
@@ -528,6 +528,7 @@ namespace Ps3DiscDumper
                             Decrypter = decrypter;
                             await decrypter.CopyToAsync(outputStream, 8 * 1024 * 1024, Cts.Token).ConfigureAwait(false);
                             await outputStream.FlushAsync();
+                            error = false;
 
                             var resultHashes = decrypter.GetHashes();
                             var resultMd5 = resultHashes["MD5"];
@@ -560,6 +561,8 @@ namespace Ps3DiscDumper
                         {
                             Log.Error(e, e.Message);
                             error = true;
+                            if (tries == 0)
+                                BrokenFiles.Add((file.TargetFileName, "failed to read"));
                         }
                     } while (error && tries > 0 && !Cts.IsCancellationRequested);
 
@@ -573,6 +576,7 @@ namespace Ps3DiscDumper
                 {
                     Log.Error(ex);
                     BrokenFiles.Add((file.TargetFileName, "Unexpected error: " + ex.Message));
+                    ValidationStatus = false;
                 }
             }
 
