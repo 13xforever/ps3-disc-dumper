@@ -14,59 +14,84 @@ namespace Ps3DiscDumper.DiscKeyProviders
 {
     public class RedumpProvider : IDiscKeyProvider
     {
+        private static readonly RedumpClient Client = new();
+        
         public async Task<HashSet<DiscKeyInfo>> EnumerateAsync(string discKeyCachePath, string productCode, CancellationToken cancellationToken)
         {
             var result = new HashSet<DiscKeyInfo>();
             try
             {
-                var assembly = Assembly.GetExecutingAssembly();
-                var embeddedResources = assembly.GetManifestResourceNames().Where(n => n.Contains("Disc_Keys") || n.Contains("Disc Keys")).ToList();
-                if (embeddedResources.Any())
-                    Log.Trace("Loading embedded redump keys");
-                else
-                    Log.Warn("No embedded redump keys found");
-                foreach (var res in embeddedResources)
+                var keyStreams = new List<Stream>();
+                var snapshotStream = await Client.GetKeysZipContent(discKeyCachePath, cancellationToken).ConfigureAwait(false);
+                if (snapshotStream is not null)
                 {
-                    await using var resStream = assembly.GetManifestResourceStream(res);
-                    using var zip = new ZipArchive(resStream, ZipArchiveMode.Read);
-                    foreach (var zipEntry in zip.Entries.Where(e => e.Name.EndsWith(".dkey", StringComparison.InvariantCultureIgnoreCase)
-                                                                    || e.Name.EndsWith(".key", StringComparison.InvariantCultureIgnoreCase)))
+                    Log.Info("Using locally cached redump keys snapshot");
+                    var copy = new MemoryStream();
+                    snapshotStream.Seek(0, SeekOrigin.Begin);
+                    await snapshotStream.CopyToAsync(copy, cancellationToken).ConfigureAwait(false);
+                    copy.Seek(0, SeekOrigin.Begin);
+                    keyStreams.Add(copy);
+                }
+                else
+                {
+                    var assembly = Assembly.GetExecutingAssembly();
+                    var embeddedResources = assembly.GetManifestResourceNames().Where(n => n.Contains("Disc_Keys") || n.Contains("Disc Keys")).ToList();
+                    if (embeddedResources is { Count: > 0 })
                     {
-                        await using var keyStream = zipEntry.Open();
-                        await using var memStream = new MemoryStream();
-                        await keyStream.CopyToAsync(memStream, cancellationToken).ConfigureAwait(false);
-                        var discKey = memStream.ToArray();
-                        if (zipEntry.Length > 256/8*2)
+                        Log.Info("Loading embedded redump keys");
+                        foreach (var res in embeddedResources)
                         {
-                            Log.Warn($"Disc key size is too big: {discKey} ({res}/{zipEntry.FullName})");
-                            continue;
-                        }
-                        if (discKey.Length > 16)
-                        {
-                            discKey = Encoding.UTF8.GetString(discKey).TrimEnd().ToByteArray();
-                        }
-
-                        try
-                        {
-                            result.Add(new(null, discKey, zipEntry.FullName, KeyType.Redump, discKey.ToHexString()));
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Warn(e, $"Invalid disc key format: {discKey}");
+                            var resStream = assembly.GetManifestResourceStream(res);
+                            keyStreams.Add(resStream);
                         }
                     }
+                    else
+                        Log.Warn("No embedded redump keys found");
                 }
+                foreach (var zipStream in keyStreams)
+                    await using (zipStream)
+                    {
+                        if (zipStream.CanSeek)
+                            zipStream.Seek(0, SeekOrigin.Begin);
+                        using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read);
+                        foreach (var zipEntry in zip.Entries.Where(e => e.Name.EndsWith(".dkey", StringComparison.InvariantCultureIgnoreCase)
+                                                                        || e.Name.EndsWith(".key", StringComparison.InvariantCultureIgnoreCase)))
+                        {
+                            await using var keyStream = zipEntry.Open();
+                            await using var memStream = new MemoryStream();
+                            await keyStream.CopyToAsync(memStream, cancellationToken).ConfigureAwait(false);
+                            var discKey = memStream.ToArray();
+                            if (zipEntry.Length > 256 / 8 * 2)
+                            {
+                                Log.Warn($"Disc key size is too big: {discKey} ({zipEntry.FullName})");
+                                continue;
+                            }
+                            if (discKey.Length > 16)
+                            {
+                                discKey = Encoding.UTF8.GetString(discKey).TrimEnd().ToByteArray();
+                            }
+
+                            try
+                            {
+                                result.Add(new(null, discKey, zipEntry.FullName, KeyType.Redump, discKey.ToHexString()));
+                            }
+                            catch (Exception e)
+                            {
+                                Log.Warn(e, $"Invalid disc key format: {discKey}");
+                            }
+                        }
+                    }
                 if (result.Any())
-                    Log.Info($"Found {result.Count} embedded redump keys");
+                    Log.Info($"Found {result.Count} redump keys");
                 else
-                    Log.Warn($"Failed to load any embedded redump keys");
+                    Log.Warn($"Failed to load any redump keys");
             }
             catch (Exception e)
             {
-                Log.Error(e, "Failed to load embedded redump keys");
+                Log.Error(e, "Failed to load redump keys");
             }
 
-            Log.Trace("Loading cached redump keys");
+            Log.Trace("Loading loose cached redump keys");
             var diff = result.Count;
             try
             {
@@ -80,7 +105,7 @@ namespace Ps3DiscDumper.DiscKeyProviders
                         {
                             try
                             {
-                                var discKey = File.ReadAllBytes(dkeyFile);
+                                var discKey = await File.ReadAllBytesAsync(dkeyFile, cancellationToken).ConfigureAwait(false);
                                 if (discKey.Length > 16)
                                 {
                                     try
@@ -97,12 +122,10 @@ namespace Ps3DiscDumper.DiscKeyProviders
                             catch (InvalidDataException)
                             {
                                 File.Delete(dkeyFile);
-                                continue;
                             }
                             catch (Exception e)
                             {
                                 Log.Warn(e);
-                                continue;
                             }
                         }
                         catch (Exception e)
