@@ -1,108 +1,61 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Formatting;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using IrdLibraryClient.Compression;
-using IrdLibraryClient.Utils;
 using IrdLibraryClient.IrdFormat;
-using IrdLibraryClient.POCOs;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace IrdLibraryClient
 {
     public class IrdClient
     {
-        public static readonly string BaseUrl = "http://jonnysp.bplaced.net";
+        public static readonly string BaseUrl = "https://ps3.aldostools.org/ird/";
 
         private readonly HttpClient client;
-        private readonly MediaTypeFormatterCollection underscoreFormatters;
-        private static readonly Regex IrdFilename = new(@"ird/(?<filename>\w{4}\d{5}-[A-F0-9]+\.ird)", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
+        private static readonly Regex IrdFilename = new(@"href=""(?<filename>\w{4}\d{5}-[A-F0-9]+\.ird)""", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
 
-        public IrdClient()
-        {
-            client = HttpClientFactory.Create(new CompressionMessageHandler());
-            var underscoreSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new JsonContractResolver(NamingStyles.Underscore),
-                NullValueHandling = NullValueHandling.Ignore
-            };
-            var mediaTypeFormatter = new JsonMediaTypeFormatter { SerializerSettings = underscoreSettings };
-            mediaTypeFormatter.SupportedMediaTypes.Add(new("text/html"));
-            underscoreFormatters = new(new[] { mediaTypeFormatter });
-        }
+        public IrdClient() => client = HttpClientFactory.Create(new CompressionMessageHandler());
 
-        public static string GetDownloadLink(string irdFilename) => $"{BaseUrl}/ird/{irdFilename}";
-        public static string GetInfoLink(string irdFilename) => $"{BaseUrl}/info.php?file=ird/{irdFilename}";
+        public static string GetDownloadLink(string irdFilename) => $"{BaseUrl}{irdFilename}";
 
-        public async Task<SearchResult?> SearchAsync(string query, CancellationToken cancellationToken)
+        public async Task<List<string>> GetFullListAsync(CancellationToken cancellationToken)
         {
             try
             {
-                var requestUri = new Uri(BaseUrl + "/data.php").SetQueryParameters(new Dictionary<string, string>
+                var requestUri = new Uri(BaseUrl).SetQueryParameters(new Dictionary<string, string>
                     {
-                        ["draw"] = query.Length.ToString(),
-
-                        ["columns[0][data]"] = "id",
-                        ["columns[0][name]"] = "",
-                        ["columns[0][searchable]"] = "true",
-                        ["columns[0][orderable]"] = "true",
-                        ["columns[0][search][value]"] = "",
-                        ["columns[0][search][regex]"] = "false",
-
-                        ["columns[1][data]"] = "title",
-                        ["columns[1][name]"] = "",
-                        ["columns[1][searchable]"] = "true",
-                        ["columns[1][orderable]"] = "true",
-                        ["columns[1][search][value]"] = "",
-                        ["columns[1][search][regex]"] = "false",
-
-                        ["order[0][column]"] = "0",
-                        ["order[0][dir]"] = "asc",
-
-                        ["start"] = "0",
-                        ["length"] = "10",
-
-                        ["search[value]"] = query.Trim(100),
+                        ["F"] = "0",
+                        //["P"] = query.Trim(100),
 
                         ["_"] = DateTime.UtcNow.Ticks.ToString(),
                     });
                     try
                     {
-                        var responseBytes = await client.GetByteArrayAsync(requestUri, cancellationToken).ConfigureAwait(false);
-                        var result = Deserialize(responseBytes);
-                        foreach (var item in result.Data)
-                        {
-                            item.Filename = GetIrdFilename(item.Filename) ?? $"{item.Id}.ird";
-                            item.Title = GetTitle(item.Title);
-                        }
-                        return result;
+                        var responseData = await client.GetStringAsync(requestUri, cancellationToken).ConfigureAwait(false);
+                        return Deserialize(responseData);
                     }
                     catch (Exception e)
                     {
                         Log.Warn(e, "Failed to make API call to IRD Library");
-                        return null;
+                        return new();
                     }
             }
             catch (Exception e)
             {
                 Log.Error(e);
-                return null;
+                return new();
             }
         }
 
-        public async Task<Ird?> DownloadAsync(SearchResultItem irdInfo, string localCachePath, CancellationToken cancellationToken)
+        public async Task<Ird?> DownloadAsync(string irdName, string localCachePath, CancellationToken cancellationToken)
         {
             Ird? result = null;
             try
             {
-                var localCacheFilename = Path.Combine(localCachePath, irdInfo.Filename);
+                var localCacheFilename = Path.Combine(localCachePath, irdName);
                 // first we search local cache and try to load whatever data we can
                 try
                 {
@@ -115,7 +68,7 @@ namespace IrdLibraryClient
                 }
                 try
                 {
-                    var resultBytes = await client.GetByteArrayAsync(GetDownloadLink(irdInfo.Filename), cancellationToken).ConfigureAwait(false);
+                    var resultBytes = await client.GetByteArrayAsync(GetDownloadLink(irdName), cancellationToken).ConfigureAwait(false);
                     result = IrdParser.Parse(resultBytes);
                     try
                     {
@@ -125,12 +78,12 @@ namespace IrdLibraryClient
                     }
                     catch (Exception ex)
                     {
-                        Log.Warn(ex, $"Failed to write {irdInfo.Filename} to local cache: {ex.Message}");
+                        Log.Warn(ex, $"Failed to write {irdName} to local cache: {ex.Message}");
                     }
                 }
                 catch (Exception e)
                 {
-                    Log.Warn(e, $"Failed to download {irdInfo.Filename}: {e.Message}");
+                    Log.Warn(e, $"Failed to download {irdName}: {e.Message}");
                 }
                 return result;
             }
@@ -141,58 +94,17 @@ namespace IrdLibraryClient
             }
         }
 
-        private static string? GetIrdFilename(string? html)
+        private static List<string> Deserialize(string? content)
         {
-            if (string.IsNullOrEmpty(html))
-                return null;
-
-            var matches = IrdFilename.Matches(html);
-            if (matches.Count == 0)
-            {
-                Log.Warn("Couldn't parse IRD filename from " + html);
-                return null;
-            }
-
-            return matches[0].Groups["filename"]?.Value;
-        }
-
-        private static string? GetTitle(string? html)
-        {
-            if (string.IsNullOrEmpty(html))
-                return null;
-
-            var idx = html.LastIndexOf("</span>", StringComparison.OrdinalIgnoreCase);
-            var result = html[(idx + 7)..].Trim();
-            if (string.IsNullOrEmpty(result))
-                return null;
-
-            return result;
-        }
-
-        private static SearchResult Deserialize(byte[] content)
-        {
-            var result = new SearchResult();
-            using var stream = new MemoryStream(content);
-            using var reader = new StreamReader(stream, Encoding.UTF8);
-            using var jsonReader = new JsonTextReader(reader);
-            var json = JObject.Load(jsonReader);
-            result.RecordsFiltered = (int?)json["recordsFiltered"] ?? 0;
-            result.RecordsTotal = (int?)json["recordsTotal"] ?? 0;
-            result.Data = new();
-            if (json["data"] is not { } jsonData)
+            var result = new List<string>();
+            if (string.IsNullOrEmpty(content))
                 return result;
-            
-            foreach (var obj in jsonData.Where(t => t is JObject).Cast<JObject>())
+
+            var matches = IrdFilename.Matches(content);
+            foreach (Match match in matches)
             {
-                result.Data.Add(new()
-                {
-                    Id = (string?)obj["id"] ?? "<invalid product code>",
-                    AppVersion = (string?)obj["app_version"],
-                    UpdateVersion = (string?)obj["update_version"],
-                    GameVersion = (string?)obj["game_version"],
-                    Title = (string?)obj["title"] ?? "<invalid product title>",
-                    Filename = (string?)obj["filename"] ?? "<invalid filename>",
-                });
+                if (match.Success)
+                    result.Add(match.Groups["filename"].Value);
             }
             return result;
         }

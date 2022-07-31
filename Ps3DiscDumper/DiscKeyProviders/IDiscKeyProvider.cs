@@ -6,6 +6,6 @@ namespace Ps3DiscDumper.DiscKeyProviders
 {
     public interface IDiscKeyProvider
     {
-        Task<HashSet<DiscKeyInfo>> EnumerateAsync(string discKeyCachePath, string ProductCode, CancellationToken cancellationToken);
+        Task<HashSet<DiscKeyInfo>> EnumerateAsync(string discKeyCachePath, string productCode, CancellationToken cancellationToken);
     }
 }

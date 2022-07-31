@@ -14,7 +14,7 @@ namespace Ps3DiscDumper.DiscKeyProviders
 {
     public class RedumpProvider : IDiscKeyProvider
     {
-        public async Task<HashSet<DiscKeyInfo>> EnumerateAsync(string discKeyCachePath, string ProductCode, CancellationToken cancellationToken)
+        public async Task<HashSet<DiscKeyInfo>> EnumerateAsync(string discKeyCachePath, string productCode, CancellationToken cancellationToken)
         {
             var result = new HashSet<DiscKeyInfo>();
             try

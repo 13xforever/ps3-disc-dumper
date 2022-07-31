@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using IrdLibraryClient;
 using IrdLibraryClient.IrdFormat;
-using IrdLibraryClient.POCOs;
 
 namespace Ps3DiscDumper.DiscKeyProviders
 {
@@ -14,9 +13,9 @@ namespace Ps3DiscDumper.DiscKeyProviders
     {
         private static readonly IrdClient Client = new();
 
-        public async Task<HashSet<DiscKeyInfo>> EnumerateAsync(string discKeyCachePath, string ProductCode, CancellationToken cancellationToken)
+        public async Task<HashSet<DiscKeyInfo>> EnumerateAsync(string discKeyCachePath, string productCode, CancellationToken cancellationToken)
         {
-            ProductCode = ProductCode?.ToUpperInvariant();
+            productCode = productCode.ToUpperInvariant();
             var result = new HashSet<DiscKeyInfo>();
             var knownFilenames = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
             Log.Trace("Searching local cache for a match...");
@@ -29,19 +28,17 @@ namespace Ps3DiscDumper.DiscKeyProviders
                     {
                         try
                         {
-                            var ird = IrdParser.Parse(File.ReadAllBytes(irdFile));
+                            var ird = IrdParser.Parse(await File.ReadAllBytesAsync(irdFile, cancellationToken).ConfigureAwait(false));
                             result.Add(new(ird.Data1, null, irdFile, KeyType.Ird, ird.Crc32.ToString("x8")));
                             knownFilenames.Add(Path.GetFileName(irdFile));
                         }
                         catch (InvalidDataException)
                         {
                             File.Delete(irdFile);
-                            continue;
                         }
                         catch (Exception e)
                         {
                             Log.Warn(e);
-                            continue;
                         }
                     }
                     catch (Exception e)
@@ -52,20 +49,18 @@ namespace Ps3DiscDumper.DiscKeyProviders
             }
 
             Log.Trace("Searching IRD Library for match...");
-            var irdInfoList = await Client.SearchAsync(ProductCode, cancellationToken).ConfigureAwait(false);
-            var irdList = irdInfoList?.Data?.Where(
-                              i => !knownFilenames.Contains(i.Filename) && i.Filename.Substring(0, 9).ToUpperInvariant() == ProductCode
-                          ).ToList() ?? new List<SearchResultItem>(0);
+            var irdNameList = await Client.GetFullListAsync(cancellationToken).ConfigureAwait(false);
+            var irdList = irdNameList.Where(i => !knownFilenames.Contains(i) && i.StartsWith(productCode, StringComparison.OrdinalIgnoreCase)).ToList();
             if (irdList.Count == 0)
                 Log.Debug("No matching IRD file was found in the Library");
             else
             {
                 Log.Info($"Found {irdList.Count} new match{(irdList.Count == 1 ? "" : "es")} in the IRD Library");
-                foreach (var irdInfo in irdList)
+                foreach (var irdName in irdList)
                 {
-                    var ird = await Client.DownloadAsync(irdInfo, discKeyCachePath, cancellationToken).ConfigureAwait(false);
-                    result.Add(new(ird.Data1, null, Path.Combine(discKeyCachePath, irdInfo.Filename), KeyType.Ird, ird.Crc32.ToString("x8")));
-                    knownFilenames.Add(irdInfo.Filename);
+                    var ird = await Client.DownloadAsync(irdName, discKeyCachePath, cancellationToken).ConfigureAwait(false);
+                    result.Add(new(ird.Data1, null, Path.Combine(discKeyCachePath, irdName), KeyType.Ird, ird.Crc32.ToString("x8")));
+                    knownFilenames.Add(irdName);
                 }
             }
             if (knownFilenames.Count == 0)

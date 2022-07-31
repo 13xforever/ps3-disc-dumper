@@ -23,29 +23,29 @@ namespace Tests
         [TestCase("BLES00932", 12721)]
         public async Task FileStructureParseTest(string productCode, int expectedFileCount)
         {
-            var searchResults = await Client.SearchAsync(productCode, CancellationToken.None).ConfigureAwait(false);
-            Assert.That(searchResults?.Data?.Count, Is.EqualTo(1));
+            var searchResults = await Client.GetFullListAsync(CancellationToken.None).ConfigureAwait(false);
+            searchResults = searchResults.Where(i => i.StartsWith(productCode, StringComparison.OrdinalIgnoreCase)).ToList();
+            Assert.That(searchResults.Count, Is.EqualTo(1));
 
-            var ird = await Client.DownloadAsync(searchResults.Data[0], "ird", CancellationToken.None).ConfigureAwait(false);
+            var ird = await Client.DownloadAsync(searchResults[0], "ird", CancellationToken.None).ConfigureAwait(false);
             Assert.That(ird, Is.Not.Null);
             Assert.That(ird.FileCount, Is.EqualTo(expectedFileCount));
 
-            await using (var decompressedStream = GetDecompressHeader(ird))
-            {
-                var reader = new CDReader(decompressedStream, true, true);
-                var (files, _) = reader.GetFilesystemStructure();
-                Assert.That(files.Count, Is.EqualTo(expectedFileCount));
-            }
+            await using var decompressedStream = GetDecompressHeader(ird);
+            var reader = new CDReader(decompressedStream, true, true);
+            var (files, _) = reader.GetFilesystemStructure();
+            Assert.That(files.Count, Is.EqualTo(expectedFileCount));
         }
 
         [TestCase("BLUS31604", "0A37A83C")]
         [TestCase("BLUS30259", "4f5e86e7")]
         public async Task DiscDecryptionKeyTest(string productCode, string expectedKey)
         {
-            var searchResults = await Client.SearchAsync(productCode, CancellationToken.None).ConfigureAwait(false);
-            Assert.That(searchResults?.Data?.Count, Is.EqualTo(1));
+            var searchResults = await Client.GetFullListAsync(CancellationToken.None).ConfigureAwait(false);
+            searchResults = searchResults.Where(i => i.StartsWith(productCode, StringComparison.OrdinalIgnoreCase)).ToList();
+            Assert.That(searchResults.Count, Is.EqualTo(1));
 
-            var ird = await Client.DownloadAsync(searchResults.Data[0], "ird", CancellationToken.None).ConfigureAwait(false);
+            var ird = await Client.DownloadAsync(searchResults[0], "ird", CancellationToken.None).ConfigureAwait(false);
             Assert.That(ird, Is.Not.Null);
 
             var decryptionKey = Decrypter.DecryptDiscKey(ird.Data1).ToHexString();
@@ -71,8 +71,8 @@ namespace Tests
             {
                 var bytes = await File.ReadAllBytesAsync(f).ConfigureAwait(false);
                 var ird = IrdParser.Parse(bytes);
-                await using (var header = GetDecompressHeader(ird))
-                    result.Add((Path.GetFileName(f), header.Length));
+                await using var header = GetDecompressHeader(ird);
+                result.Add((Path.GetFileName(f), header.Length));
             }
             Assert.That(result.Count, Is.GreaterThan(0));
 
