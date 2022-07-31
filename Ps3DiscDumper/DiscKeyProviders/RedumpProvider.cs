@@ -34,6 +34,7 @@ namespace Ps3DiscDumper.DiscKeyProviders
                 }
                 else
                 {
+                    
                     var assembly = Assembly.GetExecutingAssembly();
                     var embeddedResources = assembly.GetManifestResourceNames().Where(n => n.Contains("Disc_Keys") || n.Contains("Disc Keys")).ToList();
                     if (embeddedResources is { Count: > 0 })

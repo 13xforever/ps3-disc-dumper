@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -77,16 +78,34 @@ public class RedumpClient
                 catch (Exception e)
                 {
                     Log.Warn(e, $"Failed to download redump snapshot {filename}: {e.Message}");
-                    return LatestSnapshot;
                 }
             }
             else
-                Log.Warn("Returned snapshot was in unexpected format, ignoring");
+                Log.Warn("Snapshot response was in an unexpected format, ignoring");
         }
         catch (Exception e)
         {
             Log.Error(e);
         }
+
+        Log.Info("Trying to search local cache...");
+        var latestLocalCache = Directory.GetFiles(localCachePath, "Sony*Disc*Keys*.zip").MaxBy(n => n, StringComparer.OrdinalIgnoreCase);
+        if (latestLocalCache is not null)
+            try
+            {
+                var fn = Path.GetFileName(latestLocalCache);
+                Log.Info($"Using latest local redump key cache: {fn}");
+                await using var file = File.Open(fn, FileMode.Open, FileAccess.Read, FileShare.Read);
+                var result = new MemoryStream();
+                await file.CopyToAsync(result, cancellationToken).ConfigureAwait(false);
+                result.Seek(0, SeekOrigin.Begin);
+                LatestSnapshot = result;
+            }
+            catch (Exception e)
+            {
+                Log.Warn(e, "Failed to read local cache file");
+            }
+
         return LatestSnapshot;
     }
 }
