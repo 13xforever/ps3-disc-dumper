@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -10,6 +12,7 @@ using IrdLibraryClient;
 using IrdLibraryClient.IrdFormat;
 using Microsoft.WindowsAPICodePack.Taskbar;
 using Ps3DiscDumper;
+using Ps3DiscDumper.POCOs;
 using Ps3DiscDumper.Utils;
 using UI.WinForms.Msil.Utils;
 
@@ -19,7 +22,9 @@ namespace UI.WinForms.Msil
     {
         private readonly Settings settings = new();
         private BackgroundWorker discBackgroundWorker;
+        private BackgroundWorker updateCheckWorker;
         private Dumper currentDumper;
+        private string UpdateUrl = "https://github.com/13xforever/ps3-disc-dumper/releases/latest";
 
         private const int WM_DEVICECHANGE = 0x219;
 
@@ -95,8 +100,12 @@ namespace UI.WinForms.Msil
             Log.Info(Text);
             settings.Reload();
             ResetForm();
-        }
 
+            updateCheckWorker = new() { WorkerSupportsCancellation = false, WorkerReportsProgress = false, };
+            updateCheckWorker.DoWork += (o, evtArgs) => evtArgs.Result = Dumper.CheckUpdatesAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+            updateCheckWorker.RunWorkerCompleted += ShowUpdateCheckResults;
+            updateCheckWorker.RunWorkerAsync();
+        }
 
         private void settingsButton_Click(object sender, EventArgs e)
         {
@@ -129,7 +138,7 @@ namespace UI.WinForms.Msil
             currentDumper = null;
             discBackgroundWorker?.CancelAsync();
             discBackgroundWorker?.Dispose();
-            discBackgroundWorker = new() { WorkerSupportsCancellation = true, WorkerReportsProgress = true };
+            discBackgroundWorker = new() { WorkerSupportsCancellation = true, WorkerReportsProgress = true, };
             discBackgroundWorker.DoWork += DetectPs3DiscGame;
             discBackgroundWorker.RunWorkerCompleted += DetectPs3DiscGameFinished;
 
@@ -467,6 +476,36 @@ namespace UI.WinForms.Msil
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             currentDumper?.Cts.Cancel();
+        }
+
+        private void ShowUpdateCheckResults(object sender, RunWorkerCompletedEventArgs e)
+        {
+            var result = ((Version ver, GitHubReleaseInfo info)?)e.Result;
+            if (result is null or {ver: null} or {info: null})
+                return;
+            
+            var (ver, rel) = result.Value;
+
+            var info = $"v{ver} is available!\n\n{rel.Name}\n{"".PadRight(rel.Name.Length, '-')}\n\n{rel.Body}";
+            if (!string.IsNullOrEmpty(rel.HtmlUrl))
+                UpdateUrl = rel.HtmlUrl;
+            if (rel.Prerelease)
+            {
+                updateButton.ResetBackColor();
+                toolTip1.SetToolTip(updateButton, $"Prerelease " + info);
+            }
+            else
+            {
+                updateButton.BackColor = Color.MediumSeaGreen;
+                toolTip1.SetToolTip(updateButton, info);
+            }
+            updateButton.Visible = true;
+        }
+        
+        private void updateButton_Click(object sender, EventArgs e)
+        {
+            var psi = new ProcessStartInfo(UpdateUrl) { UseShellExecute = true };
+            Process.Start(psi);
         }
     }
 }

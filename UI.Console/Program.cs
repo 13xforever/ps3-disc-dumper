@@ -18,6 +18,8 @@ namespace UIConsole
             Log.Info("PS3 Disc Dumper v" + Dumper.Version);
             Log.Debug($"Log file location: {Log.LogPath}");
 
+            await Dumper.CheckUpdatesAsync().ConfigureAwait(false);
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && Console.WindowHeight < 1 && Console.WindowWidth < 1)
                 try
                 {

@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Management;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using DiscUtils.Iso9660;
@@ -12,6 +15,7 @@ using IrdLibraryClient;
 using IrdLibraryClient.IrdFormat;
 using Ps3DiscDumper.DiscInfo;
 using Ps3DiscDumper.DiscKeyProviders;
+using Ps3DiscDumper.POCOs;
 using Ps3DiscDumper.Sfb;
 using Ps3DiscDumper.Sfo;
 using Ps3DiscDumper.Utils;
@@ -21,7 +25,7 @@ namespace Ps3DiscDumper
 {
     public class Dumper: IDisposable
     {
-        public const string Version = "3.3.0";
+        public const string Version = "3.3.1";
 
         private static readonly HashSet<char> InvalidChars = new(Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()));
         private static readonly char[] MultilineSplit = {'\r', '\n'};
@@ -40,6 +44,12 @@ namespace Ps3DiscDumper
         private byte[] sectorIV;
         private Stream driveStream;
         private static readonly byte[] Iso9660PrimaryVolumeDescriptorHeader = {0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0x00};
+
+        private static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            PropertyNamingPolicy = new SnakeCasePolicy(),
+            WriteIndented = true,
+        };
 
         public ParamSfo ParamSfo { get; private set; }
         public string ProductCode { get; private set; }
@@ -607,6 +617,46 @@ namespace Ps3DiscDumper
             Log.Info("Completed");
         }
 
+        public static async Task<(Version, GitHubReleaseInfo)> CheckUpdatesAsync()
+        {
+            try
+            {
+                using var client = new HttpClient();
+                var curVerParts = Version.Split(new[] {' ', '-'}, 2);
+                client.DefaultRequestHeaders.UserAgent.Add(new("PS3DiscDumper", curVerParts[0]));
+                var responseJson = await client.GetStringAsync("https://api.github.com/repos/13xforever/ps3-disc-dumper/releases").ConfigureAwait(false);
+                var releaseList = JsonSerializer.Deserialize<List<GitHubReleaseInfo>>(responseJson, JsonOptions);
+                releaseList = releaseList?.OrderByDescending(r => System.Version.TryParse(r.TagName.TrimStart('v'), out var v) ? v : null).ToList();
+                var latest = releaseList?.FirstOrDefault(r => !r.Prerelease);
+                var latestBeta = releaseList?.FirstOrDefault(r => r.Prerelease);
+                System.Version.TryParse(curVerParts[0], out var curVer);
+                System.Version.TryParse(latest?.TagName.TrimStart('v') ?? "0", out var latestVer);
+                var latestBetaParts = latestBeta?.TagName.Split(new[] {' ', '-'}, 2);
+                System.Version.TryParse(latestBetaParts?[0] ?? "0", out var latestBetaVer);
+                if (latestVer > curVer || latestVer == curVer && curVerParts.Length > 1)
+                {
+                    Log.Warn($"Newer version available: v{latestVer}\n\n{latest?.Name}\n{"".PadRight(latest?.Name.Length ?? 0, '-')}\n{latest?.Body}\n{latest?.HtmlUrl}\n");
+                    return (latestVer, latest);
+                }
+                
+                if (latestBetaVer > latestVer
+                    || (latestVer == latestBetaVer
+                        && curVerParts.Length > 1
+                        && (latestBetaParts?.Length > 1 && latestBetaParts[1] != curVerParts[1]
+                            || (latestBetaParts?.Length ?? 0) == 0)))
+                {
+                    Log.Warn($"Newer prerelease version available: v{latestBetaVer}\n\n{latestBeta?.Name}\n{"".PadRight(latestBeta?.Name.Length ?? 0, '-')}\n{latestBeta?.Body}\n{latestBeta?.HtmlUrl}\n");
+                    return (latestBetaVer, latestBeta);
+                }
+            }
+            catch
+            {
+                Log.Warn("Failed to check for updates");
+            }
+            return (null, null);
+        }
+
+        
         private (List<FileRecord> files, List<DirRecord> dirs) GetFilesystemStructure()
         {
             var pos = driveStream.Position;

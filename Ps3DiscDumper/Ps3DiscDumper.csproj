@@ -14,6 +14,7 @@
     <!-- explicit references to fix msbuild complaints -->
     <PackageReference Include="System.Buffers" Version="4.3.0" />
     <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.Text.Json" Version="6.0.5" />
     <PackageReference Include="System.Threading.ThreadPool" Version="4.3.0" />
   </ItemGroup>
 
