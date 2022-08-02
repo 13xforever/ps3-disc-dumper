@@ -489,14 +489,18 @@ namespace UI.WinForms.Msil
             var info = $"v{ver} is available!\n\n{rel.Name}\n{"".PadRight(rel.Name.Length, '-')}\n\n{rel.Body}";
             if (!string.IsNullOrEmpty(rel.HtmlUrl))
                 UpdateUrl = rel.HtmlUrl;
+
+            Text += " (Update available)";
             if (rel.Prerelease)
             {
                 updateButton.ResetBackColor();
+                updateButton.Text = "🆙";
                 toolTip1.SetToolTip(updateButton, $"Prerelease " + info);
             }
             else
             {
                 updateButton.BackColor = Color.MediumSeaGreen;
+                updateButton.Text = "🆕";
                 toolTip1.SetToolTip(updateButton, info);
             }
             updateButton.Visible = true;
