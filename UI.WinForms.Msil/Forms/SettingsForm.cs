@@ -148,9 +148,9 @@ namespace UI.WinForms.Msil
 
         private void defaultsButton_Click(object sender, EventArgs e)
         {
-            outputTextBox.Text = @".\";
-            irdTextBox.Text = @".\ird";
-            namePatternTextBox.Text = @"%title% [%product_code%]";
+            outputTextBox.Text = (string)Settings.Properties[nameof(Settings.OutputDir)].DefaultValue;
+            irdTextBox.Text = (string)Settings.Properties[nameof(Settings.IrdDir)].DefaultValue;
+            namePatternTextBox.Text = (string)Settings.Properties[nameof(Settings.DumpNameTemplate)].DefaultValue;
             namePatternTextBox_TextChanged();
         }
     }
