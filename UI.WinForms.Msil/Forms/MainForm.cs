@@ -107,6 +107,9 @@ namespace UI.WinForms.Msil
             updateCheckWorker.DoWork += (o, evtArgs) => evtArgs.Result = Dumper.CheckUpdatesAsync().ConfigureAwait(false).GetAwaiter().GetResult();
             updateCheckWorker.RunWorkerCompleted += ShowUpdateCheckResults;
             updateCheckWorker.RunWorkerAsync();
+            
+            if (string.IsNullOrEmpty(settings.OutputDir) || string.IsNullOrEmpty(settings.IrdDir) || string.IsNullOrWhiteSpace(settings.DumpNameTemplate))
+                settingsButton_Click(sender, e);
         }
 
         private void settingsButton_Click(object sender, EventArgs e)
