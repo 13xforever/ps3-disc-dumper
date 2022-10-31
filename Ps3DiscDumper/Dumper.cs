@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using DiscUtils.Iso9660;
@@ -25,8 +26,9 @@ namespace Ps3DiscDumper
 {
     public class Dumper: IDisposable
     {
-        public const string Version = "3.3.1";
+        public const string Version = "3.3.2b2";
 
+        private static readonly Regex VersionParts = new Regex(@"(?<ver>\d+(\.\d+){0,2})[ \-]*(?<pre>.*)", RegexOptions.Singleline | RegexOptions.ExplicitCapture);
         private static readonly HashSet<char> InvalidChars = new(Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()));
         private static readonly char[] MultilineSplit = {'\r', '\n'};
         private long currentSector;
@@ -622,18 +624,22 @@ namespace Ps3DiscDumper
             try
             {
                 using var client = new HttpClient();
-                var curVerParts = Version.Split(new[] {' ', '-'}, 2);
-                client.DefaultRequestHeaders.UserAgent.Add(new("PS3DiscDumper", curVerParts[0]));
+                var curVerMatch = VersionParts.Match(Version);
+                var curVerStr = curVerMatch.Groups["ver"].Value;
+                var curVerPre = curVerMatch.Groups["pre"].Value;
+                client.DefaultRequestHeaders.UserAgent.Add(new("PS3DiscDumper", curVerStr));
                 var responseJson = await client.GetStringAsync("https://api.github.com/repos/13xforever/ps3-disc-dumper/releases").ConfigureAwait(false);
                 var releaseList = JsonSerializer.Deserialize<List<GitHubReleaseInfo>>(responseJson, JsonOptions);
                 releaseList = releaseList?.OrderByDescending(r => System.Version.TryParse(r.TagName.TrimStart('v'), out var v) ? v : null).ToList();
                 var latest = releaseList?.FirstOrDefault(r => !r.Prerelease);
                 var latestBeta = releaseList?.FirstOrDefault(r => r.Prerelease);
-                System.Version.TryParse(curVerParts[0], out var curVer);
+                System.Version.TryParse(curVerStr, out var curVer);
                 System.Version.TryParse(latest?.TagName.TrimStart('v') ?? "0", out var latestVer);
-                var latestBetaParts = latestBeta?.TagName.Split(new[] {' ', '-'}, 2);
-                System.Version.TryParse(latestBetaParts?[0] ?? "0", out var latestBetaVer);
-                if (latestVer > curVer || latestVer == curVer && curVerParts.Length > 1)
+                var latestBetaMatch = VersionParts.Match(latestBeta?.TagName ?? "");
+                var latestBetaVerStr = latestBetaMatch.Groups["ver"].Value;
+                var latestBetaVerPre = latestBetaMatch.Groups["pre"].Value;
+                System.Version.TryParse("0" + latestBetaVerStr, out var latestBetaVer);
+                if (latestVer > curVer || latestVer == curVer && curVerPre is {Length: >0})
                 {
                     Log.Warn($"Newer version available: v{latestVer}\n\n{latest?.Name}\n{"".PadRight(latest?.Name.Length ?? 0, '-')}\n{latest?.Body}\n{latest?.HtmlUrl}\n");
                     return (latestVer, latest);
@@ -641,11 +647,11 @@ namespace Ps3DiscDumper
                 
                 if (latestBetaVer > latestVer
                     || (latestVer == latestBetaVer
-                        && curVerParts.Length > 1
-                        && (latestBetaParts?.Length > 1 && latestBetaParts[1] != curVerParts[1]
-                            || (latestBetaParts?.Length ?? 0) == 0)))
+                        && curVerPre is {Length: >0}
+                        && (latestBetaVerPre is {Length: >0} && StringComparer.OrdinalIgnoreCase.Compare(latestBetaVerPre, curVerPre) > 0
+                            || latestBetaVerStr is null or "")))
                 {
-                    Log.Warn($"Newer prerelease version available: v{latestBetaVer}\n\n{latestBeta?.Name}\n{"".PadRight(latestBeta?.Name.Length ?? 0, '-')}\n{latestBeta?.Body}\n{latestBeta?.HtmlUrl}\n");
+                    Log.Warn($"Newer prerelease version available: v{latestBeta!.TagName.TrimStart('v')}\n\n{latestBeta?.Name}\n{"".PadRight(latestBeta?.Name.Length ?? 0, '-')}\n{latestBeta?.Body}\n{latestBeta?.HtmlUrl}\n");
                     return (latestBetaVer, latestBeta);
                 }
             }

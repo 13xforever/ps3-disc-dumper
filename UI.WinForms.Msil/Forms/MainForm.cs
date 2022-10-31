@@ -493,7 +493,7 @@ namespace UI.WinForms.Msil
             
             var (ver, rel) = result.Value;
 
-            var info = $"v{ver} is available!\n\n{rel.Name}\n{"".PadRight(rel.Name.Length, '-')}\n\n{rel.Body}";
+            var info = $"v{rel.TagName.TrimStart('v')} is available!\n\n{rel.Name}\n{"".PadRight(rel.Name.Length, '-')}\n\n{rel.Body}";
             if (!string.IsNullOrEmpty(rel.HtmlUrl))
                 UpdateUrl = rel.HtmlUrl;
 
