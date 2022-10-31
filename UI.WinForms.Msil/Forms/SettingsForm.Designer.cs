@@ -54,15 +54,17 @@
             this.saveButton = new System.Windows.Forms.Button();
             this.irdTooltip = new System.Windows.Forms.ToolTip(this.components);
             this.dumpNameTooltip = new System.Windows.Forms.ToolTip(this.components);
+            this.defaultsButton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // outputLabel
             // 
             this.outputLabel.AutoSize = true;
-            this.outputLabel.Location = new System.Drawing.Point(46, 13);
+            this.outputLabel.Location = new System.Drawing.Point(54, 15);
+            this.outputLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.outputLabel.Name = "outputLabel";
-            this.outputLabel.Size = new System.Drawing.Size(74, 13);
+            this.outputLabel.Size = new System.Drawing.Size(84, 15);
             this.outputLabel.TabIndex = 0;
             this.outputLabel.Text = "Output Folder:";
             this.outputTooltip.SetToolTip(this.outputLabel, "Base folder where all the dumps will be created as subfolders");
@@ -71,19 +73,22 @@
             // 
             this.outputTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.outputTextBox.Location = new System.Drawing.Point(126, 10);
+            this.outputTextBox.Location = new System.Drawing.Point(147, 12);
+            this.outputTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.outputTextBox.Name = "outputTextBox";
-            this.outputTextBox.Size = new System.Drawing.Size(397, 20);
+            this.outputTextBox.Size = new System.Drawing.Size(462, 23);
             this.outputTextBox.TabIndex = 1;
             this.outputTextBox.Text = ".\\";
             this.outputTooltip.SetToolTip(this.outputTextBox, "Base folder where all the dumps will be created as subfolders");
+            this.outputTextBox.TextChanged += new System.EventHandler(this.outputTextBox_TextChanged);
             // 
             // outputBrowseButton
             // 
             this.outputBrowseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.outputBrowseButton.Location = new System.Drawing.Point(529, 8);
+            this.outputBrowseButton.Location = new System.Drawing.Point(617, 9);
+            this.outputBrowseButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.outputBrowseButton.Name = "outputBrowseButton";
-            this.outputBrowseButton.Size = new System.Drawing.Size(75, 23);
+            this.outputBrowseButton.Size = new System.Drawing.Size(88, 27);
             this.outputBrowseButton.TabIndex = 2;
             this.outputBrowseButton.Text = "Browse...";
             this.outputBrowseButton.UseVisualStyleBackColor = true;
@@ -96,19 +101,21 @@
             // namePatternExampleLabel
             // 
             this.namePatternExampleLabel.AutoSize = true;
-            this.namePatternExampleLabel.Location = new System.Drawing.Point(126, 91);
+            this.namePatternExampleLabel.Location = new System.Drawing.Point(147, 105);
+            this.namePatternExampleLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.namePatternExampleLabel.Name = "namePatternExampleLabel";
-            this.namePatternExampleLabel.Size = new System.Drawing.Size(156, 13);
+            this.namePatternExampleLabel.Size = new System.Drawing.Size(157, 15);
             this.namePatternExampleLabel.TabIndex = 8;
-            this.namePatternExampleLabel.Text = "[BLUS 12345] Weebs in Space";
+            this.namePatternExampleLabel.Text = "Weebs in Space [BLUS12345]";
             this.outputTooltip.SetToolTip(this.namePatternExampleLabel, "Example folder name for the dump");
             // 
             // labelIrd
             // 
             this.labelIrd.AutoSize = true;
-            this.labelIrd.Location = new System.Drawing.Point(25, 40);
+            this.labelIrd.Location = new System.Drawing.Point(29, 46);
+            this.labelIrd.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelIrd.Name = "labelIrd";
-            this.labelIrd.Size = new System.Drawing.Size(95, 13);
+            this.labelIrd.Size = new System.Drawing.Size(100, 15);
             this.labelIrd.TabIndex = 3;
             this.labelIrd.Text = "IRD Cache Folder:";
             this.irdTooltip.SetToolTip(this.labelIrd, "Folder where IRD files will be stored for future use");
@@ -117,19 +124,22 @@
             // 
             this.irdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.irdTextBox.Location = new System.Drawing.Point(126, 37);
+            this.irdTextBox.Location = new System.Drawing.Point(147, 43);
+            this.irdTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.irdTextBox.Name = "irdTextBox";
-            this.irdTextBox.Size = new System.Drawing.Size(397, 20);
+            this.irdTextBox.Size = new System.Drawing.Size(462, 23);
             this.irdTextBox.TabIndex = 4;
             this.irdTextBox.Text = ".\\ird";
             this.irdTooltip.SetToolTip(this.irdTextBox, "Folder where IRD files will be stored for future use");
+            this.irdTextBox.TextChanged += new System.EventHandler(this.outputTextBox_TextChanged);
             // 
             // irdButton
             // 
             this.irdButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.irdButton.Location = new System.Drawing.Point(529, 35);
+            this.irdButton.Location = new System.Drawing.Point(617, 40);
+            this.irdButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.irdButton.Name = "irdButton";
-            this.irdButton.Size = new System.Drawing.Size(75, 23);
+            this.irdButton.Size = new System.Drawing.Size(88, 27);
             this.irdButton.TabIndex = 5;
             this.irdButton.Text = "Browse...";
             this.irdButton.UseVisualStyleBackColor = true;
@@ -138,9 +148,10 @@
             // namePatternLabel
             // 
             this.namePatternLabel.AutoSize = true;
-            this.namePatternLabel.Location = new System.Drawing.Point(14, 67);
+            this.namePatternLabel.Location = new System.Drawing.Point(16, 77);
+            this.namePatternLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.namePatternLabel.Name = "namePatternLabel";
-            this.namePatternLabel.Size = new System.Drawing.Size(106, 13);
+            this.namePatternLabel.Size = new System.Drawing.Size(119, 15);
             this.namePatternLabel.TabIndex = 6;
             this.namePatternLabel.Text = "Dump Name Pattern:";
             this.dumpNameTooltip.SetToolTip(this.namePatternLabel, "Pattern used to generate the folder name to store the decrypted game copy in (i.e" +
@@ -150,11 +161,12 @@
             // 
             this.namePatternTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.namePatternTextBox.Location = new System.Drawing.Point(126, 64);
+            this.namePatternTextBox.Location = new System.Drawing.Point(147, 74);
+            this.namePatternTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.namePatternTextBox.Name = "namePatternTextBox";
-            this.namePatternTextBox.Size = new System.Drawing.Size(397, 20);
+            this.namePatternTextBox.Size = new System.Drawing.Size(462, 23);
             this.namePatternTextBox.TabIndex = 7;
-            this.namePatternTextBox.Text = "[%product_code_letters% %product_code_numbers%] %title%";
+            this.namePatternTextBox.Text = "%title% [%product_code%]";
             this.dumpNameTooltip.SetToolTip(this.namePatternTextBox, "Pattern used to generate the folder name to store the decrypted game copy in (i.e" +
         ". game dump)");
             this.namePatternTextBox.TextChanged += new System.EventHandler(this.namePatternTextBox_TextChanged);
@@ -174,9 +186,11 @@
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Location = new System.Drawing.Point(12, 108);
+            this.groupBox1.Location = new System.Drawing.Point(14, 125);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(511, 97);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.groupBox1.Size = new System.Drawing.Size(596, 112);
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Available patterns:";
@@ -184,99 +198,110 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(148, 72);
+            this.label10.Location = new System.Drawing.Point(173, 83);
+            this.label10.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(118, 13);
+            this.label10.Size = new System.Drawing.Size(130, 15);
             this.label10.TabIndex = 9;
             this.label10.Text = "- Game region (e.g. US)";
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(148, 59);
+            this.label9.Location = new System.Drawing.Point(173, 68);
+            this.label9.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(169, 13);
+            this.label9.Size = new System.Drawing.Size(184, 15);
             this.label9.TabIndex = 8;
             this.label9.Text = "- Game title (e.g. Weebs in Space)";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(148, 46);
+            this.label8.Location = new System.Drawing.Point(173, 53);
+            this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(225, 13);
+            this.label8.Size = new System.Drawing.Size(252, 15);
             this.label8.TabIndex = 7;
             this.label8.Text = "- Number part of the Product Code (i.e. 12345)";
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(148, 33);
+            this.label7.Location = new System.Drawing.Point(173, 38);
+            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(213, 13);
+            this.label7.Size = new System.Drawing.Size(235, 15);
             this.label7.TabIndex = 6;
             this.label7.Text = "- Letter part of the Product Code (i.e. BLUS)";
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(148, 20);
+            this.label6.Location = new System.Drawing.Point(173, 23);
+            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(197, 13);
+            this.label6.Size = new System.Drawing.Size(212, 15);
             this.label6.TabIndex = 5;
             this.label6.Text = "- Game Product Code (e.g. BLUS12345)";
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(7, 72);
+            this.label5.Location = new System.Drawing.Point(8, 83);
+            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(52, 13);
+            this.label5.Size = new System.Drawing.Size(61, 15);
             this.label5.TabIndex = 4;
             this.label5.Text = "%region%";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(7, 59);
+            this.label4.Location = new System.Drawing.Point(8, 68);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(39, 13);
+            this.label4.Size = new System.Drawing.Size(47, 15);
             this.label4.TabIndex = 3;
             this.label4.Text = "%title%";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(7, 46);
+            this.label3.Location = new System.Drawing.Point(8, 53);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(135, 13);
+            this.label3.Size = new System.Drawing.Size(152, 15);
             this.label3.TabIndex = 2;
             this.label3.Text = "%product_code_numbers%";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 33);
+            this.label2.Location = new System.Drawing.Point(8, 38);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(123, 13);
+            this.label2.Size = new System.Drawing.Size(137, 15);
             this.label2.TabIndex = 1;
             this.label2.Text = "%product_code_letters%";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 20);
+            this.label1.Location = new System.Drawing.Point(8, 23);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(89, 13);
+            this.label1.Size = new System.Drawing.Size(100, 15);
             this.label1.TabIndex = 0;
             this.label1.Text = "%product_code%";
             // 
             // cancelButton
             // 
             this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.cancelButton.Location = new System.Drawing.Point(530, 182);
+            this.cancelButton.Location = new System.Drawing.Point(618, 210);
+            this.cancelButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new System.Drawing.Size(74, 23);
+            this.cancelButton.Size = new System.Drawing.Size(86, 27);
             this.cancelButton.TabIndex = 11;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
@@ -285,9 +310,10 @@
             // saveButton
             // 
             this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.saveButton.Location = new System.Drawing.Point(530, 153);
+            this.saveButton.Location = new System.Drawing.Point(618, 177);
+            this.saveButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(75, 23);
+            this.saveButton.Size = new System.Drawing.Size(88, 27);
             this.saveButton.TabIndex = 10;
             this.saveButton.Text = "OK";
             this.saveButton.UseVisualStyleBackColor = true;
@@ -301,11 +327,24 @@
             // 
             this.dumpNameTooltip.ToolTipTitle = "Dump Name Pattern";
             // 
+            // defaultsButton
+            // 
+            this.defaultsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.defaultsButton.Location = new System.Drawing.Point(616, 71);
+            this.defaultsButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.defaultsButton.Name = "defaultsButton";
+            this.defaultsButton.Size = new System.Drawing.Size(88, 27);
+            this.defaultsButton.TabIndex = 12;
+            this.defaultsButton.Text = "Defaults";
+            this.defaultsButton.UseVisualStyleBackColor = true;
+            this.defaultsButton.Click += new System.EventHandler(this.defaultsButton_Click);
+            // 
             // SettingsForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(616, 217);
+            this.ClientSize = new System.Drawing.Size(719, 250);
+            this.Controls.Add(this.defaultsButton);
             this.Controls.Add(this.saveButton);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.groupBox1);
@@ -319,6 +358,7 @@
             this.Controls.Add(this.outputTextBox);
             this.Controls.Add(this.outputLabel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "SettingsForm";
@@ -360,5 +400,6 @@
         private System.Windows.Forms.Button saveButton;
         private System.Windows.Forms.ToolTip irdTooltip;
         private System.Windows.Forms.ToolTip dumpNameTooltip;
+        private System.Windows.Forms.Button defaultsButton;
     }
 }
