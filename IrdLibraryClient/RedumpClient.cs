@@ -74,6 +74,7 @@ public class RedumpClient
                         Log.Warn(ex, $"Failed to write {filename} to local cache: {ex.Message}");
                     }
                     LatestSnapshot = new MemoryStream(resultBytes);
+                    return LatestSnapshot;
                 }
                 catch (Exception e)
                 {
@@ -95,7 +96,7 @@ public class RedumpClient
             {
                 var fn = Path.GetFileName(latestLocalCache);
                 Log.Info($"Using latest local redump key cache: {fn}");
-                await using var file = File.Open(fn, FileMode.Open, FileAccess.Read, FileShare.Read);
+                await using var file = File.Open(latestLocalCache, FileMode.Open, FileAccess.Read, FileShare.Read);
                 var result = new MemoryStream();
                 await file.CopyToAsync(result, cancellationToken).ConfigureAwait(false);
                 result.Seek(0, SeekOrigin.Begin);
