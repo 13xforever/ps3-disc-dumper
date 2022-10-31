@@ -99,6 +99,8 @@ namespace UI.WinForms.Msil
             Text = "PS3 Disc Dumper v" + Dumper.Version;
             Log.Info(Text);
             settings.Reload();
+            Log.Info("User settings:");
+            LogCurrentSettings();
             ResetForm();
 
             updateCheckWorker = new() { WorkerSupportsCancellation = false, WorkerReportsProgress = false, };
@@ -110,8 +112,13 @@ namespace UI.WinForms.Msil
         private void settingsButton_Click(object sender, EventArgs e)
         {
             var settingsForm = new SettingsForm();
-            settingsForm.ShowDialog();
-            settings.Reload();
+            var result = settingsForm.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                settings.Reload();
+                Log.Info("Changed user settings:");
+                LogCurrentSettings();
+            }
         }
 
         private void ResetForm()
@@ -510,6 +517,14 @@ namespace UI.WinForms.Msil
         {
             var psi = new ProcessStartInfo(UpdateUrl) { UseShellExecute = true };
             Process.Start(psi);
+        }
+
+        private void LogCurrentSettings()
+        {
+            Log.Info($"\t{nameof(settings.Configured)}: {settings.Configured}");
+            Log.Info($"\t{nameof(settings.OutputDir)}: {settings.OutputDir}");
+            Log.Info($"\t{nameof(settings.IrdDir)}: {settings.IrdDir}");
+            Log.Info($"\t{nameof(settings.DumpNameTemplate)}: {settings.DumpNameTemplate}");
         }
     }
 }
