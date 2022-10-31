@@ -36,16 +36,6 @@ namespace IrdLibraryClient.IrdFormat
             
             var filenames = filePaths.Distinct().ToList();
             var dirNames = dirPaths.Distinct().OrderByDescending(n => n.Length).ToList();
-            var deepestDirNames = new List<string>();
-            foreach (var dirname in dirNames)
-            {
-                var tmp = dirname + "\\";
-                if (deepestDirNames.Any(n => n.StartsWith(tmp)))
-                    continue;
-                
-                deepestDirNames.Add(dirname);
-            }
-            dirNames = deepestDirNames.OrderBy(n => n).ToList();
             var dirNamesWithFiles = filenames.Select(Path.GetDirectoryName).Distinct().ToList();
             var dirList = dirNames.Except(dirNamesWithFiles)
                 .OrderBy(d => d, StringComparer.OrdinalIgnoreCase)
