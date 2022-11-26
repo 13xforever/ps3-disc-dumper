@@ -26,9 +26,9 @@ namespace Ps3DiscDumper
 {
     public class Dumper: IDisposable
     {
-        public const string Version = "3.3.3";
+        public const string Version = "3.3.4";
 
-        private static readonly Regex VersionParts = new Regex(@"(?<ver>\d+(\.\d+){0,2})[ \-]*(?<pre>.*)", RegexOptions.Singleline | RegexOptions.ExplicitCapture);
+        private static readonly Regex VersionParts = new(@"(?<ver>\d+(\.\d+){0,2})[ \-]*(?<pre>.*)", RegexOptions.Singleline | RegexOptions.ExplicitCapture);
         private static readonly HashSet<char> InvalidChars = new(Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()));
         private static readonly char[] MultilineSplit = {'\r', '\n'};
         private long currentSector;
