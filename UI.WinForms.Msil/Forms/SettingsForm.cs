@@ -20,7 +20,7 @@ namespace UI.WinForms.Msil
             [Patterns.ProductCode] = "BLUS12345",
             [Patterns.ProductCodeLetters] = "BLUS",
             [Patterns.ProductCodeNumbers] = "12345",
-            [Patterns.Title] = "Weebs in Space",
+            [Patterns.Title] = "My PS3 Game Can't Be This Cute",
             [Patterns.Region] = "US",
         };
 

@@ -107,7 +107,7 @@ namespace UI.WinForms.Msil
             updateCheckWorker.DoWork += (o, evtArgs) => evtArgs.Result = Dumper.CheckUpdatesAsync().ConfigureAwait(false).GetAwaiter().GetResult();
             updateCheckWorker.RunWorkerCompleted += ShowUpdateCheckResults;
             updateCheckWorker.RunWorkerAsync();
-            
+
             if (string.IsNullOrEmpty(settings.OutputDir) || string.IsNullOrEmpty(settings.IrdDir) || string.IsNullOrWhiteSpace(settings.DumpNameTemplate))
                 settingsButton_Click(sender, e);
         }
@@ -349,7 +349,7 @@ namespace UI.WinForms.Msil
             catch (Exception e)
             {
                 Log.Error(e, "Failed to find matching key");
-//                MessageBox.Show(e.Message, "Disc check error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //                MessageBox.Show(e.Message, "Disc check error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 dumper.Cts.Cancel();
             }
             doWorkEventArgs.Result = dumper;
@@ -406,7 +406,7 @@ namespace UI.WinForms.Msil
                                                  do
                                                  {
                                                      if (dumper.TotalSectors > 0 && backgroundWorker.IsBusy && !backgroundWorker.CancellationPending)
-                                                        try { backgroundWorker.ReportProgress((int)(dumper.CurrentSector * 10000L / dumper.TotalSectors), dumper); } catch { }
+                                                         try { backgroundWorker.ReportProgress((int)(dumper.CurrentSector * 10000L / dumper.TotalSectors), dumper); } catch { }
                                                      Task.Delay(1000, combinedToken.Token).GetAwaiter().GetResult();
                                                  } while (!combinedToken.Token.IsCancellationRequested);
                                              }
@@ -491,9 +491,9 @@ namespace UI.WinForms.Msil
         private void ShowUpdateCheckResults(object sender, RunWorkerCompletedEventArgs e)
         {
             var result = ((Version ver, GitHubReleaseInfo info)?)e.Result;
-            if (result is null or {ver: null} or {info: null})
+            if (result is null or { ver: null } or { info: null })
                 return;
-            
+
             var (ver, rel) = result.Value;
 
             var info = $"v{rel.TagName.TrimStart('v')} is available!\n\n{rel.Name}\n{"".PadRight(rel.Name.Length, '-')}\n\n{rel.Body}";
@@ -515,7 +515,7 @@ namespace UI.WinForms.Msil
             }
             updateButton.Visible = true;
         }
-        
+
         private void updateButton_Click(object sender, EventArgs e)
         {
             var psi = new ProcessStartInfo(UpdateUrl) { UseShellExecute = true };
