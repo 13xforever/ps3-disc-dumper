@@ -1,13 +1,13 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.IO;
 using System.Text;
-using BitConverter;
 
 namespace Ps3DiscDumper.Sfb
 {
     public static class SfbReader
     {
-        public static Ps3DiscDumper.Sfb.Sfb Parse(byte[] content)
+        public static Sfb Parse(byte[] content)
         {
             if (content == null)
                 throw new ArgumentNullException(nameof(content));
@@ -15,15 +15,15 @@ namespace Ps3DiscDumper.Sfb
             if (content.Length < 200)
                 throw new ArgumentException("Data is too small to be a valid SFB structure", nameof(content));
 
-            if (EndianBitConverter.BigEndian.ToInt32(content, 0) != Ps3DiscDumper.Sfb.Sfb.Magic)
+            if (BitConverter.ToInt32(content.AsSpan(0, 4)) != Sfb.Magic)
                 throw new ArgumentException("Specified file is not a valid SFB file", nameof(content));
 
-            var result = new Ps3DiscDumper.Sfb.Sfb();
+            var result = new Sfb();
             using var stream = new MemoryStream(content, false);
             using var reader = new BinaryReader(stream, Encoding.ASCII);
             reader.ReadInt32(); // magic
-            result.VersionMajor = EndianBitConverter.BigEndian.ToInt16(reader.ReadBytes(2), 0);
-            result.VersionMinor = EndianBitConverter.BigEndian.ToInt16(reader.ReadBytes(2), 0);
+            result.VersionMajor = BinaryPrimitives.ReadInt16BigEndian(reader.ReadBytes(2));
+            result.VersionMinor = BinaryPrimitives.ReadInt16BigEndian(reader.ReadBytes(2));
             result.Unknown1 = reader.ReadBytes(0x18);
             do
             {
@@ -32,8 +32,8 @@ namespace Ps3DiscDumper.Sfb
                 if (string.IsNullOrEmpty(keyEntry.Key))
                     break;
 
-                keyEntry.ValueOffset = EndianBitConverter.BigEndian.ToInt32(reader.ReadBytes(4), 0);
-                keyEntry.ValueLength = EndianBitConverter.BigEndian.ToInt32(reader.ReadBytes(4), 0);
+                keyEntry.ValueOffset = BinaryPrimitives.ReadInt32BigEndian(reader.ReadBytes(4));
+                keyEntry.ValueLength = BinaryPrimitives.ReadInt32BigEndian(reader.ReadBytes(4));
                 keyEntry.Unknown = reader.ReadInt64();
                 result.KeyEntries.Add(keyEntry);
             } while (true);

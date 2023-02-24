@@ -25,7 +25,7 @@ namespace Tests
         {
             var searchResults = await Client.GetFullListAsync(CancellationToken.None).ConfigureAwait(false);
             searchResults = searchResults.Where(i => i.StartsWith(productCode, StringComparison.OrdinalIgnoreCase)).ToList();
-            Assert.That(searchResults.Count, Is.EqualTo(1));
+            Assert.That(searchResults, Has.Count.EqualTo(1));
 
             var ird = await Client.DownloadAsync(searchResults[0], "ird", CancellationToken.None).ConfigureAwait(false);
             Assert.That(ird, Is.Not.Null);
@@ -34,7 +34,7 @@ namespace Tests
             await using var decompressedStream = GetDecompressHeader(ird);
             var reader = new CDReader(decompressedStream, true, true);
             var (files, _) = reader.GetFilesystemStructure();
-            Assert.That(files.Count, Is.EqualTo(expectedFileCount));
+            Assert.That(files, Has.Count.EqualTo(expectedFileCount));
         }
 
         [TestCase("BLUS31604", "0A37A83C")]
@@ -43,7 +43,7 @@ namespace Tests
         {
             var searchResults = await Client.GetFullListAsync(CancellationToken.None).ConfigureAwait(false);
             searchResults = searchResults.Where(i => i.StartsWith(productCode, StringComparison.OrdinalIgnoreCase)).ToList();
-            Assert.That(searchResults.Count, Is.EqualTo(1));
+            Assert.That(searchResults, Has.Count.EqualTo(1));
 
             var ird = await Client.DownloadAsync(searchResults[0], "ird", CancellationToken.None).ConfigureAwait(false);
             Assert.That(ird, Is.Not.Null);
@@ -65,7 +65,7 @@ namespace Tests
         [Test, Explicit("Requires custom data")]
         public async Task TocSizeTest()
         {
-            var path = @"E:\FakeCDs\PS3 Games\ird";
+            const string path = @"E:\FakeCDs\PS3 Games\ird";
             var result = new List<(string filename, long size)>();
             foreach (var f in Directory.EnumerateFiles(path, "*.ird", SearchOption.TopDirectoryOnly))
             {
@@ -90,7 +90,7 @@ namespace Tests
             foreach (var s in groupedStats)
                 Console.WriteLine($"{s.count} items of size {s.size}");
 
-            Assert.That(groupedStats.Count, Is.EqualTo(1));
+            Assert.That(groupedStats, Has.Count.EqualTo(1));
         }
 
         private static MemoryStream GetDecompressHeader(Ird ird)

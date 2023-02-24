@@ -1,16 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Text;
-using BitConverter;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Ps3DiscDumper.Sfb
 {
     public class Sfb
     {
-        public static int Magic = EndianBitConverter.BigEndian.ToInt32(Encoding.ASCII.GetBytes(".SFB"), 0);
+        public static readonly int Magic = BitConverter.ToInt32(".SFB"u8);
         public short VersionMajor;
         public short VersionMinor;
         public byte[] Unknown1; // 0x18
-        public List<SfbKeyEntry> KeyEntries = new();
+        public readonly List<SfbKeyEntry> KeyEntries = new();
     }
 
     public class SfbKeyEntry
