@@ -60,7 +60,21 @@ namespace IrdLibraryClient
                 try
                 {
                     if (File.Exists(localCacheFilename))
-                        return IrdParser.Parse(await File.ReadAllBytesAsync(localCacheFilename, cancellationToken).ConfigureAwait(false));
+                    {
+                        var fi = new FileInfo(localCacheFilename);
+                        if (fi.Length > 0)
+                            return IrdParser.Parse(await File.ReadAllBytesAsync(localCacheFilename, cancellationToken).ConfigureAwait(false));
+                        
+                        Log.Warn($"Removing empty IRD file {localCacheFilename}...");
+                        try
+                        {
+                            File.Delete(localCacheFilename);
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Warn(e, $"Failed to remove invalid IRD file {localCacheFilename}");
+                        }
+                    }
                 }
                 catch (Exception e)
                 {
