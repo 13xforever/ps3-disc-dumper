@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Management;
@@ -36,13 +37,13 @@ public class Dumper: IDisposable
     private static readonly Dictionary<string, HashSet<DiscKeyInfo>> AllKnownDiscKeys = new();
     private readonly HashSet<string> TestedDiscKeys = new();
     private byte[] discSfbData;
-    private static readonly Dictionary<string, byte[]> Detectors = new()
+    private static readonly Dictionary<string, ImmutableArray<byte>> Detectors = new()
     {
-        [@"\PS3_GAME\LICDIR\LIC.DAT"] = Encoding.UTF8.GetBytes("PS3LICDA"),
-        [@"\PS3_GAME\USRDIR\EBOOT.BIN"] = Encoding.UTF8.GetBytes("SCE").Concat(new byte[] { 0, 0, 0, 0, 2 }).ToArray(),
+        [@"\PS3_GAME\LICDIR\LIC.DAT"] = "PS3LICDA"u8.ToImmutableArray(),
+        [@"\PS3_GAME\USRDIR\EBOOT.BIN"] = "SCE"u8.ToArray().Concat(new byte[] { 0, 0, 0, 0, 2 }).ToImmutableArray(),
     };
     private byte[] detectionSector;
-    private byte[] detectionBytesExpected;
+    private ImmutableArray<byte> detectionBytesExpected;
     private byte[] sectorIV;
     private Stream driveStream;
     private static readonly byte[] Iso9660PrimaryVolumeDescriptorHeader = {0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0x00};
@@ -359,7 +360,7 @@ public class Dumper: IDisposable
         // find disc license file
         discReader = new(driveStream, true, true);
         FileRecord detectionRecord = null;
-        byte[] expectedBytes = null;
+        var expectedBytes = ImmutableArray<byte>.Empty;
         try
         {
             foreach (var path in Detectors.Keys)
@@ -383,7 +384,7 @@ public class Dumper: IDisposable
         {
             Log.Error(e);
         }
-        if (detectionRecord == null)
+        if (detectionRecord is null)
             throw new FileNotFoundException("Couldn't find a single disc key detection file, please report");
 
         if (Cts.IsCancellationRequested)
