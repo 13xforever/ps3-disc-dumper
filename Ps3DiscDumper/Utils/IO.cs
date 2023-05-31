@@ -3,87 +3,86 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Ps3DiscDumper.Utils
+namespace Ps3DiscDumper.Utils;
+
+internal class IOEx
 {
-    internal class IOEx
+    public static IEnumerable<string> GetFilepaths(string rootPath, string patternMatch, SearchOption searchOption)
     {
-        public static IEnumerable<string> GetFilepaths(string rootPath, string patternMatch, SearchOption searchOption)
+        var foundFiles = Enumerable.Empty<string>();
+        try
         {
-            var foundFiles = Enumerable.Empty<string>();
+            foundFiles = foundFiles.Concat(Directory.EnumerateFiles(rootPath, patternMatch));
+        }
+        catch (Exception e) when (e is UnauthorizedAccessException || e is PathTooLongException)
+        {
+            Console.WriteLine($"{rootPath}: {e.Message}");
+        }
+
+        if (searchOption == SearchOption.AllDirectories)
+        {
             try
             {
-                foundFiles = foundFiles.Concat(Directory.EnumerateFiles(rootPath, patternMatch));
+                var subDirs = Directory.EnumerateDirectories(rootPath);
+                foreach (var dir in subDirs)
+                {
+                    try
+                    {
+                        var newFiles = GetFilepaths(dir, patternMatch, searchOption);
+                        foundFiles = foundFiles.Concat(newFiles);
+                    }
+                    catch (Exception e) when (e is UnauthorizedAccessException || e is PathTooLongException)
+                    {
+                        Console.WriteLine($"{dir}: {e.Message}");
+                    }
+                }
             }
             catch (Exception e) when (e is UnauthorizedAccessException || e is PathTooLongException)
             {
                 Console.WriteLine($"{rootPath}: {e.Message}");
             }
+        }
+        return foundFiles;
+    }
 
-            if (searchOption == SearchOption.AllDirectories)
-            {
-                try
-                {
-                    var subDirs = Directory.EnumerateDirectories(rootPath);
-                    foreach (var dir in subDirs)
-                    {
-                        try
-                        {
-                            var newFiles = GetFilepaths(dir, patternMatch, searchOption);
-                            foundFiles = foundFiles.Concat(newFiles);
-                        }
-                        catch (Exception e) when (e is UnauthorizedAccessException || e is PathTooLongException)
-                        {
-                            Console.WriteLine($"{dir}: {e.Message}");
-                        }
-                    }
-                }
-                catch (Exception e) when (e is UnauthorizedAccessException || e is PathTooLongException)
-                {
-                    Console.WriteLine($"{rootPath}: {e.Message}");
-                }
-            }
-            return foundFiles;
+    public static IEnumerable<string> GetFilepaths(string rootPath, string patternMatch, int maxLevel)
+        => GetFilepaths(rootPath, patternMatch, 0, maxLevel);
+
+    private static IEnumerable<string> GetFilepaths(string rootPath, string patternMatch, int currentLevel, int maxLevel)
+    {
+        var foundFiles = Enumerable.Empty<string>();
+        try
+        {
+            foundFiles = foundFiles.Concat(Directory.EnumerateFiles(rootPath, patternMatch));
+        }
+        catch (Exception e) when (e is UnauthorizedAccessException || e is PathTooLongException)
+        {
+            Console.WriteLine($"{rootPath}: {e.Message}");
         }
 
-        public static IEnumerable<string> GetFilepaths(string rootPath, string patternMatch, int maxLevel)
-            => GetFilepaths(rootPath, patternMatch, 0, maxLevel);
-
-        private static IEnumerable<string> GetFilepaths(string rootPath, string patternMatch, int currentLevel, int maxLevel)
+        if (currentLevel < maxLevel)
         {
-            var foundFiles = Enumerable.Empty<string>();
             try
             {
-                foundFiles = foundFiles.Concat(Directory.EnumerateFiles(rootPath, patternMatch));
+                var subDirs = Directory.EnumerateDirectories(rootPath);
+                foreach (var dir in subDirs)
+                {
+                    try
+                    {
+                        var newFiles = GetFilepaths(dir, patternMatch, currentLevel+1, maxLevel);
+                        foundFiles = foundFiles.Concat(newFiles);
+                    }
+                    catch (Exception e) when (e is UnauthorizedAccessException || e is PathTooLongException)
+                    {
+                        Console.WriteLine($"{dir}: {e.Message}");
+                    }
+                }
             }
             catch (Exception e) when (e is UnauthorizedAccessException || e is PathTooLongException)
             {
                 Console.WriteLine($"{rootPath}: {e.Message}");
             }
-
-            if (currentLevel < maxLevel)
-            {
-                try
-                {
-                    var subDirs = Directory.EnumerateDirectories(rootPath);
-                    foreach (var dir in subDirs)
-                    {
-                        try
-                        {
-                            var newFiles = GetFilepaths(dir, patternMatch, currentLevel+1, maxLevel);
-                            foundFiles = foundFiles.Concat(newFiles);
-                        }
-                        catch (Exception e) when (e is UnauthorizedAccessException || e is PathTooLongException)
-                        {
-                            Console.WriteLine($"{dir}: {e.Message}");
-                        }
-                    }
-                }
-                catch (Exception e) when (e is UnauthorizedAccessException || e is PathTooLongException)
-                {
-                    Console.WriteLine($"{rootPath}: {e.Message}");
-                }
-            }
-            return foundFiles;
         }
+        return foundFiles;
     }
 }

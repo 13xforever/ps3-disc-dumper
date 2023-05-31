@@ -10,8 +10,8 @@ namespace IrdLibraryClient;
 
 public class RedumpClient
 {
-    public static readonly Uri BaseUrl = new Uri("http://redump.org/keys/ps3/");
-    private static Stream? LatestSnapshot = null;
+    public static readonly Uri BaseUrl = new("http://redump.org/keys/ps3/");
+    private static Stream? latestSnapshot = null;
 
     private readonly HttpClient client;
 
@@ -19,10 +19,10 @@ public class RedumpClient
 
     public async Task<Stream?> GetKeysZipContent(string localCachePath, CancellationToken cancellationToken)
     {
-        if (LatestSnapshot is not null)
+        if (latestSnapshot is not null)
         {
-            LatestSnapshot.Seek(0, SeekOrigin.Begin);
-            return LatestSnapshot;
+            latestSnapshot.Seek(0, SeekOrigin.Begin);
+            return latestSnapshot;
         }
             
         try
@@ -33,7 +33,7 @@ public class RedumpClient
             {
                 var errorBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
                 Log.Warn($"Redump key request failed with {response.StatusCode}: {errorBody}");
-                return LatestSnapshot;
+                return latestSnapshot;
             }
                 
             if (response.Content.Headers.ContentDisposition?.FileName is string filename)
@@ -50,8 +50,8 @@ public class RedumpClient
                         await using var file = File.Open(localCacheFilename, FileMode.Open, FileAccess.Read, FileShare.Read);
                         var result = new MemoryStream();
                         await file.CopyToAsync(result, cancellationToken).ConfigureAwait(false);
-                        LatestSnapshot = result;
-                        return LatestSnapshot;
+                        latestSnapshot = result;
+                        return latestSnapshot;
                     }
                 }
                 catch (Exception e)
@@ -73,8 +73,8 @@ public class RedumpClient
                     {
                         Log.Warn(ex, $"Failed to write {filename} to local cache: {ex.Message}");
                     }
-                    LatestSnapshot = new MemoryStream(resultBytes);
-                    return LatestSnapshot;
+                    latestSnapshot = new MemoryStream(resultBytes);
+                    return latestSnapshot;
                 }
                 catch (Exception e)
                 {
@@ -100,13 +100,13 @@ public class RedumpClient
                 var result = new MemoryStream();
                 await file.CopyToAsync(result, cancellationToken).ConfigureAwait(false);
                 result.Seek(0, SeekOrigin.Begin);
-                LatestSnapshot = result;
+                latestSnapshot = result;
             }
             catch (Exception e)
             {
                 Log.Warn(e, "Failed to read local cache file");
             }
 
-        return LatestSnapshot;
+        return latestSnapshot;
     }
 }
