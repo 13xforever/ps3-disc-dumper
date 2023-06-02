@@ -479,7 +479,7 @@ public partial class MainForm : Form
     {
         var dumper = (Dumper)e.UserState;
         dumpingProgressBar.Value = e.ProgressPercentage;
-        dumpingProgressLabel.Text = $"{(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
+        dumpingProgressLabel.Text = $"Sector data {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
         TaskbarManager.Instance.SetProgressValue(e.ProgressPercentage, dumpingProgressBar.Maximum, Handle);
     }
 

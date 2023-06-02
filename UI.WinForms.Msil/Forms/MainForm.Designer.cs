@@ -123,9 +123,9 @@
             label4.Location = new System.Drawing.Point(7, 76);
             label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             label4.Name = "label4";
-            label4.Size = new System.Drawing.Size(55, 15);
+            label4.Size = new System.Drawing.Size(57, 15);
             label4.TabIndex = 8;
-            label4.Text = "Disc Size:";
+            label4.Text = "Dump Size:";
             // 
             // irdMatchLabel
             // 
