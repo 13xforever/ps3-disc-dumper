@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deploy", "Deploy", "{BA0C92
 		publish.ps1 = publish.ps1
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI.Avalonia", "UI.Avalonia\UI.Avalonia.csproj", "{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{874BD35B-DFDF-40BE-BB6F-EC36059E40EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{874BD35B-DFDF-40BE-BB6F-EC36059E40EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{874BD35B-DFDF-40BE-BB6F-EC36059E40EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
