@@ -2,5 +2,6 @@
 
 public class MainWindowViewModel : ViewModelBase
 {
-    public string Greeting => "Welcome to Avalonia!";
+    public string Greeting { get; set; } = "Effigy ft. stoqy 017 {!@$*}";
+    public int Size => 48;
 }

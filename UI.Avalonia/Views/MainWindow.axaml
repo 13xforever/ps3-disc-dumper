@@ -4,12 +4,23 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        Width="800" Height="450"
         x:Class="UI.Avalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
+        
+		WindowStartupLocation="CenterScreen"
+		CanResize="False"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="PreferSystemChrome"
-        Icon="/Assets/icon.ico"
-        Title="PS3 Disc Dumper">
+        
+		Background="#3f000000"
+        TransparencyLevelHint="AcrylicBlur, None"
+        FontFamily="Segoe UI Variable"
+        
+		Icon="/Assets/icon.ico"
+        Title="PS3 Disc Dumper"
+        >
+        <!-- Background="#7f0094ff" -->
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -17,6 +28,17 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Panel>
+		
+		<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="12" Margin="17 17 0 0" RenderOptions.TextRenderingMode="Antialias" >PS3 Disc Dumper v4.0-alpha1</TextBlock>
+		<Button HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0 0 138 0" Width="46" Height="29" Background="Transparent" FontSize="12" HorizontalContentAlignment="Center">🆕</Button>
+		
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Text="{Binding Greeting}" FontSize="{Binding Size}"/>
+            <TextBlock Text="{Binding Greeting}" FontFamily="Lato" FontSize="{Binding Size}"/>
+            <TextBlock Text="{Binding Greeting}" FontFamily="Segoe UI Variable" FontSize="{Binding Size}"/>
+            <TextBlock Text="{Binding Greeting}" FontFamily="Arial" FontSize="{Binding Size}"/>
+        </StackPanel>
+    </Panel>
 
 </Window>
