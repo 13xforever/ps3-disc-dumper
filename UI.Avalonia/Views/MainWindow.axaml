@@ -3,6 +3,7 @@
         xmlns:vm="using:UI.Avalonia.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UI.Avalonia;assembly=UI.Avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         Width="800" Height="450"
         x:Class="UI.Avalonia.Views.MainWindow"
@@ -12,15 +13,21 @@
 		CanResize="False"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="PreferSystemChrome"
+        SystemDecorations="Full"
         
-		Background="#3f000000"
-        TransparencyLevelHint="AcrylicBlur, None"
+		Background="Transparent"
+        TransparencyLevelHint="Mica, AcrylicBlur, Blur"
         FontFamily="Segoe UI Variable"
         
 		Icon="/Assets/icon.ico"
         Title="PS3 Disc Dumper"
         >
-        <!-- Background="#7f0094ff" -->
+        <!--
+        Background:
+        accent: #0094ff
+        Mica Dark: #e0202020
+        Mica Light: #d0f3f3f3
+         -->
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -28,16 +35,38 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
+    <Window.Resources>
+        <local:ColorConverter x:Key="ColorConverter"/>
+    </Window.Resources>
+        
     <Panel>
-		
-		<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="12" Margin="17 17 0 0" RenderOptions.TextRenderingMode="Antialias" >PS3 Disc Dumper v4.0-alpha1</TextBlock>
-		<Button HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0 0 138 0" Width="46" Height="29" Background="Transparent" FontSize="12" HorizontalContentAlignment="Center">🆕</Button>
+	    <ExperimentalAcrylicBorder IsHitTestVisible="False">
+		    <ExperimentalAcrylicBorder.Material>
+			    <ExperimentalAcrylicMaterial
+				    BackgroundSource="Digger"
+				    TintColor="{Binding TintColor, Converter={StaticResource ColorConverter}}"
+				    TintOpacity="{Binding TintOpacity}"
+				    MaterialOpacity="{Binding MaterialOpacity}"
+				    PlatformTransparencyCompensationLevel="{Binding LuminosityOpacity}"/>
+		    </ExperimentalAcrylicBorder.Material>
+	    </ExperimentalAcrylicBorder>
+	    
+		<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="12" Margin="17 17 0 0" RenderOptions.TextRenderingMode="Antialias" >Avalonia Mica custom</TextBlock>
+		<Button HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0 0 138 0" Width="46" Height="31" Background="Transparent" CornerRadius="0" FontSize="18" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0">ℹ️</Button>
 		
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock Text="{Binding Greeting}" FontSize="{Binding Size}"/>
-            <TextBlock Text="{Binding Greeting}" FontFamily="Lato" FontSize="{Binding Size}"/>
-            <TextBlock Text="{Binding Greeting}" FontFamily="Segoe UI Variable" FontSize="{Binding Size}"/>
-            <TextBlock Text="{Binding Greeting}" FontFamily="Arial" FontSize="{Binding Size}"/>
+	        <Label>Tint Color</Label>
+	        <TextBox Text="{Binding TintColor}"></TextBox>
+	        <ColorView Height="14" Color="{Binding TintColor, Converter={StaticResource ColorConverter}}"></ColorView>
+
+	        <Label>Tint Color Opacity</Label>
+	        <Slider Minimum="0" Maximum="1" SmallChange="0.01" LargeChange="0.1" Value="{Binding TintOpacity}"></Slider>
+	        
+            <Label>Material Opacity</Label>
+	        <Slider Minimum="0" Maximum="1" SmallChange="0.01" LargeChange="0.1" Value="{Binding MaterialOpacity}"></Slider>
+	        
+	        <Label>Platform Transparency Compensation Level</Label>
+	        <Slider Minimum="0" Maximum="1" SmallChange="0.01" LargeChange="0.1" Value="{Binding LuminosityOpacity}"></Slider>
         </StackPanel>
     </Panel>
 
