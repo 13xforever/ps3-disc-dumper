@@ -1,5 +1,4 @@
 using System;
-using System.Management;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using UI.Avalonia.ViewModels;
@@ -17,15 +16,23 @@ public partial class MainWindow : Window
     {
         base.Show();
         App.OnThemeChanged(this, EventArgs.Empty);
-        if (DataContext is MainWindowViewModel vm)
-        {
-            vm.ResetViewModelCommand.Execute(null);
-            //vm.ScanDiscsCommand.Execute(null);
-        }
+        
     }
 
-    private void Control_OnLoaded(object? sender, RoutedEventArgs e)
+    private void OnLoaded(object? sender, RoutedEventArgs e)
     {
+        if (DataContext is not MainWindowViewModel vm)
+            return;
+        
+        vm.ResetViewModelCommand.Execute(null);
+        //vm.ScanDiscsCommand.Execute(null);
+    }
 
+    private void OnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm)
+            return;
+        
+        vm.Dispose();
     }
 }

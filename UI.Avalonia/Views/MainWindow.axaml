@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:UI.Avalonia;assembly=UI.Avalonia"
         xmlns:converters="clr-namespace:UI.Avalonia.Converters"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        Width="800" Height="450"
+        Width="600" Height="400"
         x:Class="UI.Avalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         
@@ -23,7 +23,8 @@
 		Icon="/Assets/icon.ico"
         Title="PS3 Disc Dumper"
         
-        Loaded="Control_OnLoaded"
+        Loaded="OnLoaded"
+        Closing="OnClosing"
         >
         <!--
         Background:
@@ -67,15 +68,66 @@
 		>ℹ️</Button>
 		
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-	        <TextBlock FontSize="32" RenderOptions.TextRenderingMode="Antialias" Text="{Binding StepTitle}"/>
-	        <TextBlock RenderOptions.TextRenderingMode="Antialias" Text="{Binding StepSubtitle}"/>
+	        <TextBlock FontSize="32" RenderOptions.TextRenderingMode="Antialias"
+	                   Margin="8 24 8 8" TextAlignment="Center"
+	                   Text="{Binding StepTitle}"/>
+	        <TextBlock RenderOptions.TextRenderingMode="Antialias"
+	                   TextAlignment="Center"
+	                   Text="{Binding StepSubtitle}">
+		        <TextBlock.IsVisible>
+			        <MultiBinding Converter="{x:Static BoolConverters.Or}">
+				        <Binding Path="StepSubtitle" Converter="{x:Static StringConverters.IsNotNullOrEmpty}"/>
+				        <Binding Path="ProductCode" Converter="{x:Static StringConverters.IsNullOrEmpty}"/>
+			        </MultiBinding>
+		        </TextBlock.IsVisible>
+	        </TextBlock>
 	        
-	        <Button HorizontalAlignment="Center"
-	                Background="{Binding AccentColor}"
-	                Foreground="White"
-	                IsVisible="{Binding FoundDisc, Converter={x:Static BoolConverters.Not}}"
+	        <Expander IsExpanded="True" Margin="20" Width="500"
+	                  IsVisible="{Binding ProductCode, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+		        <Expander.Header >
+				    <TextBlock>Disc Info</TextBlock>
+		        </Expander.Header>
+		        <Grid ColumnDefinitions="100,*" RowDefinitions="*,*,*,*" VerticalAlignment="Bottom">
+			        <TextBlock Grid.Row="0" Grid.Column="0" >Product Code</TextBlock>
+			        <TextBlock Grid.Row="0" Grid.Column="1" Foreground="DimGray" Text="{Binding ProductCode}" Name="ProductCode"></TextBlock>
+			        <TextBlock Grid.Row="1" Grid.Column="0">Game Title</TextBlock>
+			        <TextBlock Grid.Row="1" Grid.Column="1" Foreground="DimGray" Text="{Binding GameTitle}"></TextBlock>
+			        <TextBlock Grid.Row="2" Grid.Column="0">Dump Size</TextBlock>
+			        <TextBlock Grid.Row="2" Grid.Column="1" Foreground="DimGray" Text="{Binding DiscSizeInfo}"></TextBlock>
+			        <TextBlock Grid.Row="3" Grid.Column="0">Disc Key</TextBlock>
+			        <TextBlock Grid.Row="3" Grid.Column="1" Foreground="DimGray" Text="{Binding DiscKeyName}"></TextBlock>
+		        </Grid>
+	        </Expander>
+	        
+	        <Button HorizontalAlignment="Center" Width="200" Height="48"
+	                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+	                Background="{Binding AccentColor}" Foreground="White"
+	                IsVisible="{Binding !FoundDisc}"
 	                Command="{Binding ScanDiscsCommand}"
 		    >Rescan disc devices</Button>
+	        <Button HorizontalAlignment="Center" Width="200" Height="48"
+	                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+	                Background="{Binding AccentColor}" Foreground="White"
+	                Command="{Binding DumpDiscCommand}">
+		        <Button.IsVisible>
+			        <MultiBinding Converter="{x:Static BoolConverters.And}">
+				        <Binding Path="DumperIsReady"></Binding>
+				        <Binding Path="!DumpingInProgress"></Binding>
+			        </MultiBinding>
+		        </Button.IsVisible>
+		        Start
+	        </Button>
+	        
+	        <ProgressBar Width="500"
+	                     ShowProgressText="True"
+	                     Minimum="0" Maximum="10000" Value="{Binding Progress}"
+	                     IsVisible="{Binding DumpingInProgress}"/>
+	        <TextBlock Width="500" Margin="6"
+	                   TextAlignment="Center"
+	                   FontSize="10" Foreground="DimGray" RenderOptions.TextRenderingMode="Antialias"
+	                   IsVisible="{Binding DumpingInProgress}"
+	                   Text="{Binding ProgressInfo}"
+	                   ></TextBlock>
         </StackPanel>
     </Panel>
 
