@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
+using UI.Avalonia.Utils;
 using UI.Avalonia.ViewModels;
 using UI.Avalonia.Views;
 
@@ -33,22 +34,22 @@ public partial class App : Application
 
     internal static void OnThemeChanged(object? sender, EventArgs e)
     {
-        if (sender is not Window { DataContext: MainWindowViewModel mainWindowViewModel } window)
+        if (sender is not Window { DataContext: MainWindowViewModel viewModel } window)
             return;
 
         if (window.ActualThemeVariant == ThemeVariant.Light)
         {
-            mainWindowViewModel.TintColor = ThemeConsts.LightThemeTintColor;
-            mainWindowViewModel.TintOpacity = ThemeConsts.LightThemeTintOpacity;
-            mainWindowViewModel.MaterialOpacity = ThemeConsts.LightThemeMaterialOpacity;
-            mainWindowViewModel.LuminosityOpacity = ThemeConsts.LightThemeLuminosityOpacity;
+            viewModel.TintColor = ThemeConsts.LightThemeTintColor;
+            viewModel.TintOpacity = ThemeConsts.LightThemeTintOpacity;
+            viewModel.MaterialOpacity = ThemeConsts.LightThemeMaterialOpacity;
+            viewModel.LuminosityOpacity = ThemeConsts.LightThemeLuminosityOpacity;
         }
         else if (window.ActualThemeVariant == ThemeVariant.Dark)
         {
-            mainWindowViewModel.TintColor = ThemeConsts.DarkThemeTintColor;
-            mainWindowViewModel.TintOpacity = ThemeConsts.DarkThemeTintOpacity;
-            mainWindowViewModel.MaterialOpacity = ThemeConsts.DarkThemeMaterialOpacity;
-            mainWindowViewModel.LuminosityOpacity = ThemeConsts.DarkThemeLuminosityOpacity;
+            viewModel.TintColor = ThemeConsts.DarkThemeTintColor;
+            viewModel.TintOpacity = ThemeConsts.DarkThemeTintOpacity;
+            viewModel.MaterialOpacity = ThemeConsts.DarkThemeMaterialOpacity;
+            viewModel.LuminosityOpacity = ThemeConsts.DarkThemeLuminosityOpacity;
         }
     }
 }

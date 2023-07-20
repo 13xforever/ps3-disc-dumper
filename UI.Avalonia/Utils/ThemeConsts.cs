@@ -1,6 +1,4 @@
-﻿using Avalonia.Media;
-
-namespace UI.Avalonia;
+﻿namespace UI.Avalonia.Utils;
 
 public class ThemeConsts
 {

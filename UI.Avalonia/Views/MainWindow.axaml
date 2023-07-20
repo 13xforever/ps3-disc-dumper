@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UI.Avalonia;assembly=UI.Avalonia"
+        xmlns:converters="clr-namespace:UI.Avalonia.Converters"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         Width="800" Height="450"
         x:Class="UI.Avalonia.Views.MainWindow"
@@ -21,6 +22,8 @@
         
 		Icon="/Assets/icon.ico"
         Title="PS3 Disc Dumper"
+        
+        Loaded="Control_OnLoaded"
         >
         <!--
         Background:
@@ -36,7 +39,7 @@
     </Design.DataContext>
 
     <Window.Resources>
-        <local:ColorConverter x:Key="ColorConverter"/>
+        <converters:ColorConverter x:Key="ColorConverter"/>
     </Window.Resources>
         
     <Panel>
@@ -51,22 +54,28 @@
 		    </ExperimentalAcrylicBorder.Material>
 	    </ExperimentalAcrylicBorder>
 	    
-		<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="12" Margin="17 17 0 0" RenderOptions.TextRenderingMode="Antialias" >Avalonia Mica custom</TextBlock>
-		<Button HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0 0 138 0" Width="46" Height="31" Background="Transparent" CornerRadius="0" FontSize="18" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0">ℹ️</Button>
+		<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top"
+		           Margin="17 17 0 0"
+		           FontSize="12" RenderOptions.TextRenderingMode="Antialias"
+		           Text="{Binding TitleWithVersion}"/>
+		<Button HorizontalAlignment="Right" VerticalAlignment="Top"
+		        Margin="0 0 138 0" Width="46" Height="31"
+		        Background="Transparent" CornerRadius="0"
+		        FontSize="18" RenderOptions.TextRenderingMode="Antialias"
+		        HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
+		        IsVisible="{Binding UpdateInfo, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+		>ℹ️</Button>
 		
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-	        <Label>Tint Color</Label>
-	        <TextBox Text="{Binding TintColor}"></TextBox>
-	        <ColorView Height="14" Color="{Binding TintColor, Converter={StaticResource ColorConverter}}"></ColorView>
-
-	        <Label>Tint Color Opacity</Label>
-	        <Slider Minimum="0" Maximum="1" SmallChange="0.01" LargeChange="0.1" Value="{Binding TintOpacity}"></Slider>
+	        <TextBlock FontSize="32" RenderOptions.TextRenderingMode="Antialias" Text="{Binding StepTitle}"/>
+	        <TextBlock RenderOptions.TextRenderingMode="Antialias" Text="{Binding StepSubtitle}"/>
 	        
-            <Label>Material Opacity</Label>
-	        <Slider Minimum="0" Maximum="1" SmallChange="0.01" LargeChange="0.1" Value="{Binding MaterialOpacity}"></Slider>
-	        
-	        <Label>Platform Transparency Compensation Level</Label>
-	        <Slider Minimum="0" Maximum="1" SmallChange="0.01" LargeChange="0.1" Value="{Binding LuminosityOpacity}"></Slider>
+	        <Button HorizontalAlignment="Center"
+	                Background="{Binding AccentColor}"
+	                Foreground="White"
+	                IsVisible="{Binding FoundDisc, Converter={x:Static BoolConverters.Not}}"
+	                Command="{Binding ScanDiscsCommand}"
+		    >Rescan disc devices</Button>
         </StackPanel>
     </Panel>
 
