@@ -23,6 +23,10 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private FontFamily symbolFontFamily = new("avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free Solid");
     [ObservableProperty] private FontFamily largeFontFamily = FontManager.Current.DefaultFontFamily;
     [ObservableProperty] private FontFamily smallFontFamily = FontManager.Current.DefaultFontFamily;
+
+    [ObservableProperty] private string updateUrl = "https://github.com/13xforever/ps3-disc-dumper/releases/latest";
+    [ObservableProperty] private bool updateIsPrerelease = false; 
+
     [ObservableProperty] private string titleWithVersion = "PS3 Disc Dumper";
     [ObservableProperty] private string stepTitleSymbol = "";
     [ObservableProperty] private string stepTitle = "Please insert a PS3 game disc";
@@ -47,7 +51,6 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     
     
     internal Dumper? dumper;
-    internal const string updateUrl = "https://github.com/13xforever/ps3-disc-dumper/releases/latest";
 
     private static readonly NameValueCollection RegionMapping = new()
     {
@@ -209,6 +212,18 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         }
     }
 
+    internal async void CheckUpdatesAsync()
+    {
+        var (ver, rel) = await Dumper.CheckUpdatesAsync();
+        if (ver is null || rel is null)
+            return;
+        
+        UpdateInfo = $"v{rel.TagName.TrimStart('v')} is available!\n\n{rel.Name}\n{"".PadRight(rel.Name.Length, '-')}\n\n{rel.Body}";
+        if (!string.IsNullOrEmpty(rel.HtmlUrl))
+            UpdateUrl = rel.HtmlUrl;
+        UpdateIsPrerelease = rel.Prerelease;
+    }
+    
     public void Dispose()
     {
         dumper?.Dispose();

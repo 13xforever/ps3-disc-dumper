@@ -40,7 +40,9 @@
     <Window.Resources>
         <local:ColorConverter x:Key="ColorConverter"/>
         <local:ValidationColorConverter x:Key="ValidationColorConverter"/>
+        <local:UpdateColorConverter x:Key="UpdateColorConverter"/>
         <local:ValidationSymbolConverter x:Key="ValidationSymbolConverter"/>
+        <local:UpdateSymbolConverter x:Key="UpdateSymbolConverter"/>
     </Window.Resources>
         
     <Panel>
@@ -65,7 +67,11 @@
 		        Background="Transparent" CornerRadius="0"
 		        HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
 		        IsVisible="{Binding UpdateInfo, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-		>ℹ️</Button>
+		>
+			<TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="18" RenderOptions.TextRenderingMode="Antialias"
+	                   Text="{Binding UpdateInfo, Converter={StaticResource UpdateSymbolConverter}}"
+	                   Foreground="{Binding UpdateIsPrerelease, Converter={StaticResource UpdateColorConverter}}"/>
+		</Button>
 		
 	    <!-- top -->
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
