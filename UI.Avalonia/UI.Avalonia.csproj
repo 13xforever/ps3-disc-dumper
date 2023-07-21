@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFrameworks>net7.0-windows;net7.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -17,7 +17,6 @@
         <AvaloniaResource Include="Assets\**" />
     </ItemGroup>
 
-
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.0.0" />
         <PackageReference Include="Avalonia.Desktop" Version="11.0.0" />
@@ -28,9 +27,11 @@
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
         <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
-        <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.22621.2" />
     </ItemGroup>
-
+    <ItemGroup Condition="'$(TargetFramework)'=='net7.0-windows'">
+        <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.22621.2" />
+        <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
+    </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\IrdLibraryClient\IrdLibraryClient.csproj" />

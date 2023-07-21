@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.IO;
-using System.Management;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -54,40 +53,6 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         ["T"] = "JP",
         ["U"] = "US",
     };
-
-    /*
-    ManagementEventWatcher? newDeviceWatcher, removedDeviceWatcher;
-
-    public MainWindowViewModel()
-    {
-        if (!OperatingSystem.IsWindows())
-            return;
-
-        return;
-#pragma warning disable CA1416
-        newDeviceWatcher = new("select * from __InstanceCreationEvent within 1 where TargetInstance ISA 'Win32_CDROMDrive'");
-        newDeviceWatcher.EventArrived += (_, _) => { ScanDiscsAsync().Wait(); };
-        newDeviceWatcher.Start();
-
-        removedDeviceWatcher = new("select * from __InstanceDeletionEvent within 1 where TargetInstance ISA 'Win32_CDROMDrive'");
-        removedDeviceWatcher.EventArrived += (src, evt) =>
-        {
-            if (dumper is null)
-                return;
-
-            if (evt.NewEvent.Properties["TargetInstance"].Value is not ManagementBaseObject obj
-                || obj.Properties["Drive"].Value is not string str
-                || str[0] != dumper.Drive)
-                return;
-                
-            dumper.Cts.Cancel();
-            dumper = null;
-            ResetViewModel();
-        };
-        removedDeviceWatcher.Start();
-#pragma warning restore CA1416
-    }
-    */
 
     [RelayCommand]
     private void ResetViewModel()
@@ -237,14 +202,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     public void Dispose()
     {
         dumper?.Dispose();
-        /*
-        if (!OperatingSystem.IsWindows())
-            return;
-        
-        newDeviceWatcher?.Stop();
-        newDeviceWatcher?.Dispose();
-        removedDeviceWatcher?.Stop();
-        removedDeviceWatcher?.Dispose();
-        */
+        OnDisposePlatform();
     }
+
+    partial void OnDisposePlatform();
 }

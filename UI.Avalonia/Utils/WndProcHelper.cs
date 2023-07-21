@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if WINDOWS
+using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -34,3 +35,4 @@ public static unsafe class WndProcHelper
         return wrappedWndProc(hwnd, msg, wParam, lParam);
     }
 }
+#endif
