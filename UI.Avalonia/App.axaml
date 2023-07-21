@@ -12,4 +12,9 @@
     <Application.Styles>
         <FluentTheme />
     </Application.Styles>
+             
+     <Application.Resources>
+         <FontFamily x:Key="FontAwesomeSolid">avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free Solid</FontFamily>
+     </Application.Resources>
+             
 </Application>

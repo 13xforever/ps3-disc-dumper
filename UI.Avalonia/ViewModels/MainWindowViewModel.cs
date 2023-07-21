@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IrdLibraryClient;
@@ -19,9 +20,13 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private double materialOpacity = 0.69;
     [ObservableProperty] private double luminosityOpacity = 1.0;
     [ObservableProperty] private string accentColor = ThemeConsts.AccentColor;
-    
+    [ObservableProperty] private FontFamily symbolFontFamily = new("avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free Solid");
+    [ObservableProperty] private FontFamily largeFontFamily = FontManager.Current.DefaultFontFamily;
+    [ObservableProperty] private FontFamily smallFontFamily = FontManager.Current.DefaultFontFamily;
     [ObservableProperty] private string titleWithVersion = "PS3 Disc Dumper";
+    [ObservableProperty] private string stepTitleSymbol = "";
     [ObservableProperty] private string stepTitle = "Please insert a PS3 game disc";
+    [ObservableProperty] private string stepSubtitleSymbol = "";
     [ObservableProperty] private string stepSubtitle = "";
 
     [ObservableProperty] private bool foundDisc = false;
@@ -35,6 +40,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private string discKeyName = "knack_0.ird";
     [ObservableProperty] private int progress = 0;
     [ObservableProperty] private string progressInfo = "1/100 files (10/100 GB)";
+    [ObservableProperty] private bool? success;
+    [ObservableProperty] private bool? validated;
 
     [ObservableProperty] private string updateInfo = "";
     
@@ -69,6 +76,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         DiscKeyName = "";
         Progress = 0;
         ProgressInfo = "";
+        Success = null;
+        Validated = null;
     }
 
     [RelayCommand]
@@ -179,7 +188,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         DumpingInProgress = false;
         DumperIsReady = false;
         FoundDisc = false;
-        if (dumper.ValidationStatus == false)
+        Success = dumper.ValidationStatus;
+        if (Success == false)
         {
             StepTitle = "Dump is corrupted";
             if (dumper.BrokenFiles.Count > 0)
@@ -188,7 +198,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         else
         {
             StepTitle = "Files are decrypted and copied";
-            if (dumper.ValidationStatus == true)
+            if (Success == true)
             {
                 StepSubtitle = "Disc copy matches another verified copy";
             }

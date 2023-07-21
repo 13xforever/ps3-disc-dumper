@@ -3,8 +3,7 @@
         xmlns:vm="using:UI.Avalonia.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:UI.Avalonia;assembly=UI.Avalonia"
-        xmlns:converters="clr-namespace:UI.Avalonia.Converters"
+        xmlns:local="clr-namespace:UI.Avalonia.Converters"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         Width="600" Height="400"
         x:Class="UI.Avalonia.Views.MainWindow"
@@ -18,7 +17,6 @@
         
 		Background="Transparent"
         TransparencyLevelHint="Mica, AcrylicBlur, Blur"
-        FontFamily="Segoe UI Variable"
         
 		Icon="/Assets/icon.ico"
         Title="PS3 Disc Dumper"
@@ -40,7 +38,9 @@
     </Design.DataContext>
 
     <Window.Resources>
-        <converters:ColorConverter x:Key="ColorConverter"/>
+        <local:ColorConverter x:Key="ColorConverter"/>
+        <local:ValidationColorConverter x:Key="ValidationColorConverter"/>
+        <local:ValidationSymbolConverter x:Key="ValidationSymbolConverter"/>
     </Window.Resources>
         
     <Panel>
@@ -58,21 +58,25 @@
 	    <!-- title bar -->
 		<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top"
 		           Margin="17 17 0 0"
-		           FontSize="12" RenderOptions.TextRenderingMode="Antialias"
+		           FontFamily="{Binding SmallFontFamily}" FontSize="12" RenderOptions.TextRenderingMode="Antialias"
 		           Text="{Binding TitleWithVersion}"/>
 		<Button HorizontalAlignment="Right" VerticalAlignment="Top"
 		        Margin="0 0 138 0" Width="46" Height="31"
 		        Background="Transparent" CornerRadius="0"
-		        FontSize="18" RenderOptions.TextRenderingMode="Antialias"
 		        HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
 		        IsVisible="{Binding UpdateInfo, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
 		>ℹ️</Button>
 		
 	    <!-- top -->
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-	        <TextBlock FontSize="32" RenderOptions.TextRenderingMode="Antialias"
-	                   Margin="8 24 8 8" TextAlignment="Center"
-	                   Text="{Binding StepTitle}"/>
+	        <StackPanel Margin="8 24 8 8" Orientation="Horizontal" HorizontalAlignment="Center">
+		        <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="32" RenderOptions.TextRenderingMode="Antialias"
+		                   Margin="0 0 8 0" VerticalAlignment="Center"
+		                   Foreground="{Binding Success, Converter={StaticResource ValidationColorConverter}}"
+		                   Text="{Binding Success, Converter={StaticResource ValidationSymbolConverter}}"/>
+		        <TextBlock FontSize="32" RenderOptions.TextRenderingMode="Antialias"
+		                   Text="{Binding StepTitle}"/>
+	        </StackPanel>
 	        <TextBlock RenderOptions.TextRenderingMode="Antialias"
 	                   TextAlignment="Center"
 	                   Text="{Binding StepSubtitle}">
@@ -127,7 +131,8 @@
 	                     IsVisible="{Binding DumpingInProgress}"/>
 	        <TextBlock Width="500" Margin="6"
 	                   TextAlignment="Center"
-	                   FontSize="10" Foreground="DimGray" RenderOptions.TextRenderingMode="Antialias"
+	                   FontFamily="{Binding SmallFontFamily}" FontSize="10" RenderOptions.TextRenderingMode="Antialias"
+	                   Foreground="DimGray"
 	                   IsVisible="{Binding DumpingInProgress}"
 	                   Text="{Binding ProgressInfo}"
 	                   ></TextBlock>
