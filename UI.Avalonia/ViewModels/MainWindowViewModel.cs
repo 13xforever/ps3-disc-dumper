@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.IO;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Media;
@@ -8,7 +9,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IrdLibraryClient;
 using Ps3DiscDumper;
+using Ps3DiscDumper.POCOs;
 using Ps3DiscDumper.Utils;
+using ReactiveUI;
 using UI.Avalonia.Utils;
 
 namespace UI.Avalonia.ViewModels;
@@ -24,8 +27,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private FontFamily largeFontFamily = FontManager.Current.DefaultFontFamily;
     [ObservableProperty] private FontFamily smallFontFamily = FontManager.Current.DefaultFontFamily;
 
-    [ObservableProperty] private string updateUrl = "https://github.com/13xforever/ps3-disc-dumper/releases/latest";
-    [ObservableProperty] private bool updateIsPrerelease = false; 
+    [ObservableProperty] private GitHubReleaseInfo? updateInfo;
+    [ObservableProperty] private bool updateIsPrerelease; 
 
     [ObservableProperty] private string titleWithVersion = "PS3 Disc Dumper";
     [ObservableProperty] private string stepTitleSymbol = "";
@@ -33,23 +36,20 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private string stepSubtitleSymbol = "";
     [ObservableProperty] private string stepSubtitle = "";
 
-    [ObservableProperty] private bool foundDisc = false;
-    [ObservableProperty] private bool dumperIsReady = false;
-    [ObservableProperty] private bool dumpingInProgress = false;
+    [ObservableProperty] private bool foundDisc;
+    [ObservableProperty] private bool dumperIsReady;
+    [ObservableProperty] private bool dumpingInProgress;
 
     [ObservableProperty] private bool discInfoExpanded = true;
     [ObservableProperty] private string productCode = "BLUS69420";
     [ObservableProperty] private string gameTitle = "Knack 0";
     [ObservableProperty] private string discSizeInfo = "0 bytes (0 files)";
     [ObservableProperty] private string discKeyName = "knack_0.ird";
-    [ObservableProperty] private int progress = 0;
+    [ObservableProperty] private int progress;
     [ObservableProperty] private string progressInfo = "1/100 files (10/100 GB)";
     [ObservableProperty] private bool? success;
     [ObservableProperty] private bool? validated;
 
-    [ObservableProperty] private string updateInfo = "";
-    
-    
     internal Dumper? dumper;
 
     private static readonly NameValueCollection RegionMapping = new()
@@ -63,6 +63,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         ["T"] = "JP",
         ["U"] = "US",
     };
+
+    private Interaction<UpdateInfoWindowViewModel, bool> ShowUpdateInfoDialog { get; } = new();
 
     [RelayCommand]
     private void ResetViewModel()
@@ -212,16 +214,29 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         }
     }
 
+    [RelayCommand]
+    private async Task ShowUpdateInfoAsync() => await ShowUpdateInfoDialog.Handle(new() { UpdateInfo = UpdateInfo });
+
     internal async void CheckUpdatesAsync()
     {
         var (ver, rel) = await Dumper.CheckUpdatesAsync();
         if (ver is null || rel is null)
             return;
-        
-        UpdateInfo = $"v{rel.TagName.TrimStart('v')} is available!\n\n{rel.Name}\n{"".PadRight(rel.Name.Length, '-')}\n\n{rel.Body}";
+
+        UpdateInfo = rel;
+        UpdateIsPrerelease = rel.Prerelease;
+        /*
+         UpdateInfo = $"""
+            v{rel.TagName.TrimStart('v')} is available!
+            
+            {rel.Name}
+            {"".PadRight(rel.Name.Length, '-')}
+            
+            {rel.Body}
+            """;
         if (!string.IsNullOrEmpty(rel.HtmlUrl))
             UpdateUrl = rel.HtmlUrl;
-        UpdateIsPrerelease = rel.Prerelease;
+        */
     }
     
     public void Dispose()

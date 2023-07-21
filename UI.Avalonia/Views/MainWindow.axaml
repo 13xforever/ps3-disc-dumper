@@ -66,7 +66,8 @@
 		        Margin="0 0 138 0" Width="46" Height="31"
 		        Background="Transparent" CornerRadius="0"
 		        HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
-		        IsVisible="{Binding UpdateInfo, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+		        IsVisible="{Binding UpdateInfo, Converter={x:Static ObjectConverters.IsNotNull}}"
+		        Command="{Binding ShowUpdateInfoCommand}"
 		>
 			<TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="18" RenderOptions.TextRenderingMode="Antialias"
 	                   Text="{Binding UpdateInfo, Converter={StaticResource UpdateSymbolConverter}}"

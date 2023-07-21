@@ -1,7 +1,9 @@
 using System;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Threading;
 using UI.Avalonia.ViewModels;
 
 namespace UI.Avalonia.Views;
@@ -11,6 +13,9 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+#if DEBUG
+        this.AttachDevTools();
+#endif
     }
 
     public override void Show()
@@ -40,9 +45,17 @@ public partial class MainWindow : Window
         if (DataContext is not MainWindowViewModel vm)
             return;
 
-        vm.ResetViewModelCommand.Execute(null);
-        vm.CheckUpdatesAsync();
-        vm.ScanDiscsCommand.Execute(null);
+        Dispatcher.UIThread.Post(() =>
+        {
+            vm.ResetViewModelCommand.Execute(null);
+            vm.CheckUpdatesAsync();
+            vm.ScanDiscsCommand.Execute(null);
+        }, DispatcherPriority.Background);
+
+        /*
+        var platformColors = PlatformSettings.GetColorValues();
+        platformColors.AccentColor1
+        */
     }
 
     partial void OnLoadedPlatform();
