@@ -40,8 +40,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private string updateInfo = "";
     
     
-    private Dumper? dumper;
-    private string updateUrl = "https://github.com/13xforever/ps3-disc-dumper/releases/latest";
+    internal Dumper? dumper;
+    internal const string updateUrl = "https://github.com/13xforever/ps3-disc-dumper/releases/latest";
 
     private static readonly NameValueCollection RegionMapping = new()
     {
@@ -55,8 +55,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         ["U"] = "US",
     };
 
+    /*
     ManagementEventWatcher? newDeviceWatcher, removedDeviceWatcher;
-    
+
     public MainWindowViewModel()
     {
         if (!OperatingSystem.IsWindows())
@@ -86,6 +87,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         removedDeviceWatcher.Start();
 #pragma warning restore CA1416
     }
+    */
 
     [RelayCommand]
     private void ResetViewModel()
@@ -235,6 +237,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     public void Dispose()
     {
         dumper?.Dispose();
+        /*
         if (!OperatingSystem.IsWindows())
             return;
         
@@ -242,5 +245,6 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         newDeviceWatcher?.Dispose();
         removedDeviceWatcher?.Stop();
         removedDeviceWatcher?.Dispose();
+        */
     }
 }

@@ -30,6 +30,7 @@ public partial class MainForm : Form
 
     private const int DBT_DEVNODES_CHANGED = 0x0007;
     private const int DBT_DEVICEARRIVAL = 0x8000;
+    private const int DBT_DEVICEREMOVEPENDING = 0x8003;
     private const int DBT_DEVICEREMOVECOMPLETE = 0x8004;
 
     private const int DBT_DEVTYP_VOLUME = 0x2;
@@ -62,6 +63,7 @@ public partial class MainForm : Form
             switch (msgType)
             {
                 case DBT_DEVICEARRIVAL:
+                case DBT_DEVICEREMOVEPENDING:
                 case DBT_DEVICEREMOVECOMPLETE:
                     var hdr = (DEV_BROADCAST_HDR)Marshal.PtrToStructure(msg.LParam, typeof(DEV_BROADCAST_HDR));
                     if (hdr.dbch_devicetype == DBT_DEVTYP_VOLUME)
