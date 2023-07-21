@@ -28,7 +28,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private bool foundDisc = false;
     [ObservableProperty] private bool dumperIsReady = false;
     [ObservableProperty] private bool dumpingInProgress = false;
-    
+
+    [ObservableProperty] private bool discInfoExpanded = true;
     [ObservableProperty] private string productCode = "BLUS69420";
     [ObservableProperty] private string gameTitle = "Knack 0";
     [ObservableProperty] private string discSizeInfo = "0 bytes (0 files)";
@@ -191,7 +192,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                             Progress = (int)(dumper.CurrentSector * 10000L / dumper.TotalSectors);
                             ProgressInfo = $"Sector data {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
                         }
-                        Task.Delay(1000, combinedToken.Token).GetAwaiter().GetResult();
+                        Task.Delay(200, combinedToken.Token).GetAwaiter().GetResult();
                     } while (!combinedToken.Token.IsCancellationRequested);
                 }
                 catch (TaskCanceledException) { }
@@ -209,6 +210,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         }
 
         DumpingInProgress = false;
+        DumperIsReady = false;
+        FoundDisc = false;
         if (dumper.ValidationStatus == false)
         {
             StepTitle = "Dump is corrupted";

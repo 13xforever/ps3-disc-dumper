@@ -55,6 +55,7 @@
 		    </ExperimentalAcrylicBorder.Material>
 	    </ExperimentalAcrylicBorder>
 	    
+	    <!-- title bar -->
 		<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top"
 		           Margin="17 17 0 0"
 		           FontSize="12" RenderOptions.TextRenderingMode="Antialias"
@@ -67,6 +68,7 @@
 		        IsVisible="{Binding UpdateInfo, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
 		>ℹ️</Button>
 		
+	    <!-- top -->
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
 	        <TextBlock FontSize="32" RenderOptions.TextRenderingMode="Antialias"
 	                   Margin="8 24 8 8" TextAlignment="Center"
@@ -82,23 +84,23 @@
 		        </TextBlock.IsVisible>
 	        </TextBlock>
 	        
-	        <Expander IsExpanded="True" Margin="20" Width="500"
+	        <!-- middle -->
+	        <Expander IsExpanded="{Binding DiscInfoExpanded}" Margin="20" Width="500"
 	                  IsVisible="{Binding ProductCode, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
 		        <Expander.Header >
-				    <TextBlock>Disc Info</TextBlock>
+				    <TextBlock Text="{Binding GameTitle}"/>
 		        </Expander.Header>
-		        <Grid ColumnDefinitions="100,*" RowDefinitions="*,*,*,*" VerticalAlignment="Bottom">
+		        <Grid ColumnDefinitions="100,*" RowDefinitions="*,*,*" VerticalAlignment="Bottom">
 			        <TextBlock Grid.Row="0" Grid.Column="0" >Product Code</TextBlock>
 			        <TextBlock Grid.Row="0" Grid.Column="1" Foreground="DimGray" Text="{Binding ProductCode}" Name="ProductCode"></TextBlock>
-			        <TextBlock Grid.Row="1" Grid.Column="0">Game Title</TextBlock>
-			        <TextBlock Grid.Row="1" Grid.Column="1" Foreground="DimGray" Text="{Binding GameTitle}"></TextBlock>
-			        <TextBlock Grid.Row="2" Grid.Column="0">Dump Size</TextBlock>
-			        <TextBlock Grid.Row="2" Grid.Column="1" Foreground="DimGray" Text="{Binding DiscSizeInfo}"></TextBlock>
-			        <TextBlock Grid.Row="3" Grid.Column="0">Disc Key</TextBlock>
-			        <TextBlock Grid.Row="3" Grid.Column="1" Foreground="DimGray" Text="{Binding DiscKeyName}"></TextBlock>
+			        <TextBlock Grid.Row="1" Grid.Column="0">Dump Size</TextBlock>
+			        <TextBlock Grid.Row="1" Grid.Column="1" Foreground="DimGray" Text="{Binding DiscSizeInfo}"></TextBlock>
+			        <TextBlock Grid.Row="2" Grid.Column="0">Disc Key</TextBlock>
+			        <TextBlock Grid.Row="2" Grid.Column="1" Foreground="DimGray" Text="{Binding DiscKeyName}"></TextBlock>
 		        </Grid>
 	        </Expander>
 	        
+	        <!-- bottom -->
 	        <Button HorizontalAlignment="Center" Width="200" Height="48"
 	                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
 	                Background="{Binding AccentColor}" Foreground="White"
@@ -119,7 +121,8 @@
 	        </Button>
 	        
 	        <ProgressBar Width="500"
-	                     ShowProgressText="True"
+	                     ShowProgressText="True" Foreground="{Binding AccentColor}"
+	                     IsIndeterminate="{Binding !Progress}"
 	                     Minimum="0" Maximum="10000" Value="{Binding Progress}"
 	                     IsVisible="{Binding DumpingInProgress}"/>
 	        <TextBlock Width="500" Margin="6"

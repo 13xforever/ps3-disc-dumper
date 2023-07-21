@@ -16,7 +16,6 @@ public partial class MainWindow : Window
     {
         base.Show();
         App.OnThemeChanged(this, EventArgs.Empty);
-        
     }
 
     private void OnLoaded(object? sender, RoutedEventArgs e)

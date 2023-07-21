@@ -12,8 +12,6 @@ namespace UI.Avalonia;
 
 public partial class App : Application
 {
-    public MainWindowViewModel MainWindowViewModel = new();
-    
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -25,7 +23,7 @@ public partial class App : Application
         {
             desktop.MainWindow = new MainWindow
             {
-                DataContext = MainWindowViewModel,
+                DataContext = new MainWindowViewModel(),
             };
             desktop.MainWindow.ActualThemeVariantChanged += OnThemeChanged;
         }
