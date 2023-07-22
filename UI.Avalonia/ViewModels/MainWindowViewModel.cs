@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Media;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IrdLibraryClient;
@@ -85,7 +86,12 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     }
 
     [RelayCommand]
-    private async Task ScanDiscsAsync()
+    private void ScanDiscs() => Dispatcher.UIThread.Post(ScanDiscsAsync, DispatcherPriority.Background);
+
+    [RelayCommand]
+    private void DumpDisc() => Dispatcher.UIThread.Post(DumpDiscAsync, DispatcherPriority.Background);
+
+    private async void ScanDiscsAsync()
     {
         FoundDisc = true;
         StepTitle = "Scanning disc drives";
@@ -143,9 +149,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         StepTitle = "Ready to dump";
         DumperIsReady = true;
     }
-
-    [RelayCommand]
-    private async Task DumpDiscAsync()
+    
+    private async void DumpDiscAsync()
     {
         if (dumper is null)
         {
@@ -170,7 +175,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                         if (dumper.TotalSectors > 0 && !dumper.Cts.IsCancellationRequested)
                         {
                             Progress = (int)(dumper.CurrentSector * 10000L / dumper.TotalSectors);
-                            ProgressInfo = $"Sector data {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
+                            ProgressInfo = $"Raw sectors {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
                         }
                         Task.Delay(200, combinedToken.Token).GetAwaiter().GetResult();
                     } while (!combinedToken.Token.IsCancellationRequested);
