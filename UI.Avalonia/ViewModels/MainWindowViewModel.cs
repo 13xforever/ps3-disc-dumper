@@ -23,6 +23,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private double materialOpacity = 0.69;
     [ObservableProperty] private double luminosityOpacity = 1.0;
     [ObservableProperty] private string accentColor = ThemeConsts.AccentColor;
+    [ObservableProperty] private string dimTextColor = "#646464";
     [ObservableProperty] private FontFamily symbolFontFamily = FontManager.Current.DefaultFontFamily;// new("avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free Solid");
     [ObservableProperty] private FontFamily largeFontFamily = FontManager.Current.DefaultFontFamily;
     [ObservableProperty] private FontFamily smallFontFamily = FontManager.Current.DefaultFontFamily;
@@ -31,9 +32,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private bool updateIsPrerelease; 
 
     [ObservableProperty] private string titleWithVersion = "PS3 Disc Dumper";
-    [ObservableProperty] private string stepTitleSymbol = "";
     [ObservableProperty] private string stepTitle = "Please insert a PS3 game disc";
-    [ObservableProperty] private string stepSubtitleSymbol = "";
     [ObservableProperty] private string stepSubtitle = "";
 
     [ObservableProperty] private bool foundDisc;

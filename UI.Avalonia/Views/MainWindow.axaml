@@ -104,11 +104,11 @@
 		        </Expander.Header>
 		        <Grid ColumnDefinitions="100,*" RowDefinitions="*,*,*" VerticalAlignment="Bottom">
 			        <TextBlock Grid.Row="0" Grid.Column="0" >Product Code</TextBlock>
-			        <TextBlock Grid.Row="0" Grid.Column="1" Foreground="DimGray" Text="{Binding ProductCode}" Name="ProductCode"></TextBlock>
+			        <TextBlock Grid.Row="0" Grid.Column="1" Foreground="{Binding DimTextColor}" Text="{Binding ProductCode}" Name="ProductCode"></TextBlock>
 			        <TextBlock Grid.Row="1" Grid.Column="0">Dump Size</TextBlock>
-			        <TextBlock Grid.Row="1" Grid.Column="1" Foreground="DimGray" Text="{Binding DiscSizeInfo}"></TextBlock>
+			        <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{Binding DimTextColor}" Text="{Binding DiscSizeInfo}"></TextBlock>
 			        <TextBlock Grid.Row="2" Grid.Column="0">Disc Key</TextBlock>
-			        <TextBlock Grid.Row="2" Grid.Column="1" Foreground="DimGray" Text="{Binding DiscKeyName}"></TextBlock>
+			        <TextBlock Grid.Row="2" Grid.Column="1" Foreground="{Binding DimTextColor}" Text="{Binding DiscKeyName}"></TextBlock>
 		        </Grid>
 	        </Expander>
 	        
@@ -140,7 +140,7 @@
 	        <TextBlock Width="500" Margin="6"
 	                   TextAlignment="Center"
 	                   FontFamily="{Binding SmallFontFamily}" FontSize="10" RenderOptions.TextRenderingMode="Antialias"
-	                   Foreground="DimGray"
+	                   Foreground="{Binding DimTextColor}"
 	                   IsVisible="{Binding DumpingInProgress}"
 	                   Text="{Binding ProgressInfo}"
 	                   ></TextBlock>
