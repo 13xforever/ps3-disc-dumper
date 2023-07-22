@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Globalization;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
+using Avalonia.Styling;
 using UI.Avalonia.Utils;
 
 namespace UI.Avalonia.Converters;
@@ -11,7 +15,9 @@ public class UpdateColorConverter: IValueConverter
     private static readonly IBrush AccentBrush = Brush.Parse(ThemeConsts.AccentColor);
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         => value is true
-            ? Brushes.DimGray
+            ? parameter is string {Length: >0} currentDimGrey
+                ? currentDimGrey
+                : ThemeConsts.LightThemeDimGray
             : AccentBrush;
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

@@ -3,7 +3,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Media;
 using Avalonia.Styling;
 using UI.Avalonia.Utils;
 using UI.Avalonia.ViewModels;
@@ -52,7 +51,7 @@ public partial class App : Application
                 vm.MaterialOpacity = ThemeConsts.LightThemeMaterialOpacity;
                 vm.LuminosityOpacity = ThemeConsts.LightThemeLuminosityOpacity;
             }
-            vm.DimTextColor = "#646464";
+            vm.DimTextColor = ThemeConsts.LightThemeDimGray;
         }
         else if (window.ActualThemeVariant == ThemeVariant.Dark)
         {
@@ -63,7 +62,7 @@ public partial class App : Application
                 vm.MaterialOpacity = ThemeConsts.DarkThemeMaterialOpacity;
                 vm.LuminosityOpacity = ThemeConsts.DarkThemeLuminosityOpacity;
             }
-            vm.DimTextColor = "#a9aba9";
+            vm.DimTextColor = ThemeConsts.DarkThemeDimGray;
         }
     }
 }

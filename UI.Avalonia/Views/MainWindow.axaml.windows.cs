@@ -52,8 +52,7 @@ public partial class MainWindow
 
         var vol = (DEV_BROADCAST_VOLUME)Marshal.PtrToStructure(lParam, typeof(DEV_BROADCAST_VOLUME))!;
 #if DEBUG
-        Debug.WriteLine(
-            $"dbcv: devicetype 0x{vol.dbcv_devicetype:x4}, unitmask 0x{vol.dbcv_unitmask:x4}, flags 0x{vol.dbcv_flags:x8}");
+        Debug.WriteLine($"dbcv: devicetype 0x{vol.dbcv_devicetype:x4}, unitmask 0x{vol.dbcv_unitmask:x4}, flags 0x{vol.dbcv_flags:x8}");
 #endif
         if (msgType == DBT_DEVICEARRIVAL) //&& (vol.dbcv_flags & (DBTF_MEDIA | DBTF_MOUNT_ISO)) != 0
             vm.ScanDiscsCommand.Execute(null);

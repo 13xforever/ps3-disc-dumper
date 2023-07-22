@@ -1,16 +1,18 @@
-using System;
+﻿using System;
 using System.Globalization;
+using Avalonia.Controls;
 using Avalonia.Data.Converters;
+using Avalonia.Media;
 
 namespace UI.Avalonia.Converters;
 
-public class ValidationSymbolConverter: SymbolConverterBase, IValueConverter
+public class TextRenderingModeConverter: IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => value is bool b
-            ? HasFluentIcons.Value
-                ? b ? "\ue73e" : "\ueb90"
-                : b ? "\uf058" : "\uf06a"
+        => value is WindowTransparencyLevel wtl
+            ? wtl == WindowTransparencyLevel.Mica || wtl == WindowTransparencyLevel.AcrylicBlur
+                ? TextRenderingMode.Antialias
+                : TextRenderingMode.SubpixelAntialias
             : null;
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

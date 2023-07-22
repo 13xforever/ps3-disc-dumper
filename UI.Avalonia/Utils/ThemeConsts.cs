@@ -13,5 +13,7 @@ public class ThemeConsts
     public const double DarkThemeMaterialOpacity = 0.8;
     public const double DarkThemeLuminosityOpacity = 0;
 
+    public const string LightThemeDimGray = "#646464";
+    public const string DarkThemeDimGray = "#a9aba9";
     public const string AccentColor = "#0094ff";
 }

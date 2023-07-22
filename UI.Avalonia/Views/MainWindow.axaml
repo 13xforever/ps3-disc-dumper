@@ -39,6 +39,7 @@
 
     <Window.Resources>
         <local:ColorConverter x:Key="ColorConverter"/>
+        <local:TextRenderingModeConverter x:Key="TextRenderingModeConverter"/>
         <local:ValidationColorConverter x:Key="ValidationColorConverter"/>
         <local:UpdateColorConverter x:Key="UpdateColorConverter"/>
         <local:ValidationSymbolConverter x:Key="ValidationSymbolConverter"/>
@@ -63,28 +64,36 @@
 		           FontFamily="{Binding SmallFontFamily}" FontSize="12" RenderOptions.TextRenderingMode="Antialias"
 		           IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=IsExtendedIntoWindowDecorations}"
 		           Text="{Binding TitleWithVersion}"/>
-		<Button HorizontalAlignment="Right" VerticalAlignment="Top"
-		        Margin="0 0 138 0" Width="46" Height="31"
-		        Background="Transparent" CornerRadius="0"
-		        HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
-		        IsVisible="{Binding UpdateInfo, Converter={x:Static ObjectConverters.IsNotNull}}"
-		        Command="{Binding ShowUpdateInfoCommand}"
-		>
-			<TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="18" RenderOptions.TextRenderingMode="Antialias"
-	                   Text="{Binding UpdateInfo, Converter={StaticResource UpdateSymbolConverter}}"
-	                   Foreground="{Binding UpdateIsPrerelease, Converter={StaticResource UpdateColorConverter}}"/>
-		</Button>
+	    <!-- RenderOptions.TextRenderingMode="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource TextRenderingModeConverter}}" -->
+	    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top"
+	                Margin="0 0 138 0">
+		    <!-- update button -->
+		    <Button Width="46" Height="31"
+		            Background="Transparent" CornerRadius="0"
+		            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
+		            IsVisible="{Binding UpdateInfo, Converter={x:Static ObjectConverters.IsNotNull}}"
+		            Command="{Binding ShowUpdateInfoCommand}"
+		    >
+				<TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="18" RenderOptions.TextRenderingMode="Antialias"
+		                   Text="{Binding UpdateInfo, Converter={StaticResource UpdateSymbolConverter}}"
+		                   Foreground="{Binding UpdateIsPrerelease, Converter={StaticResource UpdateColorConverter}, ConverterParameter={Binding DimTextColor}}"/>
+			</Button>
+		    <!-- settings button -->
+		    <Button Width="46" Height="31"
+		            Background="Transparent" CornerRadius="0"
+		            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
+		    >
+				<TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="18" RenderOptions.TextRenderingMode="Antialias"
+		                   Text="{Binding SettingsSymbol}"
+		                   Foreground="{Binding DimTextColor}"/>
+			</Button>
+	    </StackPanel>
 
 	    <!-- top -->
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-	        <StackPanel Margin="8 24 8 8" Orientation="Horizontal" HorizontalAlignment="Center">
-		        <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="32" RenderOptions.TextRenderingMode="Antialias"
-		                   Margin="0 0 8 0" VerticalAlignment="Center"
-		                   Foreground="{Binding Success, Converter={StaticResource ValidationColorConverter}}"
-		                   Text="{Binding Success, Converter={StaticResource ValidationSymbolConverter}}"/>
-		        <TextBlock FontSize="32" RenderOptions.TextRenderingMode="Antialias"
-		                   Text="{Binding StepTitle}"/>
-	        </StackPanel>
+	        <TextBlock FontSize="32" RenderOptions.TextRenderingMode="Antialias"
+	                   Margin="0 0 8 0" TextAlignment="Center"
+	                   Text="{Binding StepTitle}"/>
 	        <TextBlock RenderOptions.TextRenderingMode="Antialias"
 	                   TextAlignment="Center"
 	                   Text="{Binding StepSubtitle}">
@@ -100,7 +109,13 @@
 	        <Expander IsExpanded="{Binding DiscInfoExpanded}" Margin="20" Width="500"
 	                  IsVisible="{Binding ProductCode, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
 		        <Expander.Header >
-				    <TextBlock Text="{Binding GameTitle}"/>
+			        <StackPanel Orientation="Horizontal">
+				        <TextBlock Text="{Binding GameTitle}"/>
+				        <TextBlock FontFamily="{Binding SymbolFontFamily}"
+				                   Margin="6 0 0 0" VerticalAlignment="Center"
+				                   Foreground="{Binding Success, Converter={StaticResource ValidationColorConverter}}"
+				                   Text="{Binding Success, Converter={StaticResource ValidationSymbolConverter}}"/>
+			        </StackPanel>
 		        </Expander.Header>
 		        <Grid ColumnDefinitions="100,*" RowDefinitions="*,*,*" VerticalAlignment="Bottom">
 			        <TextBlock Grid.Row="0" Grid.Column="0" >Product Code</TextBlock>

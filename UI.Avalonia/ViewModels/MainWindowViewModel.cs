@@ -25,12 +25,14 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private double luminosityOpacity = 1.0;
     [ObservableProperty] private string accentColor = ThemeConsts.AccentColor;
     [ObservableProperty] private string dimTextColor = "#646464";
+    [NotifyPropertyChangedFor(nameof(SettingsSymbol))]
     [ObservableProperty] private FontFamily symbolFontFamily = new("avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free Solid");
     [ObservableProperty] private FontFamily largeFontFamily = FontManager.Current.DefaultFontFamily;
     [ObservableProperty] private FontFamily smallFontFamily = FontManager.Current.DefaultFontFamily;
 
     [ObservableProperty] private GitHubReleaseInfo? updateInfo;
-    [ObservableProperty] private bool updateIsPrerelease; 
+    [ObservableProperty] private bool updateIsPrerelease;
+    public string SettingsSymbol => SymbolFontFamily.Name is "Segoe Fluent Icons" ? "\ue713" : "\uf013"; 
 
     [ObservableProperty] private string titleWithVersion = "PS3 Disc Dumper";
     [ObservableProperty] private string stepTitle = "Please insert a PS3 game disc";
@@ -175,7 +177,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                         if (dumper.TotalSectors > 0 && !dumper.Cts.IsCancellationRequested)
                         {
                             Progress = (int)(dumper.CurrentSector * 10000L / dumper.TotalSectors);
-                            ProgressInfo = $"Raw sectors {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
+                            ProgressInfo = $"Sector data {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
                         }
                         Task.Delay(200, combinedToken.Token).GetAwaiter().GetResult();
                     } while (!combinedToken.Token.IsCancellationRequested);
