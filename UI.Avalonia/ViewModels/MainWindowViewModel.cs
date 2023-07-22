@@ -24,7 +24,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private double luminosityOpacity = 1.0;
     [ObservableProperty] private string accentColor = ThemeConsts.AccentColor;
     [ObservableProperty] private string dimTextColor = "#646464";
-    [ObservableProperty] private FontFamily symbolFontFamily = FontManager.Current.DefaultFontFamily;// new("avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free Solid");
+    [ObservableProperty] private FontFamily symbolFontFamily = new("avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free Solid");
     [ObservableProperty] private FontFamily largeFontFamily = FontManager.Current.DefaultFontFamily;
     [ObservableProperty] private FontFamily smallFontFamily = FontManager.Current.DefaultFontFamily;
 

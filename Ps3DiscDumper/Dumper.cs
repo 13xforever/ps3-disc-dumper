@@ -416,7 +416,8 @@ public class Dumper: IDisposable
 
         lock (AllKnownDiscKeys)
             AllKnownDiscKeys.TryGetValue(discKey, out allMatchingKeys);
-        var discKeyInfo = allMatchingKeys?.First();
+        var discKeyInfo = allMatchingKeys?.FirstOrDefault(k => k.FullPath.EndsWith(".ird", StringComparison.OrdinalIgnoreCase))
+                          ?? allMatchingKeys?.First();
         DiscKeyFilename = Path.GetFileName(discKeyInfo?.FullPath);
         DiscKeyType = discKeyInfo?.KeyType ?? default;
     }
