@@ -11,7 +11,7 @@ public class UpdateSymbolConverter: IValueConverter
     private static readonly Lazy<bool> HasFluentIcons = new(() => FontManager.Current.SystemFonts.Any(f => f.Name is "Segoe Fluent Icons"));
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => value is string {Length: >0}
+        => value is not null
             ? HasFluentIcons.Value
                 ? "\ue946"
                 : "\uf05a" //"\uf06a" // exclamation mark in circle

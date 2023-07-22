@@ -19,7 +19,7 @@
         TransparencyLevelHint="Mica, AcrylicBlur, Blur"
         
 		Icon="/Assets/icon.ico"
-        Title="PS3 Disc Dumper"
+        Title="{Binding TitleWithVersion}"
         
         Loaded="OnLoaded"
         Closing="OnClosing"
@@ -61,6 +61,7 @@
 		<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top"
 		           Margin="17 17 0 0"
 		           FontFamily="{Binding SmallFontFamily}" FontSize="12" RenderOptions.TextRenderingMode="Antialias"
+		           IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=IsExtendedIntoWindowDecorations}"
 		           Text="{Binding TitleWithVersion}"/>
 		<Button HorizontalAlignment="Right" VerticalAlignment="Top"
 		        Margin="0 0 138 0" Width="46" Height="31"
@@ -73,7 +74,7 @@
 	                   Text="{Binding UpdateInfo, Converter={StaticResource UpdateSymbolConverter}}"
 	                   Foreground="{Binding UpdateIsPrerelease, Converter={StaticResource UpdateColorConverter}}"/>
 		</Button>
-		
+
 	    <!-- top -->
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
 	        <StackPanel Margin="8 24 8 8" Orientation="Horizontal" HorizontalAlignment="Center">

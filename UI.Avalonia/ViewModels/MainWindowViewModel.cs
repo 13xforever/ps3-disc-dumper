@@ -23,7 +23,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private double materialOpacity = 0.69;
     [ObservableProperty] private double luminosityOpacity = 1.0;
     [ObservableProperty] private string accentColor = ThemeConsts.AccentColor;
-    [ObservableProperty] private FontFamily symbolFontFamily = new("avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free Solid");
+    [ObservableProperty] private FontFamily symbolFontFamily = FontManager.Current.DefaultFontFamily;// new("avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free Solid");
     [ObservableProperty] private FontFamily largeFontFamily = FontManager.Current.DefaultFontFamily;
     [ObservableProperty] private FontFamily smallFontFamily = FontManager.Current.DefaultFontFamily;
 
@@ -41,12 +41,12 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private bool dumpingInProgress;
 
     [ObservableProperty] private bool discInfoExpanded = true;
-    [ObservableProperty] private string productCode = "BLUS69420";
-    [ObservableProperty] private string gameTitle = "Knack 0";
-    [ObservableProperty] private string discSizeInfo = "0 bytes (0 files)";
-    [ObservableProperty] private string discKeyName = "knack_0.ird";
+    [ObservableProperty] private string productCode = "";
+    [ObservableProperty] private string gameTitle = "";
+    [ObservableProperty] private string discSizeInfo = "";
+    [ObservableProperty] private string discKeyName = "";
     [ObservableProperty] private int progress;
-    [ObservableProperty] private string progressInfo = "1/100 files (10/100 GB)";
+    [ObservableProperty] private string progressInfo = "";
     [ObservableProperty] private bool? success;
     [ObservableProperty] private bool? validated;
 
@@ -193,7 +193,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         DumpingInProgress = false;
         DumperIsReady = false;
         FoundDisc = false;
-        Success = dumper.ValidationStatus;
+        Success = dumper.ValidationStatus is not false;
         if (Success == false)
         {
             StepTitle = "Dump is corrupted";
