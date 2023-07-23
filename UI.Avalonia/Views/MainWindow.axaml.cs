@@ -30,11 +30,6 @@ public partial class MainWindow : Window
         {
             if (systemFonts.TryGetGlyphTypeface("Segoe Fluent Icons", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
                 vm.SymbolFontFamily = new("Segoe Fluent Icons");
-            else if (OperatingSystem.IsWindows())
-                vm.SymbolFontFamily = new("avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free Solid");
-            else if (OperatingSystem.IsLinux()) // why? who knows
-                vm.SymbolFontFamily = new("avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free");
-                
             if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Small", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
                 vm.SmallFontFamily = new("Segoe UI Variable Small");
             if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Display", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
