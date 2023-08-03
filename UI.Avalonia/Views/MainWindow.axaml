@@ -14,6 +14,7 @@
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="PreferSystemChrome"
         SystemDecorations="Full"
+        Topmost="True"
         
 		Background="Transparent"
         TransparencyLevelHint="Mica, AcrylicBlur, Blur"
@@ -39,7 +40,6 @@
 
     <Window.Resources>
         <local:ColorConverter x:Key="ColorConverter"/>
-        <local:TextRenderingModeConverter x:Key="TextRenderingModeConverter"/>
         <local:ValidationColorConverter x:Key="ValidationColorConverter"/>
         <local:UpdateColorConverter x:Key="UpdateColorConverter"/>
         <local:ValidationSymbolConverter x:Key="ValidationSymbolConverter"/>
@@ -47,16 +47,14 @@
     </Window.Resources>
         
     <Panel>
-	    <ExperimentalAcrylicBorder IsHitTestVisible="False">
-		    <ExperimentalAcrylicBorder.Material>
-			    <ExperimentalAcrylicMaterial
-				    BackgroundSource="Digger"
-				    TintColor="{Binding TintColor, Converter={StaticResource ColorConverter}}"
-				    TintOpacity="{Binding TintOpacity}"
-				    MaterialOpacity="{Binding MaterialOpacity}"
-				    PlatformTransparencyCompensationLevel="{Binding LuminosityOpacity}"/>
-		    </ExperimentalAcrylicBorder.Material>
-	    </ExperimentalAcrylicBorder>
+	    <Border IsHitTestVisible="False" Background="{Binding TintColor}">
+		    <Border.IsVisible>
+			    <MultiBinding Converter="{x:Static BoolConverters.Or}">
+				    <Binding Path="!MicaEnabled"/>
+				    <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=Window}" Path="!IsActive"/>
+			    </MultiBinding>
+		    </Border.IsVisible>
+	    </Border>
 	    
 	    <!-- title bar -->
 		<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top"
@@ -64,9 +62,7 @@
 		           FontFamily="{Binding SmallFontFamily}" FontSize="12" RenderOptions.TextRenderingMode="Antialias"
 		           IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=IsExtendedIntoWindowDecorations}"
 		           Text="{Binding TitleWithVersion}"/>
-	    <!-- RenderOptions.TextRenderingMode="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Converter={StaticResource TextRenderingModeConverter}}" -->
 	    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0 0 138 0">
-		    <!-- <TextBlock FontFamily="{StaticResource FontAwesomeSolid}" FontSize="18" RenderOptions.TextRenderingMode="Antialias" Text="" Foreground="Gold"/> -->
 		    <!-- update button -->
 		    <Button Width="46" Height="31"
 		            Background="Transparent" CornerRadius="0"

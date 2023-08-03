@@ -12,10 +12,19 @@ namespace UI.Avalonia;
 
 public partial class App : Application
 {
-    public override void Initialize()
+    private static readonly WindowTransparencyLevel[] DesiredTransparencyHints =
     {
-        AvaloniaXamlLoader.Load(this);
-    }
+        WindowTransparencyLevel.Mica,
+        WindowTransparencyLevel.AcrylicBlur,
+        WindowTransparencyLevel.None,
+    };
+
+    private readonly Lazy<bool> isMicaCapable = new(() =>
+        Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: Window w }
+        && w.ActualTransparencyLevel == WindowTransparencyLevel.Mica
+    );
+
+    public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
     public override void OnFrameworkInitializationCompleted()
     {
@@ -25,9 +34,40 @@ public partial class App : Application
             {
                 DataContext = new MainWindowViewModel(),
             };
+            desktop.MainWindow.Activated += OnActivated;
+            desktop.MainWindow.Deactivated += OnDeactivated;
             desktop.MainWindow.ActualThemeVariantChanged += OnThemeChanged;
+
+            if (desktop is { MainWindow.DataContext: MainWindowViewModel vm })
+                vm.MicaEnabled = isMicaCapable.Value;
+            /*
+            if (isMicaCapable.Value && desktop.MainWindow is Window w)
+                RenderOptions.SetTextRenderingMode(w, TextRenderingMode.Antialias);
+            */
         }
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void OnActivated(object? sender, EventArgs e)
+    {
+        if (sender is not Window w)
+            return;
+
+        if (isMicaCapable.Value)
+            w.TransparencyLevelHint = DesiredTransparencyHints;
+    }
+
+    private void OnDeactivated(object? sender, EventArgs e)
+    {
+        if (sender is not Window { DataContext: MainWindowViewModel vm } w)
+            return;
+
+        if (isMicaCapable.Value)
+            w.TransparencyLevelHint = Array.Empty<WindowTransparencyLevel>();
+        if (w.ActualThemeVariant == ThemeVariant.Light)
+            vm.TintColor = ThemeConsts.LightThemeTintColor;
+        else if (w.ActualThemeVariant == ThemeVariant.Dark)
+            vm.TintColor = ThemeConsts.DarkThemeTintColor;
     }
 
     internal static void OnThemeChanged(object? sender, EventArgs e)
@@ -35,33 +75,14 @@ public partial class App : Application
         if (sender is not Window { DataContext: MainWindowViewModel vm } window)
             return;
 
-        var useAcrylic = window.ActualTransparencyLevel == WindowTransparencyLevel.Mica
-                         || window.ActualTransparencyLevel == WindowTransparencyLevel.AcrylicBlur;
-        if (!useAcrylic)
-        {
-            vm.MaterialOpacity = 1.0;
-            vm.LuminosityOpacity = 1.0;
-        }
         if (window.ActualThemeVariant == ThemeVariant.Light)
         {
             vm.TintColor = ThemeConsts.LightThemeTintColor;
-            vm.TintOpacity = ThemeConsts.LightThemeTintOpacity;
-            if (useAcrylic)
-            {
-                vm.MaterialOpacity = ThemeConsts.LightThemeMaterialOpacity;
-                vm.LuminosityOpacity = ThemeConsts.LightThemeLuminosityOpacity;
-            }
             vm.DimTextColor = ThemeConsts.LightThemeDimGray;
         }
         else if (window.ActualThemeVariant == ThemeVariant.Dark)
         {
             vm.TintColor = ThemeConsts.DarkThemeTintColor;
-            vm.TintOpacity = ThemeConsts.DarkThemeTintOpacity;
-            if (useAcrylic)
-            {
-                vm.MaterialOpacity = ThemeConsts.DarkThemeMaterialOpacity;
-                vm.LuminosityOpacity = ThemeConsts.DarkThemeLuminosityOpacity;
-            }
             vm.DimTextColor = ThemeConsts.DarkThemeDimGray;
         }
     }

@@ -24,6 +24,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private double materialOpacity = 0.69;
     [ObservableProperty] private double luminosityOpacity = 1.0;
     [ObservableProperty] private string accentColor = ThemeConsts.AccentColor;
+    [ObservableProperty] private bool micaEnabled = true;
     [ObservableProperty] private string dimTextColor = "#646464";
     [NotifyPropertyChangedFor(nameof(SettingsSymbol))]
     [ObservableProperty] private FontFamily symbolFontFamily = new("avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free");

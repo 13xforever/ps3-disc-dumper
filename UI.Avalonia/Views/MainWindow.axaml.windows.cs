@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Avalonia.Threading;
 using TerraFX.Interop.Windows;
 using UI.Avalonia.Utils;
 using UI.Avalonia.ViewModels;
@@ -55,7 +56,7 @@ public partial class MainWindow
         Debug.WriteLine($"dbcv: devicetype 0x{vol.dbcv_devicetype:x4}, unitmask 0x{vol.dbcv_unitmask:x4}, flags 0x{vol.dbcv_flags:x8}");
 #endif
         if (msgType == DBT_DEVICEARRIVAL) //&& (vol.dbcv_flags & (DBTF_MEDIA | DBTF_MOUNT_ISO)) != 0
-            vm.ScanDiscsCommand.Execute(null);
+            Dispatcher.UIThread.Post(() => vm.ScanDiscsCommand.Execute(null), DispatcherPriority.Background); 
         else if (msgType is DBT_DEVICEREMOVEPENDING or DBT_DEVICEREMOVECOMPLETE)
         {
             var dumper = vm.dumper;
