@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
 using System.Reactive.Linq;
 using System.Threading;
@@ -34,6 +35,11 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     [ObservableProperty] private GitHubReleaseInfo? updateInfo;
     [ObservableProperty] private bool updateIsPrerelease;
+    [ObservableProperty] private string formattedUpdateInfoHeader;
+    [ObservableProperty] private string formattedUpdateInfoBody;
+    [ObservableProperty] private string formattedUpdateInfoUrl = "https://github.com/13xforever/ps3-disc-dumper/releases/latest";
+    [ObservableProperty] private string formattedUpdateInfoVersion;
+    
     public string SettingsSymbol => SymbolFontFamily.Name is "Segoe Fluent Icons" ? "\ue713" : "\uf013"; 
 
     [ObservableProperty] private string titleWithVersion = "PS3 Disc Dumper";
@@ -90,11 +96,21 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     }
 
     [RelayCommand]
+    private void OpenUrl(string url)
+    {
+        ProcessStartInfo psi = OperatingSystem.IsWindows()
+            ? new() { FileName = url, UseShellExecute = true, }
+            : new() { FileName = "open", Arguments = url, };
+        psi.CreateNoWindow = true;
+        try { using var _ = Process.Start(psi); } catch { }
+    }
+
+    [RelayCommand]
     private void ScanDiscs() => Dispatcher.UIThread.Post(ScanDiscsAsync, DispatcherPriority.Background);
 
     [RelayCommand]
     private void DumpDisc() => Dispatcher.UIThread.Post(DumpDiscAsync, DispatcherPriority.Background);
-
+    
     private async void ScanDiscsAsync()
     {
         FoundDisc = true;
@@ -222,9 +238,6 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         }
     }
 
-    [RelayCommand]
-    private async Task ShowUpdateInfoAsync() => await ShowUpdateInfoDialog.Handle(new() { UpdateInfo = UpdateInfo });
-
     internal async void CheckUpdatesAsync()
     {
         var (ver, rel) = await Dumper.CheckUpdatesAsync();
@@ -233,18 +246,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 
         UpdateInfo = rel;
         UpdateIsPrerelease = rel.Prerelease;
-        /*
-         UpdateInfo = $"""
-            v{rel.TagName.TrimStart('v')} is available!
-            
-            {rel.Name}
-            {"".PadRight(rel.Name.Length, '-')}
-            
-            {rel.Body}
-            """;
-        if (!string.IsNullOrEmpty(rel.HtmlUrl))
-            UpdateUrl = rel.HtmlUrl;
-        */
+        FormattedUpdateInfoHeader = rel.Name;
+        FormattedUpdateInfoVersion = $"Download v{rel.TagName.TrimStart('v')}";
+        FormattedUpdateInfoBody = rel.Body;
     }
     
     public void Dispose()
