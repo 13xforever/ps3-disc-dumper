@@ -29,11 +29,11 @@ public partial class MainWindow : Window
         if (DataContext is MainWindowViewModel vm)
         {
             if (systemFonts.TryGetGlyphTypeface("Segoe Fluent Icons", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-                vm.SymbolFontFamily = new("Segoe Fluent Icons");
+                vm.CurrentPage.SymbolFontFamily = new("Segoe Fluent Icons");
             if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Small", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-                vm.SmallFontFamily = new("Segoe UI Variable Small");
+                vm.CurrentPage.SmallFontFamily = new("Segoe UI Variable Small");
             if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Display", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-                vm.LargeFontFamily = new("Segoe UI Variable Display");
+                vm.CurrentPage.LargeFontFamily = new("Segoe UI Variable Display");
         }
         base.Show();
         App.OnThemeChanged(this, EventArgs.Empty);
@@ -42,20 +42,18 @@ public partial class MainWindow : Window
     private void OnLoaded(object? sender, RoutedEventArgs e)
     {
         OnLoadedPlatform();
-        if (DataContext is not MainWindowViewModel vm)
+        if (DataContext is not MainWindowViewModel mwvm)
             return;
-
+        
+        Dispatcher.UIThread.Post(() => { mwvm.CheckUpdatesAsync(); }, DispatcherPriority.Background);
+        if (mwvm.CurrentPage is not MainViewModel mvm)
+            return;
+        
         Dispatcher.UIThread.Post(() =>
         {
-            vm.ResetViewModelCommand.Execute(null);
-            vm.CheckUpdatesAsync();
-            vm.ScanDiscsCommand.Execute(null);
+            mvm.ResetViewModelCommand.Execute(null);
+            mvm.ScanDiscsCommand.Execute(null);
         }, DispatcherPriority.Background);
-
-        /*
-        var platformColors = PlatformSettings.GetColorValues();
-        platformColors.AccentColor1
-        */
     }
 
     partial void OnLoadedPlatform();
