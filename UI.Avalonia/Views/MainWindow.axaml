@@ -19,7 +19,7 @@
         TransparencyLevelHint="Mica, AcrylicBlur, None"
         
 		Icon="/Assets/icon.ico"
-        Title="{Binding TitleWithVersion}"
+        Title="{Binding CurrentPage.PageTitle}"
         
         Loaded="OnLoaded"
         Closing="OnClosing"
@@ -55,7 +55,7 @@
 		           Margin="17 17 0 0"
 		           FontFamily="{Binding SmallFontFamily}" FontSize="12" RenderOptions.TextRenderingMode="Antialias"
 		           IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=IsExtendedIntoWindowDecorations}"
-		           Text="{Binding TitleWithVersion}"/>
+		           Text="{Binding CurrentPage.PageTitle}"/>
 	    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0 0 138 0">
 		    <!-- update button -->
 		    <Button Width="46" Height="31"
@@ -87,6 +87,7 @@
 		    <Button Width="46" Height="31"
 		            Background="Transparent" CornerRadius="0"
 		            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
+		            IsVisible="{Binding CurrentPage.CanEditSettings}"
 		    >
 				<TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="18" RenderOptions.TextRenderingMode="Antialias"
 		                   Text="{Binding SettingsSymbol}"
@@ -94,6 +95,7 @@
 			</Button>
 	    </StackPanel>
 
+	    <TransitioningContentControl Content="{Binding CurrentPage}"/>
 	    
     </Panel>
 </Window>

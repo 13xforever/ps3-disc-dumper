@@ -9,6 +9,16 @@ namespace UI.Avalonia.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase, IDisposable
 {
+    private readonly ViewModelBase[] pages =
+    {
+        new MainViewModel(),
+        new SettingsViewModel(),
+    };
+
+    [ObservableProperty] private ViewModelBase currentPage;
+
+    public MainWindowViewModel() => CurrentPage = pages[0];
+
     [ObservableProperty] private GitHubReleaseInfo? updateInfo;
     [ObservableProperty] private bool updateIsPrerelease;
     [ObservableProperty] private string formattedUpdateInfoHeader = "";
@@ -41,6 +51,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     
     public void Dispose()
     {
+        foreach (var p in pages)
+            if (p is IDisposable dp)
+                dp.Dispose();
         OnDisposePlatform();
     }
 

@@ -37,7 +37,7 @@
 		        <!-- 436 for container, 414 for title without checkmark -->
 		        <StackPanel Orientation="Horizontal">
 			        <!-- PrefixCharacterEllipsis or CharacterEllipsis -->
-			        <TextBlock Text="{Binding GameTitle}" Width="414" ClipToBounds="True" TextTrimming="CharacterEllipsis"/>
+			        <TextBlock Text="{Binding GameTitle}" MaxWidth="414" ClipToBounds="True" TextTrimming="CharacterEllipsis"/>
 			        <TextBlock FontFamily="{Binding SymbolFontFamily}"
 			                   Margin="6 0 0 0" VerticalAlignment="Center"
 			                   Foreground="{Binding Success, Converter={StaticResource ValidationColorConverter}}"

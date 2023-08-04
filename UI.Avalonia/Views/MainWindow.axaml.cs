@@ -26,7 +26,7 @@ public partial class MainWindow : Window
         else if (systemFonts.TryGetGlyphTypeface("Segoe UI", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
             FontFamily = new("Segoe UI");
         
-        if (DataContext is MainWindowViewModel vm)
+        if (DataContext is ViewModelBase vm)
         {
             if (systemFonts.TryGetGlyphTypeface("Segoe Fluent Icons", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
                 vm.SymbolFontFamily = new("Segoe Fluent Icons");
@@ -42,14 +42,18 @@ public partial class MainWindow : Window
     private void OnLoaded(object? sender, RoutedEventArgs e)
     {
         OnLoadedPlatform();
-        if (DataContext is MainWindowViewModel mwvm)
-            Dispatcher.UIThread.Post(() => { mwvm.CheckUpdatesAsync(); }, DispatcherPriority.Background);
-        if (DataContext is MainViewModel mvm)
-            Dispatcher.UIThread.Post(() =>
-            {
-                mvm.ResetViewModelCommand.Execute(null);
-                mvm.ScanDiscsCommand.Execute(null);
-            }, DispatcherPriority.Background);
+        if (DataContext is not MainWindowViewModel mwvm)
+            return;
+        
+        Dispatcher.UIThread.Post(() => { mwvm.CheckUpdatesAsync(); }, DispatcherPriority.Background);
+        if (mwvm.CurrentPage is not MainViewModel mvm)
+            return;
+        
+        Dispatcher.UIThread.Post(() =>
+        {
+            mvm.ResetViewModelCommand.Execute(null);
+            mvm.ScanDiscsCommand.Execute(null);
+        }, DispatcherPriority.Background);
     }
 
     partial void OnLoadedPlatform();

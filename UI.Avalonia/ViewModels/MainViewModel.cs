@@ -4,16 +4,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IrdLibraryClient;
 using Ps3DiscDumper;
-using Ps3DiscDumper.POCOs;
 using Ps3DiscDumper.Utils;
 using ReactiveUI;
-using UI.Avalonia.Utils;
 
 namespace UI.Avalonia.ViewModels;
 
@@ -55,12 +52,13 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     [RelayCommand]
     private void ResetViewModel()
     {
-        TitleWithVersion = "PS3 Disc Dumper v" + Dumper.Version;
+        PageTitle = "PS3 Disc Dumper v" + Dumper.Version;
         StepTitle = "Please insert a PS3 game disc";
         StepSubtitle = "";
         FoundDisc = false;
         DumperIsReady = false;
         DumpingInProgress = false;
+        CanEditSettings = true;
         ProductCode = "";
         GameTitle = "";
         DiscSizeInfo = "";
@@ -157,6 +155,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         StepTitle = "Dumping the disc";
         StepSubtitle = "Decrypting and copying the data…";
         DumpingInProgress = true;
+        CanEditSettings = false;
         
         try
         {
@@ -191,6 +190,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         }
 
         DumpingInProgress = false;
+        CanEditSettings = true;
         DumperIsReady = false;
         FoundDisc = false;
         Success = dumper.ValidationStatus is not false;
