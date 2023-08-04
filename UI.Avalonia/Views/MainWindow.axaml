@@ -103,10 +103,13 @@
 	        
 	        <!-- middle -->
 	        <Expander IsExpanded="{Binding DiscInfoExpanded}" Margin="20" Width="500"
+	                  Background="{Binding HoverLayerColor}"
 	                  IsVisible="{Binding ProductCode, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
 		        <Expander.Header >
+			        <!-- 436 for container, 414 for title without checkmark -->
 			        <StackPanel Orientation="Horizontal">
-				        <TextBlock Text="{Binding GameTitle}"/>
+				        <!-- PrefixCharacterEllipsis or CharacterEllipsis -->
+				        <TextBlock Text="{Binding GameTitle}" Width="414" ClipToBounds="True" TextTrimming="CharacterEllipsis"/>
 				        <TextBlock FontFamily="{Binding SymbolFontFamily}"
 				                   Margin="6 0 0 0" VerticalAlignment="Center"
 				                   Foreground="{Binding Success, Converter={StaticResource ValidationColorConverter}}"

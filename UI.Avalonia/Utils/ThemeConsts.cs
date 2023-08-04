@@ -15,5 +15,10 @@ public class ThemeConsts
 
     public const string LightThemeDimGray = "#646464";
     public const string DarkThemeDimGray = "#a9aba9";
+
+    // idk man, can't find dark const anywhere
+    public const string LightThemeLayerHover = "#ccffffff";
+    public const string DarkThemeLayerHover = "#b32e2e2e";
+    
     public const string AccentColor = "#0094ff";
 }

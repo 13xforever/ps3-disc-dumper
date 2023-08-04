@@ -79,11 +79,13 @@ public partial class App : Application
         {
             vm.TintColor = ThemeConsts.LightThemeTintColor;
             vm.DimTextColor = ThemeConsts.LightThemeDimGray;
+            vm.HoverLayerColor = ThemeConsts.LightThemeLayerHover;
         }
         else if (window.ActualThemeVariant == ThemeVariant.Dark)
         {
             vm.TintColor = ThemeConsts.DarkThemeTintColor;
             vm.DimTextColor = ThemeConsts.DarkThemeDimGray;
+            vm.HoverLayerColor = ThemeConsts.DarkThemeLayerHover;
         }
     }
 }
