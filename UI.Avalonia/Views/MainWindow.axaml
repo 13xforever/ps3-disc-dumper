@@ -50,12 +50,25 @@
 		    </Border.IsVisible>
 	    </Border>
 	    
-	    <!-- title bar -->
-		<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top"
-		           Margin="17 17 0 0"
-		           FontFamily="{Binding CurrentPage.SmallFontFamily}" FontSize="12" RenderOptions.TextRenderingMode="Antialias"
-		           IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=IsExtendedIntoWindowDecorations}"
-		           Text="{Binding CurrentPage.PageTitle}"/>
+	    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4 6 -6 0">
+		    <!-- back button -->
+		    <Button Width="40" Height="36"
+		            Background="Transparent" CornerRadius="4"
+		            VerticalAlignment="Top" HorizontalAlignment="Left"
+		            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
+		            IsVisible="{Binding InSettings}"
+		            Command="{Binding ToggleSettingsPageCommand}"
+		    >
+			    <TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="12" RenderOptions.TextRenderingMode="Antialias"
+			               Text="{Binding CurrentPage.BackSymbol}"
+			               Foreground="{Binding CurrentPage.DimTextColor}"/>
+		    </Button>
+		    <!-- window title -->
+			<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="11 11 0 0"
+		               FontFamily="{Binding CurrentPage.SmallFontFamily}" FontSize="12" RenderOptions.TextRenderingMode="Antialias"
+		               IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=IsExtendedIntoWindowDecorations}"
+		               Text="{Binding CurrentPage.PageTitle}"/>
+	    </StackPanel>
 	    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0 0 138 0">
 		    <!-- update button -->
 		    <Button Width="46" Height="31"
@@ -87,12 +100,17 @@
 		    <Button Width="46" Height="31"
 		            Background="Transparent" CornerRadius="0"
 		            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
-		            IsVisible="{Binding CurrentPage.CanEditSettings}"
 		            Command="{Binding ToggleSettingsPageCommand}"
 		    >
-				<TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="18" RenderOptions.TextRenderingMode="Antialias"
-		                   Text="{Binding CurrentPage.SettingsSymbol}"
-		                   Foreground="{Binding CurrentPage.DimTextColor}"/>
+			    <TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="18" RenderOptions.TextRenderingMode="Antialias"
+			               Text="{Binding CurrentPage.SettingsSymbol}"
+			               Foreground="{Binding CurrentPage.DimTextColor}"/>
+			    <Button.IsVisible>
+				    <MultiBinding Converter="{x:Static BoolConverters.And}">
+					    <Binding Path="CurrentPage.CanEditSettings"/>
+					    <Binding Path="!InSettings"/>
+				    </MultiBinding>
+			    </Button.IsVisible>
 			</Button>
 	    </StackPanel>
 

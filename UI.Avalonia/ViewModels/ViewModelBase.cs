@@ -21,6 +21,7 @@ public partial class ViewModelBase: ObservableObject
     [ObservableProperty] private static FontFamily smallFontFamily = FontManager.Current.DefaultFontFamily;
     
     public string SettingsSymbol => SymbolFontFamily.Name is "Segoe Fluent Icons" ? "\ue713" : "\uf013"; 
+    public string BackSymbol => SymbolFontFamily.Name is "Segoe Fluent Icons" ? "\ue72b" : "\uf060"; 
     
     [ObservableProperty] protected string pageTitle = "PS3 Disc Dumper";
     [ObservableProperty] private bool canEditSettings = true;
