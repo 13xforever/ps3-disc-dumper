@@ -8,7 +8,7 @@ using Ps3DiscDumper.POCOs;
 
 namespace UI.Avalonia.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase, IDisposable
+public partial class MainWindowViewModel : ObservableObject, IDisposable
 {
     private readonly MainViewModel mainPage = new();
     private readonly SettingsViewModel settingsPage = new();

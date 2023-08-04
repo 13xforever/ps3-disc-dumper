@@ -40,8 +40,8 @@ public partial class App : Application
 
             if (desktop is { MainWindow: { DataContext: MainWindowViewModel vm } w})
             {
-                vm.MicaEnabled = isMicaCapable.Value;
-                vm.AcrylicEnabled = w.ActualTransparencyLevel == WindowTransparencyLevel.AcrylicBlur;
+                vm.CurrentPage.MicaEnabled = isMicaCapable.Value;
+                vm.CurrentPage.AcrylicEnabled = w.ActualTransparencyLevel == WindowTransparencyLevel.AcrylicBlur;
             }
             /*
             if (isMicaCapable.Value && desktop.MainWindow is Window w)
@@ -68,27 +68,27 @@ public partial class App : Application
         if (isMicaCapable.Value)
             w.TransparencyLevelHint = Array.Empty<WindowTransparencyLevel>();
         if (w.ActualThemeVariant == ThemeVariant.Light)
-            vm.TintColor = ThemeConsts.LightThemeTintColor;
+            vm.CurrentPage.TintColor = ThemeConsts.LightThemeTintColor;
         else if (w.ActualThemeVariant == ThemeVariant.Dark)
-            vm.TintColor = ThemeConsts.DarkThemeTintColor;
+            vm.CurrentPage.TintColor = ThemeConsts.DarkThemeTintColor;
     }
 
     internal static void OnThemeChanged(object? sender, EventArgs e)
     {
-        if (sender is not Window { DataContext: ViewModelBase vm } window)
+        if (sender is not Window { DataContext: MainWindowViewModel {CurrentPage: ViewModelBase cpvm} vm } window)
             return;
 
         if (window.ActualThemeVariant == ThemeVariant.Light)
         {
-            vm.TintColor = ThemeConsts.LightThemeTintColor;
-            vm.DimTextColor = ThemeConsts.LightThemeDimGray;
-            vm.HoverLayerColor = ThemeConsts.LightThemeLayerHover;
+            vm.CurrentPage.TintColor = ThemeConsts.LightThemeTintColor;
+            vm.CurrentPage.DimTextColor = ThemeConsts.LightThemeDimGray;
+            vm.CurrentPage.HoverLayerColor = ThemeConsts.LightThemeLayerHover;
         }
         else if (window.ActualThemeVariant == ThemeVariant.Dark)
         {
-            vm.TintColor = ThemeConsts.DarkThemeTintColor;
-            vm.DimTextColor = ThemeConsts.DarkThemeDimGray;
-            vm.HoverLayerColor = ThemeConsts.DarkThemeLayerHover;
+            vm.CurrentPage.TintColor = ThemeConsts.DarkThemeTintColor;
+            vm.CurrentPage.DimTextColor = ThemeConsts.DarkThemeDimGray;
+            vm.CurrentPage.HoverLayerColor = ThemeConsts.DarkThemeLayerHover;
         }
     }
 }

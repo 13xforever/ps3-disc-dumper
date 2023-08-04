@@ -38,13 +38,13 @@
     </Design.DataContext>
  
     <Panel>
-	    <Border IsHitTestVisible="False" Background="{Binding TintColor}">
+	    <Border IsHitTestVisible="False" Background="{Binding CurrentPage.TintColor}">
 		    <Border.IsVisible>
 			    <MultiBinding Converter="{x:Static BoolConverters.Or}">
 				    <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=Window}" Path="!IsActive"/>
 				    <MultiBinding Converter="{x:Static BoolConverters.And}">
-					    <Binding Path="!MicaEnabled"/>
-					    <Binding Path="!AcrylicEnabled"/>
+					    <Binding Path="!CurrentPage.MicaEnabled"/>
+					    <Binding Path="!CurrentPage.AcrylicEnabled"/>
 				    </MultiBinding>
 			    </MultiBinding>
 		    </Border.IsVisible>
@@ -53,7 +53,7 @@
 	    <!-- title bar -->
 		<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top"
 		           Margin="17 17 0 0"
-		           FontFamily="{Binding SmallFontFamily}" FontSize="12" RenderOptions.TextRenderingMode="Antialias"
+		           FontFamily="{Binding CurrentPage.SmallFontFamily}" FontSize="12" RenderOptions.TextRenderingMode="Antialias"
 		           IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=IsExtendedIntoWindowDecorations}"
 		           Text="{Binding CurrentPage.PageTitle}"/>
 	    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0 0 138 0">
@@ -63,9 +63,9 @@
 		            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
 		            IsVisible="{Binding UpdateInfo, Converter={x:Static ObjectConverters.IsNotNull}}"
 		    >
-				<TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="18" RenderOptions.TextRenderingMode="Antialias"
+				<TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="18" RenderOptions.TextRenderingMode="Antialias"
 		                   Text="{Binding UpdateInfo, Converter={StaticResource UpdateSymbolConverter}}"
-		                   Foreground="{Binding UpdateIsPrerelease, Converter={StaticResource UpdateColorConverter}, ConverterParameter={Binding DimTextColor}}"/>
+		                   Foreground="{Binding UpdateIsPrerelease, Converter={StaticResource UpdateColorConverter}, ConverterParameter={Binding CurrentPage.DimTextColor}}"/>
 				<Button.Flyout>
 					<Flyout>
 						<StackPanel>
@@ -90,9 +90,9 @@
 		            IsVisible="{Binding CurrentPage.CanEditSettings}"
 		            Command="{Binding ToggleSettingsPageCommand}"
 		    >
-				<TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="18" RenderOptions.TextRenderingMode="Antialias"
-		                   Text="{Binding SettingsSymbol}"
-		                   Foreground="{Binding DimTextColor}"/>
+				<TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="18" RenderOptions.TextRenderingMode="Antialias"
+		                   Text="{Binding CurrentPage.SettingsSymbol}"
+		                   Foreground="{Binding CurrentPage.DimTextColor}"/>
 			</Button>
 	    </StackPanel>
 

@@ -26,14 +26,14 @@ public partial class MainWindow : Window
         else if (systemFonts.TryGetGlyphTypeface("Segoe UI", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
             FontFamily = new("Segoe UI");
         
-        if (DataContext is ViewModelBase vm)
+        if (DataContext is MainWindowViewModel vm)
         {
             if (systemFonts.TryGetGlyphTypeface("Segoe Fluent Icons", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-                vm.SymbolFontFamily = new("Segoe Fluent Icons");
+                vm.CurrentPage.SymbolFontFamily = new("Segoe Fluent Icons");
             if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Small", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-                vm.SmallFontFamily = new("Segoe UI Variable Small");
+                vm.CurrentPage.SmallFontFamily = new("Segoe UI Variable Small");
             if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Display", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-                vm.LargeFontFamily = new("Segoe UI Variable Display");
+                vm.CurrentPage.LargeFontFamily = new("Segoe UI Variable Display");
         }
         base.Show();
         App.OnThemeChanged(this, EventArgs.Empty);
