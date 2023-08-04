@@ -26,6 +26,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private double luminosityOpacity = 1.0;
     [ObservableProperty] private string accentColor = ThemeConsts.AccentColor;
     [ObservableProperty] private bool micaEnabled = true;
+    [ObservableProperty] private bool acrylicEnabled = false;
     [ObservableProperty] private string dimTextColor = ThemeConsts.LightThemeDimGray;
     [ObservableProperty] private string hoverLayerColor = ThemeConsts.LightThemeLayerHover;
     [NotifyPropertyChangedFor(nameof(SettingsSymbol))]

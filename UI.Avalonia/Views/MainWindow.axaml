@@ -17,7 +17,7 @@
         Topmost="True"
         
 		Background="Transparent"
-        TransparencyLevelHint="Mica, AcrylicBlur, Blur"
+        TransparencyLevelHint="Mica, AcrylicBlur, None"
         
 		Icon="/Assets/icon.ico"
         Title="{Binding TitleWithVersion}"
@@ -50,8 +50,11 @@
 	    <Border IsHitTestVisible="False" Background="{Binding TintColor}">
 		    <Border.IsVisible>
 			    <MultiBinding Converter="{x:Static BoolConverters.Or}">
-				    <Binding Path="!MicaEnabled"/>
 				    <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=Window}" Path="!IsActive"/>
+				    <MultiBinding Converter="{x:Static BoolConverters.And}">
+					    <Binding Path="!MicaEnabled"/>
+					    <Binding Path="!AcrylicEnabled"/>
+				    </MultiBinding>
 			    </MultiBinding>
 		    </Border.IsVisible>
 	    </Border>

@@ -38,8 +38,11 @@ public partial class App : Application
             desktop.MainWindow.Deactivated += OnDeactivated;
             desktop.MainWindow.ActualThemeVariantChanged += OnThemeChanged;
 
-            if (desktop is { MainWindow.DataContext: MainWindowViewModel vm })
+            if (desktop is { MainWindow: { DataContext: MainWindowViewModel vm } w})
+            {
                 vm.MicaEnabled = isMicaCapable.Value;
+                vm.AcrylicEnabled = w.ActualTransparencyLevel == WindowTransparencyLevel.AcrylicBlur;
+            }
             /*
             if (isMicaCapable.Value && desktop.MainWindow is Window w)
                 RenderOptions.SetTextRenderingMode(w, TextRenderingMode.Antialias);
