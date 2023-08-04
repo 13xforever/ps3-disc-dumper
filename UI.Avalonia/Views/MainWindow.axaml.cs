@@ -42,20 +42,14 @@ public partial class MainWindow : Window
     private void OnLoaded(object? sender, RoutedEventArgs e)
     {
         OnLoadedPlatform();
-        if (DataContext is not MainWindowViewModel vm)
-            return;
-
-        Dispatcher.UIThread.Post(() =>
-        {
-            vm.ResetViewModelCommand.Execute(null);
-            vm.CheckUpdatesAsync();
-            vm.ScanDiscsCommand.Execute(null);
-        }, DispatcherPriority.Background);
-
-        /*
-        var platformColors = PlatformSettings.GetColorValues();
-        platformColors.AccentColor1
-        */
+        if (DataContext is MainWindowViewModel mwvm)
+            Dispatcher.UIThread.Post(() => { mwvm.CheckUpdatesAsync(); }, DispatcherPriority.Background);
+        if (DataContext is MainViewModel mvm)
+            Dispatcher.UIThread.Post(() =>
+            {
+                mvm.ResetViewModelCommand.Execute(null);
+                mvm.ScanDiscsCommand.Execute(null);
+            }, DispatcherPriority.Background);
     }
 
     partial void OnLoadedPlatform();

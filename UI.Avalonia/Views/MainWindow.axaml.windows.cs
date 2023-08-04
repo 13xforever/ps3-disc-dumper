@@ -31,7 +31,7 @@ public partial class MainWindow
     //[SupportedOSPlatform("windows6.1")]
     private void WndProc(HWND hwnd, uint msg, WPARAM wParam, LPARAM lParam)
     {
-        if (DataContext is not MainWindowViewModel vm)
+        if (DataContext is not MainViewModel vm)
             return;
 
         if (msg != WM.WM_DEVICECHANGE)

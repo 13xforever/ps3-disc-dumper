@@ -1,0 +1,24 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:UI.Avalonia.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UI.Avalonia.Views.Settings">
+
+    <Design.DataContext>
+        <vm:SettingsViewModel/>
+    </Design.DataContext>
+    
+    <Grid ColumnDefinitions="*,200">
+        <StackPanel Grid.Column="0">
+            <TextBlock FontSize="28" FontWeight="SemiBold">Settings</TextBlock>
+        </StackPanel>
+
+        <StackPanel Grid.Column="1">
+            <TextBlock FontWeight="Bold">About this app</TextBlock>
+            <TextBlock>PS3 Disc Dumper</TextBlock>
+            <Button>Send feedback</Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -3,8 +3,7 @@
         xmlns:vm="using:UI.Avalonia.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:UI.Avalonia.Converters"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
         Width="600" Height="400"
         x:Class="UI.Avalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -37,15 +36,7 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-
-    <Window.Resources>
-        <local:ColorConverter x:Key="ColorConverter"/>
-        <local:ValidationColorConverter x:Key="ValidationColorConverter"/>
-        <local:UpdateColorConverter x:Key="UpdateColorConverter"/>
-        <local:ValidationSymbolConverter x:Key="ValidationSymbolConverter"/>
-        <local:UpdateSymbolConverter x:Key="UpdateSymbolConverter"/>
-    </Window.Resources>
-        
+ 
     <Panel>
 	    <Border IsHitTestVisible="False" Background="{Binding TintColor}">
 		    <Border.IsVisible>
@@ -103,80 +94,6 @@
 			</Button>
 	    </StackPanel>
 
-	    <!-- top -->
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-	        <TextBlock FontSize="28" FontWeight="SemiBold" RenderOptions.TextRenderingMode="Antialias"
-	                   Margin="0 0 8 0" TextAlignment="Center"
-	                   Text="{Binding StepTitle}"/>
-	        <TextBlock RenderOptions.TextRenderingMode="Antialias"
-	                   TextAlignment="Center"
-	                   Text="{Binding StepSubtitle}">
-		        <TextBlock.IsVisible>
-			        <MultiBinding Converter="{x:Static BoolConverters.Or}">
-				        <Binding Path="StepSubtitle" Converter="{x:Static StringConverters.IsNotNullOrEmpty}"/>
-				        <Binding Path="ProductCode" Converter="{x:Static StringConverters.IsNullOrEmpty}"/>
-			        </MultiBinding>
-		        </TextBlock.IsVisible>
-	        </TextBlock>
-	        
-	        <!-- middle -->
-	        <Expander IsExpanded="{Binding DiscInfoExpanded}" Margin="20" Width="500"
-	                  Background="{Binding HoverLayerColor}"
-	                  IsVisible="{Binding ProductCode, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-		        <Expander.Header >
-			        <!-- 436 for container, 414 for title without checkmark -->
-			        <StackPanel Orientation="Horizontal">
-				        <!-- PrefixCharacterEllipsis or CharacterEllipsis -->
-				        <TextBlock Text="{Binding GameTitle}" Width="414" ClipToBounds="True" TextTrimming="CharacterEllipsis"/>
-				        <TextBlock FontFamily="{Binding SymbolFontFamily}"
-				                   Margin="6 0 0 0" VerticalAlignment="Center"
-				                   Foreground="{Binding Success, Converter={StaticResource ValidationColorConverter}}"
-				                   Text="{Binding Success, Converter={StaticResource ValidationSymbolConverter}}"/>
-			        </StackPanel>
-		        </Expander.Header>
-		        <Grid ColumnDefinitions="100,*" RowDefinitions="*,*,*" VerticalAlignment="Bottom">
-			        <TextBlock Grid.Row="0" Grid.Column="0" >Product Code</TextBlock>
-			        <TextBlock Grid.Row="0" Grid.Column="1" Foreground="{Binding DimTextColor}" Text="{Binding ProductCode}" Name="ProductCode"></TextBlock>
-			        <TextBlock Grid.Row="1" Grid.Column="0">Dump Size</TextBlock>
-			        <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{Binding DimTextColor}" Text="{Binding DiscSizeInfo}"></TextBlock>
-			        <TextBlock Grid.Row="2" Grid.Column="0">Disc Key</TextBlock>
-			        <TextBlock Grid.Row="2" Grid.Column="1" Foreground="{Binding DimTextColor}" Text="{Binding DiscKeyName}"></TextBlock>
-		        </Grid>
-	        </Expander>
-	        
-	        <!-- bottom -->
-	        <Button HorizontalAlignment="Center" Width="200" Height="48"
-	                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-	                Background="{Binding AccentColor}" Foreground="White"
-	                IsVisible="{Binding !FoundDisc}"
-	                Command="{Binding ScanDiscsCommand}"
-		    >Rescan disc devices</Button>
-	        <Button HorizontalAlignment="Center" Width="200" Height="48"
-	                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-	                Background="{Binding AccentColor}" Foreground="White"
-	                Command="{Binding DumpDiscCommand}">
-		        <Button.IsVisible>
-			        <MultiBinding Converter="{x:Static BoolConverters.And}">
-				        <Binding Path="DumperIsReady"></Binding>
-				        <Binding Path="!DumpingInProgress"></Binding>
-			        </MultiBinding>
-		        </Button.IsVisible>
-		        Start
-	        </Button>
-	        
-	        <ProgressBar Width="500"
-	                     ShowProgressText="True" Foreground="{Binding AccentColor}"
-	                     IsIndeterminate="{Binding !Progress}"
-	                     Minimum="0" Maximum="10000" Value="{Binding Progress}"
-	                     IsVisible="{Binding DumpingInProgress}"/>
-	        <TextBlock Width="500" Margin="6"
-	                   TextAlignment="Center"
-	                   FontFamily="{Binding SmallFontFamily}" FontSize="10" RenderOptions.TextRenderingMode="Antialias"
-	                   Foreground="{Binding DimTextColor}"
-	                   IsVisible="{Binding DumpingInProgress}"
-	                   Text="{Binding ProgressInfo}"
-	                   ></TextBlock>
-        </StackPanel>
+	    
     </Panel>
-
 </Window>

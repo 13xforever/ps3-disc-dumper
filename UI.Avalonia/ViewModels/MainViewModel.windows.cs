@@ -5,7 +5,7 @@ using System.Management;
 
 namespace UI.Avalonia.ViewModels;
 
-public partial class MainWindowViewModel
+public partial class MainViewModel
 {
     ManagementEventWatcher? newDeviceWatcher, removedDeviceWatcher;
 

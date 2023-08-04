@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace UI.Avalonia.Views;
 
-public partial class UpdateInfoWindow : Window
+public partial class Settings : Window
 {
-    public UpdateInfoWindow()
+    public Settings()
     {
         InitializeComponent();
 #if DEBUG
