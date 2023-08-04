@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ps3DiscDumper;
@@ -9,16 +10,15 @@ namespace UI.Avalonia.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase, IDisposable
 {
-    private readonly ViewModelBase[] pages =
-    {
-        new MainViewModel(),
-        new SettingsViewModel(),
-    };
+    private readonly MainViewModel mainPage = new();
+    private readonly SettingsViewModel settingsPage = new();
 
+    [NotifyPropertyChangedFor(nameof(InSettings))]
     [ObservableProperty] private ViewModelBase currentPage;
+    public bool InSettings => CurrentPage is SettingsViewModel;
 
-    public MainWindowViewModel() => CurrentPage = pages[0];
-
+    public MainWindowViewModel() => CurrentPage = mainPage;
+ 
     [ObservableProperty] private GitHubReleaseInfo? updateInfo;
     [ObservableProperty] private bool updateIsPrerelease;
     [ObservableProperty] private string formattedUpdateInfoHeader = "";
@@ -36,6 +36,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         try { using var _ = Process.Start(psi); } catch { }
     }
 
+    [RelayCommand]
+    private void ToggleSettingsPage() => CurrentPage = CurrentPage is MainViewModel ? settingsPage : mainPage;
+
     internal async void CheckUpdatesAsync()
     {
         var (ver, rel) = await Dumper.CheckUpdatesAsync();
@@ -51,9 +54,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     
     public void Dispose()
     {
-        foreach (var p in pages)
-            if (p is IDisposable dp)
-                dp.Dispose();
+        mainPage.Dispose();
         OnDisposePlatform();
     }
 

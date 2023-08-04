@@ -1,21 +1,8 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
+﻿using Avalonia.Controls;
 
 namespace UI.Avalonia.Views;
 
-public partial class Settings : Window
+public partial class Settings : UserControl
 {
-    public Settings()
-    {
-        InitializeComponent();
-#if DEBUG
-        this.AttachDevTools();
-#endif
-    }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
+    public Settings() => InitializeComponent();
 }

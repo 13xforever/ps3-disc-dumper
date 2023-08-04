@@ -75,7 +75,7 @@ public partial class App : Application
 
     internal static void OnThemeChanged(object? sender, EventArgs e)
     {
-        if (sender is not Window { DataContext: MainWindowViewModel vm } window)
+        if (sender is not Window { DataContext: ViewModelBase vm } window)
             return;
 
         if (window.ActualThemeVariant == ThemeVariant.Light)

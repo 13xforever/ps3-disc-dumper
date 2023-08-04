@@ -1,13 +1,8 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
+﻿using Avalonia.Controls;
 
 namespace UI.Avalonia.Views;
 
 public partial class Main : UserControl
 {
-    public Main()
-    {
-        InitializeComponent();
-    }
+    public Main() => InitializeComponent();
 }
