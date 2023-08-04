@@ -31,7 +31,7 @@
         
         <!-- middle -->
         <Expander IsExpanded="{Binding DiscInfoExpanded}" Margin="20" Width="500"
-                  Background="{Binding HoverLayerColor}"
+                  Background="{Binding Layer2BackgroundColor}"
                   IsVisible="{Binding ProductCode, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
 	        <Expander.Header >
 		        <!-- 436 for container, 414 for title without checkmark -->

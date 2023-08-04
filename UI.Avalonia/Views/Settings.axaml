@@ -5,21 +5,116 @@
              xmlns:vm="using:UI.Avalonia.ViewModels"
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
              x:Class="UI.Avalonia.Views.Settings"
-             x:DataType="vm:SettingsViewModel">
+             x:DataType="vm:SettingsViewModel"
+             RenderOptions.TextRenderingMode="Antialias">
 
     <Design.DataContext>
         <vm:SettingsViewModel/>
     </Design.DataContext>
 
-    <Grid ColumnDefinitions="*,160" Margin="16 64 16 16">
-        <StackPanel Grid.Column="0">
-            <TextBlock FontSize="28" FontWeight="SemiBold" RenderOptions.TextRenderingMode="Antialias">Settings</TextBlock>
+    <ScrollViewer IsHitTestVisible="True" AllowAutoHide="True" VerticalScrollBarVisibility="Auto"
+                  Margin="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=WindowDecorationMargin}">
+        <StackPanel Grid.Column="0" Margin="16 64 16 16">
+            <TextBlock FontSize="28" FontWeight="SemiBold"
+                       Margin="0 0 0 12">Settings</TextBlock>
+            
+            <!-- output dir -->
+            <TextBlock FontWeight="SemiBold" Margin="0 0 0 8">Output location</TextBlock>
+            <Border Background="{Binding Layer2BackgroundColor}"
+                    CornerRadius="4" Padding="16"
+                    BorderBrush="{Binding TintColor}" BorderThickness="1">
+                <Grid ColumnDefinitions="36,*,36">
+                    <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
+                               VerticalAlignment="Center" HorizontalAlignment="Left"
+                               Text="{Binding FolderSymbol}"/>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock>Disc dumps will save to</TextBlock>
+                        <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
+                                   HorizontalAlignment="Left"
+                                   MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
+                                   Text="{Binding OutputDir}"/>
+                    </StackPanel>
+                    <Button Grid.Column="2" Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Right">…</Button>
+                </Grid>
+            </Border>
+            
+            <!-- ird dir -->
+            <Border Background="{Binding Layer2BackgroundColor}"
+                    CornerRadius="4" Padding="16" Margin="0 3 0 0"
+                    BorderBrush="{Binding TintColor}" BorderThickness="1">
+                <Grid ColumnDefinitions="36,*,36">
+                    <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
+                               VerticalAlignment="Center" HorizontalAlignment="Left"
+                               Text="{Binding FolderSymbol}"/>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock>Disc key copies will save to</TextBlock>
+                        <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
+                                   HorizontalAlignment="Left"
+                                   MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
+                                   Text="{Binding IrdDir}"/>
+                    </StackPanel>
+                    <Button Grid.Column="2" Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Right">…</Button>
+                </Grid>
+            </Border>
+            
+            <!-- pattern -->
+            <Border Background="{Binding Layer2BackgroundColor}"
+                    CornerRadius="4 4 0 0" Padding="16" Margin="0 36 0 0"
+                    BorderBrush="{Binding TintColor}" BorderThickness="1 1 1 0">
+                <Grid ColumnDefinitions="36,*,*">
+                    <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
+                               VerticalAlignment="Center" HorizontalAlignment="Left"
+                               Text="{Binding RenameSymbol}"/>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock HorizontalAlignment="Left">Dump name template</TextBlock>
+                        <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
+                                   HorizontalAlignment="Left"
+                                   ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis">
+                            Using disc metadata
+                        </TextBlock>
+                    </StackPanel>
+                    <Button Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
+                            Padding="16 4" MinWidth="90" Height="32">
+                        Patterns
+                    </Button>
+                </Grid>
+            </Border>
+            <Border Background="{Binding Layer2BackgroundColor}"
+                    CornerRadius="0" Padding="16"
+                    BorderBrush="{Binding TintColor}" BorderThickness="1">
+                <Grid ColumnDefinitions="36,*,240">
+                    <StackPanel Grid.Column="1">
+                        <TextBlock>Live Preview</TextBlock>
+                        <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
+                                   HorizontalAlignment="Left"
+                                   ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
+                                   Text="{Binding TemplatePreview}"/>
+                    </StackPanel>
+                    <TextBox Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
+                             Margin="8 0 0 0"
+                             Text="{Binding DumpNameTemplate}"></TextBox>
+                </Grid>
+            </Border>
+            <Border Background="{Binding Layer2BackgroundColor}"
+                    CornerRadius="0" Padding="16"
+                    BorderBrush="{Binding TintColor}" BorderThickness="1">
+                <Grid ColumnDefinitions="36,200,*">
+                    <StackPanel Grid.Column="1">
+                        <TextBlock>%product_code%</TextBlock>
+                        <TextBlock>%product_code_letters%</TextBlock>
+                        <TextBlock>%product_code_numbers%</TextBlock>
+                        <TextBlock>%title%</TextBlock>
+                        <TextBlock>%region%</TextBlock>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Foreground="{Binding DimTextColor}">Game product code (e.g. BLES12345)</TextBlock>
+                        <TextBlock Foreground="{Binding DimTextColor}">Letter part of the product code (e.g. BLES)</TextBlock>
+                        <TextBlock Foreground="{Binding DimTextColor}">Number part of the product code (e.g. 12345)</TextBlock>
+                        <TextBlock Foreground="{Binding DimTextColor}">Game title (e.g. God of War)</TextBlock>
+                        <TextBlock Foreground="{Binding DimTextColor}">Game region (e.g. EU)</TextBlock>
+                    </StackPanel>
+                </Grid>
+            </Border>
         </StackPanel>
-
-        <StackPanel Grid.Column="1">
-            <TextBlock FontWeight="Bold" RenderOptions.TextRenderingMode="Antialias">About this app</TextBlock>
-            <TextBlock RenderOptions.TextRenderingMode="Antialias">PS3 Disc Dumper</TextBlock>
-            <Button>Send feedback</Button>
-        </StackPanel>
-    </Grid>
+    </ScrollViewer>
 </UserControl>

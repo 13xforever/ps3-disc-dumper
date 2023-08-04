@@ -77,7 +77,7 @@
 		            IsVisible="{Binding UpdateInfo, Converter={x:Static ObjectConverters.IsNotNull}}"
 		    >
 				<TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="18" RenderOptions.TextRenderingMode="Antialias"
-		                   Text="{Binding UpdateInfo, Converter={StaticResource UpdateSymbolConverter}}"
+		                   Text="{Binding CurrentPage.UpdateSymbol}"
 		                   Foreground="{Binding UpdateIsPrerelease, Converter={StaticResource UpdateColorConverter}, ConverterParameter={Binding CurrentPage.DimTextColor}}"/>
 				<Button.Flyout>
 					<Flyout>

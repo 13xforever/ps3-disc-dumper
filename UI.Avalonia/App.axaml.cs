@@ -75,20 +75,22 @@ public partial class App : Application
 
     internal static void OnThemeChanged(object? sender, EventArgs e)
     {
-        if (sender is not Window { DataContext: MainWindowViewModel {CurrentPage: ViewModelBase cpvm} vm } window)
+        if (sender is not Window { DataContext: MainWindowViewModel {CurrentPage: ViewModelBase vm} } window)
             return;
 
         if (window.ActualThemeVariant == ThemeVariant.Light)
         {
-            vm.CurrentPage.TintColor = ThemeConsts.LightThemeTintColor;
-            vm.CurrentPage.DimTextColor = ThemeConsts.LightThemeDimGray;
-            vm.CurrentPage.HoverLayerColor = ThemeConsts.LightThemeLayerHover;
+            vm.TintColor = ThemeConsts.LightThemeTintColor;
+            vm.DimTextColor = ThemeConsts.LightThemeDimGray;
+            vm.Layer2BackgroundColor = ThemeConsts.LightThemeLayer2Background;
+            vm.Layer2GroundedColor = ThemeConsts.LightThemeLayer2Grounded;
         }
         else if (window.ActualThemeVariant == ThemeVariant.Dark)
         {
-            vm.CurrentPage.TintColor = ThemeConsts.DarkThemeTintColor;
-            vm.CurrentPage.DimTextColor = ThemeConsts.DarkThemeDimGray;
-            vm.CurrentPage.HoverLayerColor = ThemeConsts.DarkThemeLayerHover;
+            vm.TintColor = ThemeConsts.DarkThemeTintColor;
+            vm.DimTextColor = ThemeConsts.DarkThemeDimGray;
+            vm.Layer2BackgroundColor = ThemeConsts.DarkThemeLayer2Background;
+            vm.Layer2GroundedColor = ThemeConsts.DarkThemeLayer2Grounded;
         }
     }
 }
