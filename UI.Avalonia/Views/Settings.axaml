@@ -6,20 +6,21 @@
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
              x:Class="UI.Avalonia.Views.Settings"
              x:DataType="vm:SettingsViewModel"
-             RenderOptions.TextRenderingMode="Antialias">
+             RenderOptions.TextRenderingMode="Antialias"
+             Loaded="OnLoad"
+             >
 
     <Design.DataContext>
         <vm:SettingsViewModel/>
     </Design.DataContext>
 
-    <ScrollViewer IsHitTestVisible="True" AllowAutoHide="True" VerticalScrollBarVisibility="Auto"
+    <ScrollViewer Name="SettingsPanel" IsHitTestVisible="True" AllowAutoHide="True" VerticalScrollBarVisibility="Auto"
                   Margin="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=WindowDecorationMargin}">
-        <StackPanel Grid.Column="0" Margin="16 64 16 16">
-            <TextBlock FontSize="28" FontWeight="SemiBold"
-                       Margin="0 0 0 12">Settings</TextBlock>
+        <StackPanel Grid.Column="0" Margin="16 0">
+            <!-- <TextBlock FontSize="28" FontWeight="SemiBold" Margin="0 0 0 12">Settings</TextBlock> -->
             
             <!-- output dir -->
-            <TextBlock FontWeight="SemiBold" Margin="0 0 0 8">Output location</TextBlock>
+            <TextBlock FontWeight="SemiBold" Margin="0 0 0 8">Locations</TextBlock>
             <Border Background="{Binding Layer2BackgroundColor}"
                     CornerRadius="4" Padding="16"
                     BorderBrush="{Binding TintColor}" BorderThickness="1">
@@ -58,6 +59,7 @@
             </Border>
             
             <!-- pattern -->
+            <TextBlock FontWeight="SemiBold" Margin="0 0 0 8">Naming</TextBlock>
             <Border Background="{Binding Layer2BackgroundColor}"
                     CornerRadius="4 4 0 0" Padding="16" Margin="0 36 0 0"
                     BorderBrush="{Binding TintColor}" BorderThickness="1 1 1 0">
@@ -70,12 +72,13 @@
                         <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
                                    HorizontalAlignment="Left"
                                    ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis">
-                            Using disc metadata
+                            Disc metadata will be used to substitute the values
                         </TextBlock>
                     </StackPanel>
                     <Button Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
+                            VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
                             Padding="16 4" MinWidth="90" Height="32">
-                        Patterns
+                        Reset
                     </Button>
                 </Grid>
             </Border>
@@ -92,7 +95,7 @@
                     </StackPanel>
                     <TextBox Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
                              Margin="8 0 0 0"
-                             Text="{Binding DumpNameTemplate}"></TextBox>
+                             Text="{Binding DumpNameTemplate}"/>
                 </Grid>
             </Border>
             <Border Background="{Binding Layer2BackgroundColor}"

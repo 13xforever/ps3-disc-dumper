@@ -1,9 +1,12 @@
 using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.LogicalTree;
 using Avalonia.Media;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using UI.Avalonia.ViewModels;
 
 namespace UI.Avalonia.Views;
@@ -41,6 +44,19 @@ public partial class MainWindow : Window
 
     private void OnLoaded(object? sender, RoutedEventArgs e)
     {
+        if (!IsExtendedIntoWindowDecorations)
+        {
+            TitleButtons.Margin = new(0, 6, 4, 0);
+            var buttons = TitleButtons.GetSelfAndVisualDescendants().OfType<Button>();
+            foreach (var b in buttons)
+            {
+                b.CornerRadius = new(4);
+                b.Margin = new(4, 0);
+                b.Width = 40;
+                b.Height = 36;
+            }
+        }
+        
         OnLoadedPlatform();
         if (DataContext is not MainWindowViewModel mwvm)
             return;
