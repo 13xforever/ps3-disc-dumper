@@ -16,6 +16,9 @@ namespace UI.Avalonia.ViewModels;
 
 public partial class MainViewModel : ViewModelBase, IDisposable
 {
+    private readonly SettingsViewModel settings;
+    public MainViewModel(SettingsViewModel settings) => this.settings = settings;
+
     [ObservableProperty] private string stepTitle = "Please insert a PS3 game disc";
     [ObservableProperty] private string stepSubtitle = "";
 
@@ -81,6 +84,15 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     [RelayCommand]
     private void ScanDiscs() => Dispatcher.UIThread.Post(ScanDiscsAsync, DispatcherPriority.Background);
+        /*
+         => Dispatcher.UIThread.Post(() =>
+        {
+            var thread = new Thread(async () => ScanDiscsAsync());
+            thread.Start();
+            while (!thread.Join(15))
+                Thread.Yield();
+        }, DispatcherPriority.Background);
+        */
 
     [RelayCommand]
     private void DumpDisc() => Dispatcher.UIThread.Post(DumpDiscAsync, DispatcherPriority.Background);
@@ -103,8 +115,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                         [Patterns.ProductCodeLetters] = d.ProductCode?[..4],
                         [Patterns.ProductCodeNumbers] = d.ProductCode?[4..],
                         [Patterns.Title] = d.Title,
-                        [Patterns.Region] = RegionMapping[d.ProductCode?[2..4] ?? ""],
+                        [Patterns.Region] = RegionMapping[d.ProductCode?[2..3] ?? ""],
                     };
+                    settings.TestItems = items;
                     return PatternFormatter.Format($"%{Patterns.Title}% [%{Patterns.ProductCode}%]", items);
                 });
         } catch {}
@@ -122,7 +135,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         StepSubtitle = "Checking IRD and Redump data sets…";
         try
         {
-            await dumper.FindDiscKeyAsync(@".\ird").WaitAsync(dumper.Cts.Token);
+            await dumper.FindDiscKeyAsync(@".\ird").WaitAsync(dumper.Cts.Token).ConfigureAwait(false);
         }
         catch (Exception e)
         {

@@ -10,14 +10,14 @@ namespace UI.Avalonia.ViewModels;
 
 public partial class MainWindowViewModel : ObservableObject, IDisposable
 {
-    private readonly MainViewModel mainPage = new();
     private readonly SettingsViewModel settingsPage = new();
+    private readonly MainViewModel mainPage;
+
+    public MainWindowViewModel() => CurrentPage = mainPage = new(settingsPage);
 
     [NotifyPropertyChangedFor(nameof(InSettings))]
     [ObservableProperty] private ViewModelBase currentPage;
     public bool InSettings => CurrentPage is SettingsViewModel;
-
-    public MainWindowViewModel() => CurrentPage = mainPage;
  
     [ObservableProperty] private GitHubReleaseInfo? updateInfo;
     [ObservableProperty] private bool updateIsPrerelease;

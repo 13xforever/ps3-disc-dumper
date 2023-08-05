@@ -59,11 +59,11 @@
             </Border>
             
             <!-- pattern -->
-            <TextBlock FontWeight="SemiBold" Margin="0 0 0 8">Naming</TextBlock>
+            <TextBlock FontWeight="SemiBold" Margin="0 36 0 8">Naming</TextBlock>
             <Border Background="{Binding Layer2BackgroundColor}"
-                    CornerRadius="4 4 0 0" Padding="16" Margin="0 36 0 0"
+                    CornerRadius="4 4 0 0" Padding="16" Margin="0 0 0 0"
                     BorderBrush="{Binding TintColor}" BorderThickness="1 1 1 0">
-                <Grid ColumnDefinitions="36,*,*">
+                <Grid ColumnDefinitions="36,*,100">
                     <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                                VerticalAlignment="Center" HorizontalAlignment="Left"
                                Text="{Binding RenameSymbol}"/>
@@ -103,18 +103,18 @@
                     BorderBrush="{Binding TintColor}" BorderThickness="1">
                 <Grid ColumnDefinitions="36,200,*">
                     <StackPanel Grid.Column="1">
-                        <TextBlock>%product_code%</TextBlock>
-                        <TextBlock>%product_code_letters%</TextBlock>
-                        <TextBlock>%product_code_numbers%</TextBlock>
-                        <TextBlock>%title%</TextBlock>
-                        <TextBlock>%region%</TextBlock>
+                        <TextBlock FontSize="14" LineHeight="20">%product_code%</TextBlock>
+                        <TextBlock FontSize="14" LineHeight="20">%product_code_letters%</TextBlock>
+                        <TextBlock FontSize="14" LineHeight="20">%product_code_numbers%</TextBlock>
+                        <TextBlock FontSize="14" LineHeight="20">%title%</TextBlock>
+                        <TextBlock FontSize="14" LineHeight="20">%region%</TextBlock>
                     </StackPanel>
                     <StackPanel Grid.Column="2">
-                        <TextBlock Foreground="{Binding DimTextColor}">Game product code (e.g. BLES12345)</TextBlock>
-                        <TextBlock Foreground="{Binding DimTextColor}">Letter part of the product code (e.g. BLES)</TextBlock>
-                        <TextBlock Foreground="{Binding DimTextColor}">Number part of the product code (e.g. 12345)</TextBlock>
-                        <TextBlock Foreground="{Binding DimTextColor}">Game title (e.g. God of War)</TextBlock>
-                        <TextBlock Foreground="{Binding DimTextColor}">Game region (e.g. EU)</TextBlock>
+                        <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestProductCode}"/>
+                        <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestProductCodeLetters}"/>
+                        <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestProductCodeNumbers}"/>
+                        <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestTitle}"/>
+                        <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestRegion}"/>
                     </StackPanel>
                 </Grid>
             </Border>

@@ -17,30 +17,48 @@ public partial class SettingsViewModel: ViewModelBase
     
     [ObservableProperty] private string outputDir = Path.GetFullPath(".");
     [ObservableProperty] private string irdDir = Path.GetFullPath("ird");
-    [ObservableProperty] private string dumpNameTemplate = defaultPattern;
+
     [ObservableProperty] private bool discInfoExpanded = true;
     [ObservableProperty] private bool configured;
-
-    [ObservableProperty] private string templatePreview = FormatPreview(Path.GetFullPath("."), defaultPattern);
+    
+    [ObservableProperty] private string dumpNameTemplate = defaultPattern;
+    [NotifyPropertyChangedFor(nameof(TestProductCode))]
+    [NotifyPropertyChangedFor(nameof(TestProductCodeLetters))]
+    [NotifyPropertyChangedFor(nameof(TestProductCodeNumbers))]
+    [NotifyPropertyChangedFor(nameof(TestTitle))]
+    [NotifyPropertyChangedFor(nameof(TestRegion))]
+    [ObservableProperty]
+    private static NameValueCollection testItems = new()
+    {
+        [Patterns.ProductCode] = "BLES02127",
+        [Patterns.ProductCodeLetters] = "BLES",
+        [Patterns.ProductCodeNumbers] = "02127",
+        [Patterns.Title] = "Under Night In-Birth Exe:Late",
+        [Patterns.Region] = "EU",
+    };
+    public string TestProductCode => testItems[Patterns.ProductCode]!;
+    public string TestProductCodeLetters => testItems[Patterns.ProductCodeLetters]!;
+    public string TestProductCodeNumbers => testItems[Patterns.ProductCodeNumbers]!;
+    public string TestTitle => testItems[Patterns.Title]!;
+    public string TestRegion => testItems[Patterns.Region]!;
+    
+    [ObservableProperty] private string templatePreview = FormatPreview(Path.GetFullPath("."), defaultPattern, testItems);
     
     private readonly HashSet<char> InvalidFileNameChars = new(Path.GetInvalidFileNameChars());
 
-    private static readonly NameValueCollection TestItems = new()
-    {
-        [Patterns.ProductCode] = "BLUS12345",
-        [Patterns.ProductCodeLetters] = "BLUS",
-        [Patterns.ProductCodeNumbers] = "12345",
-        [Patterns.Title] = "My PS3 Game Can't Be This Cute",
-        [Patterns.Region] = "US",
-    };
-
-
-    private static string FormatPreview(string outDir, string value)
+    private static string FormatPreview(string outDir, string template, NameValueCollection items)
         => Path.Combine(
             Path.GetRelativePath(".", outDir),
-            PatternFormatter.Format(value.Trim(), TestItems)
+            PatternFormatter.Format(template.Trim(), items)
         );
+
+    partial void OnOutputDirChanged(string value)
+        => TemplatePreview = FormatPreview(value, DumpNameTemplate, TestItems);
     
     partial void OnDumpNameTemplateChanged(string value)
-        => TemplatePreview = FormatPreview(OutputDir, value);
+        => TemplatePreview = FormatPreview(OutputDir, value, TestItems);
+
+    partial void OnTestItemsChanged(NameValueCollection value)
+        => TemplatePreview = FormatPreview(OutputDir, DumpNameTemplate, value);
+   
 }
