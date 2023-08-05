@@ -42,7 +42,7 @@ public partial class ViewModelBase: ObservableObject
     
     
     [RelayCommand]
-    private void OpenUrl(string url)
+    private static void OpenUrl(string url)
     {
         ProcessStartInfo psi = OperatingSystem.IsWindows()
             ? new() { FileName = url, UseShellExecute = true, }

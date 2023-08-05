@@ -2,7 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
+using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Ps3DiscDumper;
 using Ps3DiscDumper.Utils;
 
@@ -63,4 +68,46 @@ public partial class SettingsViewModel: ViewModelBase
 
     partial void OnTestItemsChanged(NameValueCollection value)
         => TemplatePreview = FormatPreview(OutputDir, DumpNameTemplate, value);
+
+    [RelayCommand]
+    private void ResetTemplate() => DumpNameTemplate = defaultPattern;
+
+    [RelayCommand]
+    private async Task SelectFolderAsync(string purpose)
+    {
+        var curSelectedPath = purpose switch
+        {
+            "output" => OutputDir,
+            "ird" => IrdDir,
+            _ => throw new NotImplementedException()
+        };
+        var itemsType = purpose switch
+        {
+            "output" => "disc dumps",
+            "ird" => "cached disc keys",
+            _ => throw new NotImplementedException()
+        };
+        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime
+            {
+                MainWindow.StorageProvider: { } sp
+            })
+            return;
+        
+        var curDir = await sp.TryGetFolderFromPathAsync(curSelectedPath).ConfigureAwait(false);
+        var result = await sp.OpenFolderPickerAsync(new()
+        {
+            SuggestedStartLocation = curDir,
+            Title = "Please select a folder to save " + itemsType,
+        });
+        if (result is [var newDir])
+        {
+            var newPath = newDir.Path.IsFile
+                ? newDir.Path.LocalPath
+                : newDir.Path.ToString();
+            if (purpose is "output")
+                OutputDir = newPath;
+            else if (purpose is "ird")
+                IrdDir = newPath;
+        }
+    }
 }
