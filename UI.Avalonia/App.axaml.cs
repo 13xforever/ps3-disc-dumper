@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform;
 using Avalonia.Styling;
 using UI.Avalonia.Utils;
 using UI.Avalonia.ViewModels;
@@ -37,6 +38,8 @@ public partial class App : Application
             desktop.MainWindow.Activated += OnActivated;
             desktop.MainWindow.Deactivated += OnDeactivated;
             desktop.MainWindow.ActualThemeVariantChanged += OnThemeChanged;
+            if (desktop.MainWindow.PlatformSettings is { } ps)
+                ps.ColorValuesChanged += OnPlatformColorsChanged;
 
             if (desktop is { MainWindow: { DataContext: MainWindowViewModel vm } w})
             {
@@ -78,12 +81,6 @@ public partial class App : Application
         if (sender is not Window { DataContext: MainWindowViewModel {CurrentPage: ViewModelBase vm} } window)
             return;
 
-        if (Current?.PlatformSettings?.GetColorValues() is {} pcv)
-        {
-            vm.SystemAccentColor1 = pcv.AccentColor1.ToString();
-            vm.SystemAccentColor2 = pcv.AccentColor2.ToString();
-            vm.SystemAccentColor3 = pcv.AccentColor3.ToString();
-        } 
         if (window.ActualThemeVariant == ThemeVariant.Light)
         {
             vm.TintColor = ThemeConsts.LightThemeTintColor;
@@ -98,5 +95,19 @@ public partial class App : Application
             vm.Layer2BackgroundColor = ThemeConsts.DarkThemeLayer2Background;
             vm.Layer2GroundedColor = ThemeConsts.DarkThemeLayer2Grounded;
         }
+    }
+    
+    
+    private void OnPlatformColorsChanged(object? sender, PlatformColorValues e)
+    {
+        if (Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime
+            {
+                MainWindow.DataContext: MainWindowViewModel { CurrentPage: ViewModelBase vm }
+            })
+            return;
+        
+        vm.SystemAccentColor1 = e.AccentColor1.ToString();
+        vm.SystemAccentColor2 = e.AccentColor2.ToString();
+        vm.SystemAccentColor3 = e.AccentColor3.ToString();
     }
 }
