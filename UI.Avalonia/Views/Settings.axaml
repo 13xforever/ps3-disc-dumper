@@ -20,9 +20,9 @@
             <!-- <TextBlock FontSize="28" FontWeight="SemiBold" Margin="0 0 0 12">Settings</TextBlock> -->
             
             <!-- output dir -->
-            <TextBlock FontWeight="SemiBold" Margin="0 0 0 8">Locations</TextBlock>
+            <TextBlock FontWeight="SemiBold">Locations</TextBlock>
             <Border Background="{Binding Layer2BackgroundColor}"
-                    CornerRadius="4" Padding="16"
+                    CornerRadius="4" Padding="16"  Margin="0 8 0 0"
                     BorderBrush="{Binding TintColor}" BorderThickness="1">
                 <Grid ColumnDefinitions="36,*,36">
                     <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
@@ -59,9 +59,9 @@
             </Border>
             
             <!-- pattern -->
-            <TextBlock FontWeight="SemiBold" Margin="0 36 0 8">Naming</TextBlock>
+            <TextBlock FontWeight="SemiBold" Margin="0 31 0 0">Naming</TextBlock>
             <Border Background="{Binding Layer2BackgroundColor}"
-                    CornerRadius="4 4 0 0" Padding="16" Margin="0 0 0 0"
+                    CornerRadius="4 4 0 0" Padding="16" Margin="0 8 0 0"
                     BorderBrush="{Binding TintColor}" BorderThickness="1 1 1 0">
                 <Grid ColumnDefinitions="36,*,100">
                     <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
@@ -118,6 +118,29 @@
                     </StackPanel>
                 </Grid>
             </Border>
+            
+            <!-- about -->
+            <TextBlock FontWeight="SemiBold" Margin="0 31 0 0">About this app</TextBlock>
+            <TextBlock Margin="0 12 0 0" Text="{Binding DumperVersion, StringFormat=PS3 Disc Dumper v{0}}"/>
+            <TextBlock Margin="0 8 0 0" Text="{Binding CurrentYear, StringFormat=© {0} 13xforever}"/>
+            <StackPanel Orientation="Horizontal" Margin="0 12 0 0">
+                <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="16"
+                           VerticalAlignment="Center" Margin="0 0 12 0" Text="{Binding HomeSymbol}"/>
+                <Button Padding="0"
+                        Background="Transparent" Foreground="{Binding SystemAccentColor1}" Cursor="Hand"
+                        Command="{Binding OpenUrlCommand}" CommandParameter="{Binding ProjectUrl}">
+                    Project page
+                </Button>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0 8 0 0">
+                <TextBlock FontSize="16" FontFamily="{Binding SymbolFontFamily}"
+                           VerticalAlignment="Center" Margin="0 0 12 0" Text="{Binding FeedbackSymbol}"/>
+                <Button Padding="0"
+                        Background="Transparent" Foreground="{Binding SystemAccentColor1}" Cursor="Hand"
+                        Command="{Binding OpenUrlCommand}" CommandParameter="{Binding SubmitIssueUrl}">
+                    Give feedback
+                </Button>
+            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

@@ -1,17 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Ps3DiscDumper;
 using Ps3DiscDumper.Utils;
 
 namespace UI.Avalonia.ViewModels;
 
 public partial class SettingsViewModel: ViewModelBase
 {
-    public SettingsViewModel()
-    {
-        pageTitle = "Settings";
-    }
+    public SettingsViewModel() => pageTitle = "Settings";
 
     private const string defaultPattern = $"%{Patterns.Title}% [%{Patterns.ProductCode}%]";
     
@@ -21,6 +20,7 @@ public partial class SettingsViewModel: ViewModelBase
     [ObservableProperty] private bool discInfoExpanded = true;
     [ObservableProperty] private bool configured;
     
+    [ObservableProperty] private string templatePreview = FormatPreview(Path.GetFullPath("."), defaultPattern, testItems);
     [ObservableProperty] private string dumpNameTemplate = defaultPattern;
     [NotifyPropertyChangedFor(nameof(TestProductCode))]
     [NotifyPropertyChangedFor(nameof(TestProductCodeLetters))]
@@ -41,8 +41,11 @@ public partial class SettingsViewModel: ViewModelBase
     public string TestProductCodeNumbers => testItems[Patterns.ProductCodeNumbers]!;
     public string TestTitle => testItems[Patterns.Title]!;
     public string TestRegion => testItems[Patterns.Region]!;
-    
-    [ObservableProperty] private string templatePreview = FormatPreview(Path.GetFullPath("."), defaultPattern, testItems);
+
+    public string DumperVersion => Dumper.Version;
+    public string CurrentYear => DateTime.Now.Year.ToString();
+    public static string ProjectUrl => "https://github.com/13xforever/ps3-disc-dumper";
+    public static string SubmitIssueUrl => $"{ProjectUrl}/issues/new/choose";
     
     private readonly HashSet<char> InvalidFileNameChars = new(Path.GetInvalidFileNameChars());
 
@@ -60,5 +63,4 @@ public partial class SettingsViewModel: ViewModelBase
 
     partial void OnTestItemsChanged(NameValueCollection value)
         => TemplatePreview = FormatPreview(OutputDir, DumpNameTemplate, value);
-   
 }

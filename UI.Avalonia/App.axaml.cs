@@ -78,6 +78,12 @@ public partial class App : Application
         if (sender is not Window { DataContext: MainWindowViewModel {CurrentPage: ViewModelBase vm} } window)
             return;
 
+        if (Current?.PlatformSettings?.GetColorValues() is {} pcv)
+        {
+            vm.SystemAccentColor1 = pcv.AccentColor1.ToString();
+            vm.SystemAccentColor2 = pcv.AccentColor2.ToString();
+            vm.SystemAccentColor3 = pcv.AccentColor3.ToString();
+        } 
         if (window.ActualThemeVariant == ThemeVariant.Light)
         {
             vm.TintColor = ThemeConsts.LightThemeTintColor;

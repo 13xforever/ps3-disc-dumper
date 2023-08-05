@@ -73,16 +73,6 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     }
 
     [RelayCommand]
-    private void OpenUrl(string url)
-    {
-        ProcessStartInfo psi = OperatingSystem.IsWindows()
-            ? new() { FileName = url, UseShellExecute = true, }
-            : new() { FileName = "open", Arguments = url, };
-        psi.CreateNoWindow = true;
-        try { using var _ = Process.Start(psi); } catch { }
-    }
-
-    [RelayCommand]
     private void ScanDiscs() => Dispatcher.UIThread.Post(ScanDiscsAsync, DispatcherPriority.Background);
         /*
          => Dispatcher.UIThread.Post(() =>

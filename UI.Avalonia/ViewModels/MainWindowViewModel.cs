@@ -23,18 +23,8 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     [ObservableProperty] private bool updateIsPrerelease;
     [ObservableProperty] private string formattedUpdateInfoHeader = "";
     [ObservableProperty] private string formattedUpdateInfoBody = "";
-    [ObservableProperty] private string formattedUpdateInfoUrl = "https://github.com/13xforever/ps3-disc-dumper/releases/latest";
+    [ObservableProperty] private string formattedUpdateInfoUrl = $"{SettingsViewModel.ProjectUrl}/releases/latest";
     [ObservableProperty] private string formattedUpdateInfoVersion = "";
-
-    [RelayCommand]
-    private void OpenUrl(string url)
-    {
-        ProcessStartInfo psi = OperatingSystem.IsWindows()
-            ? new() { FileName = url, UseShellExecute = true, }
-            : new() { FileName = "open", Arguments = url, };
-        psi.CreateNoWindow = true;
-        try { using var _ = Process.Start(psi); } catch { }
-    }
 
     [RelayCommand]
     private void ToggleSettingsPage() => CurrentPage = CurrentPage is MainViewModel ? settingsPage : mainPage;

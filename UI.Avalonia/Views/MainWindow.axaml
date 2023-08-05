@@ -89,7 +89,7 @@
 							<TextBlock Text="{Binding FormattedUpdateInfoBody}" TextWrapping="Wrap" Width="400"
 							           Margin="2 0 2 0"/>
 							<Button Margin="2 12 2 4"
-							        Command="{Binding OpenUrlCommand}" CommandParameter="{Binding FormattedUpdateInfoUrl}"
+							        Command="{Binding CurrentPage.OpenUrlCommand}" CommandParameter="{Binding FormattedUpdateInfoUrl}"
 							>
 								<TextBlock Text="{Binding FormattedUpdateInfoVersion}"/>
 							</Button>
