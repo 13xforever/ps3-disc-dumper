@@ -99,6 +99,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         dumper = new(new());
         try
         {
+            //todo: preference for linux to specify custom mount point
             dumper.DetectDisc("",
                 d =>
                 {
@@ -128,7 +129,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         StepSubtitle = "Checking IRD and Redump data sets…";
         try
         {
-            await dumper.FindDiscKeyAsync(@".\ird").WaitAsync(dumper.Cts.Token).ConfigureAwait(false);
+            await dumper.FindDiscKeyAsync(settings.IrdDir).WaitAsync(dumper.Cts.Token).ConfigureAwait(false);
         }
         catch (Exception e)
         {
@@ -184,7 +185,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                 catch (TaskCanceledException) { }
             });
             monitor.Start();
-            await dumper.DumpAsync(@".\").WaitAsync(dumper.Cts.Token);
+            await dumper.DumpAsync(settings.OutputDir).WaitAsync(dumper.Cts.Token);
             threadCts.Cancel();
             monitor.Join(100);
         }
