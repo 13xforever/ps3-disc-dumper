@@ -33,7 +33,7 @@
                         <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
                                    HorizontalAlignment="Left"
                                    MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
-                                   Text="{Binding OutputDir}"/>
+                                   Text="{Binding OutputDirPreview}"/>
                     </StackPanel>
                     <Button Grid.Column="2" Background="Transparent"
                             VerticalAlignment="Center" HorizontalAlignment="Right"
@@ -56,7 +56,7 @@
                         <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
                                    HorizontalAlignment="Left"
                                    MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
-                                   Text="{Binding IrdDir}"/>
+                                   Text="{Binding IrdDirPreview}"/>
                     </StackPanel>
                     <Button Grid.Column="2" Background="Transparent"
                             VerticalAlignment="Center" HorizontalAlignment="Right"
@@ -93,7 +93,7 @@
             </Border>
             <Border Background="{Binding Layer2BackgroundColor}"
                     CornerRadius="0" Padding="16"
-                    BorderBrush="{Binding TintColor}" BorderThickness="1">
+                    BorderBrush="{Binding TintColor}" BorderThickness="1 1 1 0">
                 <Grid ColumnDefinitions="36,*,240">
                     <StackPanel Grid.Column="1">
                         <TextBlock>Live Preview</TextBlock>

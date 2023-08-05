@@ -27,7 +27,16 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     [ObservableProperty] private string formattedUpdateInfoVersion = "";
 
     [RelayCommand]
-    private void ToggleSettingsPage() => CurrentPage = CurrentPage is MainViewModel ? settingsPage : mainPage;
+    private void ToggleSettingsPage()
+    {
+        if (CurrentPage is MainViewModel)
+            CurrentPage = settingsPage;
+        else
+        {
+            SettingsProvider.Save();
+            CurrentPage = mainPage;
+        }
+    }
 
     internal async void CheckUpdatesAsync()
     {

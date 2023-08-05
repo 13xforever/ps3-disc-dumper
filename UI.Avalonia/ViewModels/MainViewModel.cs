@@ -26,7 +26,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private bool dumperIsReady;
     [ObservableProperty] private bool dumpingInProgress;
 
-    [ObservableProperty] private bool discInfoExpanded = true;
+    [ObservableProperty] private bool discInfoExpanded = SettingsProvider.Settings.ShowDetails;
     [ObservableProperty] private string productCode = "";
     [ObservableProperty] private string gameTitle = "";
     [ObservableProperty] private string discSizeInfo = "";
@@ -50,7 +50,10 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         ["U"] = "US",
     };
 
-    private Interaction<SettingsViewModel, bool> ShowUpdateInfoDialog { get; } = new();
+    partial void OnDiscInfoExpandedChanged(bool value)
+    {
+        SettingsProvider.Settings = SettingsProvider.Settings with { ShowDetails = value };
+    }
 
     [RelayCommand]
     private void ResetViewModel()

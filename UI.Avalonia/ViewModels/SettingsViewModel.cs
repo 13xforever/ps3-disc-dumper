@@ -16,17 +16,17 @@ namespace UI.Avalonia.ViewModels;
 public partial class SettingsViewModel: ViewModelBase
 {
     public SettingsViewModel() => pageTitle = "Settings";
-
-    private const string defaultPattern = $"%{Patterns.Title}% [%{Patterns.ProductCode}%]";
     
-    [ObservableProperty] private string outputDir = Path.GetFullPath(".");
-    [ObservableProperty] private string irdDir = Path.GetFullPath("ird");
+    [NotifyPropertyChangedFor(nameof(OutputDirPreview))]
+    [ObservableProperty] private string outputDir = SettingsProvider.Settings.OutputDir;
+    [NotifyPropertyChangedFor(nameof(IrdDirPreview))]
+    [ObservableProperty] private string irdDir = SettingsProvider.Settings.IrdDir;
 
-    [ObservableProperty] private bool discInfoExpanded = true;
-    [ObservableProperty] private bool configured;
+    public string OutputDirPreview => FormatPathPreview(OutputDir);
+    public string IrdDirPreview => FormatPathPreview(IrdDir);
     
-    [ObservableProperty] private string templatePreview = FormatPreview(Path.GetFullPath("."), defaultPattern, testItems);
-    [ObservableProperty] private string dumpNameTemplate = defaultPattern;
+    [ObservableProperty] private string templatePreview = FormatPreview(SettingsProvider.Settings.OutputDir, SettingsProvider.Settings.DumpNameTemplate, testItems);
+    [ObservableProperty] private string dumpNameTemplate = SettingsProvider.Settings.DumpNameTemplate;
     [NotifyPropertyChangedFor(nameof(TestProductCode))]
     [NotifyPropertyChangedFor(nameof(TestProductCodeLetters))]
     [NotifyPropertyChangedFor(nameof(TestProductCodeNumbers))]
@@ -51,26 +51,43 @@ public partial class SettingsViewModel: ViewModelBase
     public string CurrentYear => DateTime.Now.Year.ToString();
     public static string ProjectUrl => "https://github.com/13xforever/ps3-disc-dumper";
     public static string SubmitIssueUrl => $"{ProjectUrl}/issues/new/choose";
-    
-    private readonly HashSet<char> InvalidFileNameChars = new(Path.GetInvalidFileNameChars());
+
+    private static string FormatPathPreview(string path)
+    {
+        if (path is "."
+            || path.StartsWith("./")
+            || OperatingSystem.IsWindows() && path.StartsWith(@".\"))
+            return "<current folder>" + path[1..];
+        return Path.IsPathRooted(path)
+            ? path
+            : Path.Combine("<current folder>", path);
+    }
 
     private static string FormatPreview(string outDir, string template, NameValueCollection items)
-        => Path.Combine(
-            Path.GetRelativePath(".", outDir),
-            PatternFormatter.Format(template.Trim(), items)
-        );
+        => PatternFormatter.Format(template.Trim(), items);
 
     partial void OnOutputDirChanged(string value)
-        => TemplatePreview = FormatPreview(value, DumpNameTemplate, TestItems);
-    
+    {
+        TemplatePreview = FormatPreview(value, DumpNameTemplate, TestItems);
+        SettingsProvider.Settings = SettingsProvider.Settings with { OutputDir = value};
+    }
+
+    partial void OnIrdDirChanged(string value)
+    {
+        SettingsProvider.Settings = SettingsProvider.Settings with { IrdDir = value };
+    }
+
     partial void OnDumpNameTemplateChanged(string value)
-        => TemplatePreview = FormatPreview(OutputDir, value, TestItems);
+    {
+        TemplatePreview = FormatPreview(OutputDir, value, TestItems);
+        SettingsProvider.Settings = SettingsProvider.Settings with { DumpNameTemplate = value };
+    }
 
     partial void OnTestItemsChanged(NameValueCollection value)
         => TemplatePreview = FormatPreview(OutputDir, DumpNameTemplate, value);
 
     [RelayCommand]
-    private void ResetTemplate() => DumpNameTemplate = defaultPattern;
+    private void ResetTemplate() => DumpNameTemplate = Settings.DefaultPattern;
 
     [RelayCommand]
     private async Task SelectFolderAsync(string purpose)
