@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -48,8 +45,8 @@ public partial class ViewModelBase: ObservableObject
     public string PinSymbol => UseSegoeIcons ? "\ue718" : "\uf08d";
     public string ValidationErrorSymbol => UseSegoeIcons ? "\ue783" : "\uf06a";
     public string ValidationWarningSymbol => UseSegoeIcons ? "\ue7ba" : "\uf071";
-    
-    [ObservableProperty] protected string pageTitle = "PS3 Disc Dumper";
+
+    [ObservableProperty] protected string pageTitle = "PS3 Disc Dumper v" + Dumper.Version;
     [ObservableProperty] private bool canEditSettings = true;
     
     [RelayCommand]

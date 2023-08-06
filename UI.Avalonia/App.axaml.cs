@@ -7,6 +7,7 @@ using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Styling;
 using Ps3DiscDumper;
+using Ps3DiscDumper.Utils;
 using UI.Avalonia.Utils.ColorPalette;
 using UI.Avalonia.ViewModels;
 using UI.Avalonia.Views;
@@ -33,17 +34,22 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var vm = new MainWindowViewModel();
-            
-            var systemFonts = FontManager.Current.SystemFonts;
-            if (systemFonts.TryGetGlyphTypeface("Segoe Fluent Icons", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-                vm.CurrentPage.SymbolFontFamily = new("Segoe Fluent Icons");
-            if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Small", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-                vm.CurrentPage.SmallFontFamily = new("Segoe UI Variable Small");
-            if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Display", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-                vm.CurrentPage.LargeFontFamily = new("Segoe UI Variable Display");
-
-            var w = new MainWindow { DataContext = vm, };
+            var safeToRun = SecurityEx.IsSafe(desktop.Args);
+            Window w;
+            ViewModelBase vm;
+            if (safeToRun)
+            {
+                var mainViewModel = new MainWindowViewModel();
+                vm = mainViewModel.CurrentPage;
+                SetSymbolFont(vm);
+                w = new MainWindow { DataContext = mainViewModel };
+            }
+            else
+            {
+                vm = new ErrorStubViewModel();
+                SetSymbolFont(vm);
+                w = new ErrorStub { DataContext = vm };
+            }
             desktop.MainWindow = w;
             desktop.MainWindow.Activated += OnActivated;
             desktop.MainWindow.Deactivated += OnDeactivated;
@@ -51,14 +57,27 @@ public partial class App : Application
             if (w.PlatformSettings is { } ps)
                 ps.ColorValuesChanged += OnPlatformColorsChanged;
 
-            vm.CurrentPage.MicaEnabled = isMicaCapable.Value;
-            vm.CurrentPage.AcrylicEnabled = w.ActualTransparencyLevel == WindowTransparencyLevel.AcrylicBlur;
+            vm.MicaEnabled = isMicaCapable.Value;
+            vm.AcrylicEnabled = w.ActualTransparencyLevel == WindowTransparencyLevel.AcrylicBlur;
+
+            var systemFonts = FontManager.Current.SystemFonts;
             if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Text", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
                 w.FontFamily = new("Segoe UI Variable Text");
             else if (systemFonts.TryGetGlyphTypeface("Segoe UI", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
                 w.FontFamily = new("Segoe UI");
         }
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static void SetSymbolFont(ViewModelBase vm)
+    {
+        var systemFonts = FontManager.Current.SystemFonts;
+        if (systemFonts.TryGetGlyphTypeface("Segoe Fluent Icons", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
+            vm.SymbolFontFamily = new("Segoe Fluent Icons");
+        if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Small", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
+            vm.SmallFontFamily = new("Segoe UI Variable Small");
+        if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Display", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
+            vm.LargeFontFamily = new("Segoe UI Variable Display");
     }
 
     private void OnActivated(object? sender, EventArgs e)
@@ -85,10 +104,16 @@ public partial class App : Application
 
     internal static void OnThemeChanged(object? sender, EventArgs e)
     {
-        if (sender is not Window { DataContext: MainWindowViewModel {CurrentPage: ViewModelBase vm} } window)
+        Window w;
+        ViewModelBase vm;
+        if (sender is Window { DataContext: MainWindowViewModel { CurrentPage: {} vm1 } } w1)
+            (w, vm) = (w1, vm1);
+        else if (sender is Window { DataContext: ViewModelBase vm2 } w2)
+            (w, vm) = (w2, vm2);
+        else
             return;
 
-        if (window.ActualThemeVariant == ThemeVariant.Light)
+        if (w.ActualThemeVariant == ThemeVariant.Light)
         {
             vm.TintColor = ThemeConsts.LightThemeTintColor;
             vm.TintOpacity = ThemeConsts.LightThemeTintOpacity;
@@ -97,7 +122,7 @@ public partial class App : Application
             vm.Layer2GroundedColor = ThemeConsts.LightThemeLayer2Grounded;
             vm.ColorPalette = ThemeConsts.Light;
         }
-        else if (window.ActualThemeVariant == ThemeVariant.Dark)
+        else if (w.ActualThemeVariant == ThemeVariant.Dark)
         {
             vm.TintColor = ThemeConsts.DarkThemeTintColor;
             vm.TintOpacity = ThemeConsts.DarkThemeTintOpacity;
@@ -107,8 +132,8 @@ public partial class App : Application
             vm.ColorPalette = ThemeConsts.Dark;
         }
     }
-    
-    
+
+
     internal static void OnPlatformColorsChanged(object? sender, PlatformColorValues e)
     {
         if (Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime

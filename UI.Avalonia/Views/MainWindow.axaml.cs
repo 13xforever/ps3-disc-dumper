@@ -29,7 +29,7 @@ public partial class MainWindow : Window
 
         base.Show();
         App.OnThemeChanged(this, EventArgs.Empty);
-        App.OnPlatformColorsChanged(this, PlatformSettings?.GetColorValues() ?? new PlatformColorValues()
+        App.OnPlatformColorsChanged(this, PlatformSettings?.GetColorValues() ?? new PlatformColorValues
         {
             AccentColor1 = Color.Parse(ThemeConsts.AccentColor),
             AccentColor2 = Color.Parse(ThemeConsts.AccentColor),

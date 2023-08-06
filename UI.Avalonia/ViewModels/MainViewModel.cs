@@ -18,12 +18,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     
     public MainViewModel(): this(new()){}
     
-    public MainViewModel(SettingsViewModel settings)
-    {
-        this.settings = settings;
-        pageTitle = "PS3 Disc Dumper v" + Dumper.Version;
-        Log.Info(pageTitle);
-    }
+    public MainViewModel(SettingsViewModel settings) => this.settings = settings;
 
     [ObservableProperty] private string stepTitle = "Please insert a PS3 game disc";
     [ObservableProperty] private string stepSubtitle = "";
