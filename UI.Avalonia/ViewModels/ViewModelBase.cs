@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -60,7 +63,13 @@ public partial class ViewModelBase: ObservableObject
     }
 
     partial void OnEnableTransparencyChanged(bool value)
-        => SettingsProvider.Settings = SettingsProvider.Settings with { EnableTransparency = value };
+    {
+        SettingsProvider.Settings = SettingsProvider.Settings with { EnableTransparency = value };
+        /* // seems to be broken atm, only works at the time the window is created
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: Window w })
+            RenderOptions.SetTextRenderingMode(w, value ? TextRenderingMode.Antialias : TextRenderingMode.SubpixelAntialias);
+        */
+    }
 
     partial void OnStayOnTopChanged(bool value)
         => SettingsProvider.Settings = SettingsProvider.Settings with { StayOnTop = value };

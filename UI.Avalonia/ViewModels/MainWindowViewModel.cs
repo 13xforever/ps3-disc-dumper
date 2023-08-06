@@ -40,7 +40,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     internal async void CheckUpdatesAsync()
     {
-        var (ver, rel) = await Dumper.CheckUpdatesAsync();
+        var (ver, rel) = await Dumper.CheckUpdatesAsync().ConfigureAwait(false);
         if (ver is null || rel is null)
             return;
 

@@ -6,7 +6,6 @@
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
              x:Class="UI.Avalonia.Views.Settings"
              x:DataType="vm:SettingsViewModel"
-             RenderOptions.TextRenderingMode="Antialias"
              Loaded="OnLoad"
              >
 

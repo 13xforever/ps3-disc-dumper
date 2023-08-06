@@ -17,6 +17,7 @@
         
 		Background="Transparent"
         TransparencyLevelHint="Mica, AcrylicBlur, None"
+        RenderOptions.TextRenderingMode="Antialias"
         
 		Icon="/Assets/icon.ico"
         Title="{Binding CurrentPage.PageTitle}"
@@ -70,13 +71,13 @@
 		            IsVisible="{Binding InSettings}"
 		            Command="{Binding ToggleSettingsPageCommand}"
 		    >
-			    <TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="12" RenderOptions.TextRenderingMode="Antialias"
+			    <TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="12"
 			               Text="{Binding CurrentPage.BackSymbol}"
 			               Foreground="{Binding CurrentPage.DimTextColor}"/>
 		    </Button>
 		    <!-- window title -->
 			<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="11 11 0 0"
-		               FontFamily="{Binding CurrentPage.SmallFontFamily}" FontSize="12" RenderOptions.TextRenderingMode="Antialias"
+		               FontFamily="{Binding CurrentPage.SmallFontFamily}" FontSize="12"
 		               IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=IsExtendedIntoWindowDecorations}"
 		               Text="{Binding CurrentPage.PageTitle}"/>
 	    </StackPanel>
@@ -88,7 +89,7 @@
 		            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
 		            IsVisible="{Binding UpdateInfo, Converter={x:Static ObjectConverters.IsNotNull}}"
 		    >
-				<TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="18" RenderOptions.TextRenderingMode="Antialias"
+				<TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="18"
 		                   Text="{Binding CurrentPage.UpdateSymbol}"
 		                   Foreground="{Binding UpdateIsPrerelease, Converter={StaticResource UpdateColorConverter}}"/>
 				<Button.Flyout>
@@ -114,7 +115,7 @@
 		            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
 		            Command="{Binding ToggleSettingsPageCommand}"
 		    >
-			    <TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="18" RenderOptions.TextRenderingMode="Antialias"
+			    <TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="18"
 			               Text="{Binding CurrentPage.SettingsSymbol}"
 			               Foreground="{Binding CurrentPage.DimTextColor}"/>
 			    <Button.IsVisible>

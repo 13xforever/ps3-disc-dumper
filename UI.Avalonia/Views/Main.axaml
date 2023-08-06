@@ -15,7 +15,7 @@
 
     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="16">
         <!-- top -->
-        <TextBlock FontSize="28" FontWeight="SemiBold" RenderOptions.TextRenderingMode="Antialias"
+        <TextBlock FontSize="28" FontWeight="SemiBold"
                    Margin="0 12 0 0" TextAlignment="Center" VerticalAlignment="Bottom"
                    Text="{Binding StepTitle}"/>
         <StackPanel Margin="0 8 0 0" Orientation="Horizontal" HorizontalAlignment="Center">
@@ -29,7 +29,7 @@
 	                   Foreground="{Binding ColorPalette.StatusWarningForeground1, Converter={StaticResource BrushConverter}}"
 	                   Text="{Binding ValidationWarningSymbol}"
 	                   IsVisible="{Binding LastOperationWarning}"/>
-	        <TextBlock RenderOptions.TextRenderingMode="Antialias" Text="{Binding StepSubtitle}">
+	        <TextBlock Text="{Binding StepSubtitle}">
 		        <TextBlock.IsVisible>
 			        <MultiBinding Converter="{x:Static BoolConverters.Or}">
 				        <Binding Path="StepSubtitle" Converter="{x:Static StringConverters.IsNotNullOrEmpty}"/>
@@ -90,7 +90,7 @@
                      IsVisible="{Binding DumpingInProgress}"/>
         <TextBlock Width="500" Margin="0 8"
                    TextAlignment="Center"
-                   FontFamily="{Binding SmallFontFamily}" FontSize="10" RenderOptions.TextRenderingMode="Antialias"
+                   FontFamily="{Binding SmallFontFamily}" FontSize="10"
                    Foreground="{Binding DimTextColor}"
                    IsVisible="{Binding DumpingInProgress}"
                    Text="{Binding ProgressInfo}"
