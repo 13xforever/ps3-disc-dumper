@@ -21,7 +21,7 @@
         
         <!-- output dir -->
         <TextBlock FontWeight="SemiBold">Locations</TextBlock>
-        <Border Background="{Binding Layer2BackgroundColor}"
+        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
                 CornerRadius="4" Padding="16"  Margin="0 8 0 0"
                 BorderBrush="{Binding TintColor}" BorderThickness="1">
             <Grid ColumnDefinitions="36,*,36">
@@ -44,7 +44,7 @@
         </Border>
         
         <!-- ird dir -->
-        <Border Background="{Binding Layer2BackgroundColor}"
+        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
                 CornerRadius="4" Padding="16" Margin="0 3 0 0"
                 BorderBrush="{Binding TintColor}" BorderThickness="1">
             <Grid ColumnDefinitions="36,*,36">
@@ -68,7 +68,7 @@
         
         <!-- pattern -->
         <TextBlock FontWeight="SemiBold" Margin="0 32 0 0">Naming</TextBlock>
-        <Border Background="{Binding Layer2BackgroundColor}"
+        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
                 CornerRadius="4 4 0 0" Padding="16" Margin="0 8 0 0"
                 BorderBrush="{Binding TintColor}" BorderThickness="1 1 1 0">
             <Grid ColumnDefinitions="36,*,100">
@@ -91,7 +91,7 @@
                 </Button>
             </Grid>
         </Border>
-        <Border Background="{Binding Layer2BackgroundColor}"
+        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
                 CornerRadius="0" Padding="16"
                 BorderBrush="{Binding TintColor}" BorderThickness="1 1 1 0">
             <Grid ColumnDefinitions="36,*,240">
@@ -107,7 +107,7 @@
                          Text="{Binding DumpNameTemplate}"/>
             </Grid>
         </Border>
-        <Border Background="{Binding Layer2BackgroundColor}"
+        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
                 CornerRadius="0 0 4 4" Padding="16"
                 BorderBrush="{Binding TintColor}" BorderThickness="1">
             <Grid ColumnDefinitions="36,200,*">
@@ -131,7 +131,7 @@
         <!-- window options -->
         <TextBlock FontWeight="SemiBold" Margin="0 32 0 0">Personalization</TextBlock>
         <!-- stay on top -->
-        <Border Background="{Binding Layer2BackgroundColor}"
+        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
                 CornerRadius="4" Padding="16" Margin="0 8 0 0"
                 BorderBrush="{Binding TintColor}" BorderThickness="1">
             <Grid ColumnDefinitions="36,*,100">
@@ -151,7 +151,7 @@
             </Grid>
         </Border>
         <!-- transparency -->
-        <Border Background="{Binding Layer2BackgroundColor}"
+        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
                 CornerRadius="4" Padding="16" Margin="0 3 0 0"
                 BorderBrush="{Binding TintColor}" BorderThickness="1">
             <Border.IsVisible>
