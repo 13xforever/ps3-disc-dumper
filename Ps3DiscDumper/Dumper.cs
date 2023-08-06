@@ -350,7 +350,12 @@ public class Dumper: IDisposable
             try
             {
                 Log.Trace($"Checking physical drive {drive}...");
-                await using var discStream = File.Open(drive, FileMode.Open, FileAccess.Read, FileShare.Read);
+                await using var discStream = File.Open(drive, new FileStreamOptions
+                {
+                    Mode = FileMode.Open,
+                    Access = FileAccess.Read,
+                    Options = FileOptions.Asynchronous | FileOptions.SequentialScan
+                });
                 var tmpDiscReader = new CDReader(discStream, true, true);
                 if (tmpDiscReader.FileExists("PS3_DISC.SFB"))
                 {

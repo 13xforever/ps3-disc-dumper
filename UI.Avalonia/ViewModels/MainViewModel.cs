@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,13 +9,15 @@ using CommunityToolkit.Mvvm.Input;
 using IrdLibraryClient;
 using Ps3DiscDumper;
 using Ps3DiscDumper.Utils;
-using ReactiveUI;
 
 namespace UI.Avalonia.ViewModels;
 
 public partial class MainViewModel : ViewModelBase, IDisposable
 {
     private readonly SettingsViewModel settings;
+    
+    public MainViewModel(): this(new()){}
+    
     public MainViewModel(SettingsViewModel settings)
     {
         this.settings = settings;
@@ -26,6 +27,10 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     [ObservableProperty] private string stepTitle = "Please insert a PS3 game disc";
     [ObservableProperty] private string stepSubtitle = "";
+    [ObservableProperty] private bool lastOperationSuccess = true;
+    [ObservableProperty] private string errorTitle = "";
+    [ObservableProperty] private string errorMessage = "";
+    [ObservableProperty] private string startButtonCaption = "Start";
 
     [ObservableProperty] private bool foundDisc;
     [ObservableProperty] private bool dumperIsReady;
@@ -65,6 +70,10 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     {
         StepTitle = "Please insert a PS3 game disc";
         StepSubtitle = "";
+        LastOperationSuccess = true;
+        ErrorTitle = "";
+        ErrorMessage = "";
+        StartButtonCaption = "Start";
         FoundDisc = false;
         DumperIsReady = false;
         DumpingInProgress = false;
@@ -96,6 +105,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     
     private async void ScanDiscsAsync()
     {
+        ResetViewModel();
+        
         FoundDisc = true;
         StepTitle = "Scanning disc drives";
         StepSubtitle = "Checking the inserted disc…";
@@ -103,7 +114,6 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         dumper = new(new());
         try
         {
-            //todo: preference for linux to specify custom mount point
             dumper.DetectDisc("",
                 d =>
                 {
@@ -125,6 +135,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             return;
         }
 
+        Success = null;
+        Validated = null;
         ProductCode = dumper.ProductCode;
         GameTitle = dumper.Title;
         DiscSizeInfo = $"{dumper.TotalFileSize.AsStorageUnit()} ({dumper.TotalFileCount} files)";
@@ -140,9 +152,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             Log.Error(e, "Failed to find a matching key");
             dumper.Cts.Cancel();
             FoundDisc = false;
-            //MessageBox.Show(e.Message, "Disc check error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //ResetViewModel();
-            //rescan
+            StepTitle = "Disc check error";
+            StepSubtitle = e.Message;
+            LastOperationSuccess = false;
             return;
         }
         StepSubtitle = "";
@@ -151,7 +163,18 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         else
             DiscKeyName = "No match found";
 
-        StepTitle = "Ready to dump";
+        var destination = Path.Combine(settings.OutputDir, dumper.OutputDir);
+        if (Directory.Exists(destination))
+        {
+            StepTitle = "Dump already exists";
+            StepSubtitle = "All existing files will be overwritten";
+            StartButtonCaption = "Overwrite";
+            LastOperationSuccess = false;
+        }
+        else
+        {
+            StepTitle = "Ready to dump";
+        }
         DumperIsReady = true;
     }
     
@@ -159,12 +182,15 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     {
         if (dumper is null)
         {
-            //message box
+            StepTitle = "Unexpected error occured";
+            StepSubtitle = "Please restart the application";
+            LastOperationSuccess = false;
             return;
         }
 
         StepTitle = "Dumping the disc";
         StepSubtitle = "Decrypting and copying the data…";
+        LastOperationSuccess = true;
         DumpingInProgress = true;
         CanEditSettings = false;
         
@@ -196,8 +222,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         catch (Exception e)
         {
             Log.Error(e, "Failed to dump the disc");
-            // todo
-            //MessageBox.Show(e.Message, "Disc dumping error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            StepTitle = "Failed to dump the disc";
+            StepSubtitle = e.Message;
+            LastOperationSuccess = false;
             dumper.Cts.Cancel();
         }
 
@@ -216,7 +243,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         {
             StepTitle = "Files are decrypted and copied";
             if (Success == true)
-                StepSubtitle = "Disc copy matches another verified copy";
+                StepSubtitle = "Disc copy matches a verified copy";
             else
                 StepSubtitle = "No reading errors were detected";
         }

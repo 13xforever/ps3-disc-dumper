@@ -13,13 +13,13 @@
 		<vm:MainViewModel/>
 	</Design.DataContext>
 
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="16">
         <!-- top -->
         <TextBlock FontSize="28" FontWeight="SemiBold" RenderOptions.TextRenderingMode="Antialias"
-                   Margin="0 0 8 0" TextAlignment="Center"
+                   Margin="0 12 0 0" TextAlignment="Center" VerticalAlignment="Bottom"
                    Text="{Binding StepTitle}"/>
-        <TextBlock RenderOptions.TextRenderingMode="Antialias"
-                   TextAlignment="Center"
+        <TextBlock TextAlignment="Center" RenderOptions.TextRenderingMode="Antialias"
+                   Margin="0 8 0 0"
                    Text="{Binding StepSubtitle}">
 	        <TextBlock.IsVisible>
 		        <MultiBinding Converter="{x:Static BoolConverters.Or}">
@@ -30,7 +30,7 @@
         </TextBlock>
         
         <!-- middle -->
-        <Expander IsExpanded="{Binding DiscInfoExpanded}" Margin="20" Width="500" CornerRadius="4"
+        <Expander IsExpanded="{Binding DiscInfoExpanded}" Margin="0 24" Width="500" CornerRadius="4"
                   Background="{Binding Layer2BackgroundColor}"
                   IsVisible="{Binding ProductCode, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
 	        <Expander.Header >
@@ -39,7 +39,7 @@
 			        <!-- PrefixCharacterEllipsis or CharacterEllipsis -->
 			        <TextBlock Text="{Binding GameTitle}" MaxWidth="414" ClipToBounds="True" TextTrimming="CharacterEllipsis"/>
 			        <TextBlock FontFamily="{Binding SymbolFontFamily}"
-			                   Margin="6 0 0 0" VerticalAlignment="Center"
+			                   Margin="8 0 0 0" VerticalAlignment="Center"
 			                   Foreground="{Binding Success, Converter={StaticResource ValidationColorConverter}}"
 			                   Text="{Binding Success, Converter={StaticResource ValidationSymbolConverter}}"/>
 		        </StackPanel>
@@ -55,13 +55,13 @@
         </Expander>
         
         <!-- bottom -->
-        <Button HorizontalAlignment="Center" Width="200" Height="48"
+        <Button HorizontalAlignment="Center" Width="200" Height="48" Margin="0"
                 HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                 Background="{Binding AccentColor}" Foreground="White"
                 IsVisible="{Binding !FoundDisc}"
                 Command="{Binding ScanDiscsCommand}"
 	    >Rescan disc devices</Button>
-        <Button HorizontalAlignment="Center" Width="200" Height="48"
+        <Button HorizontalAlignment="Center" Width="200" Height="48" Margin="0"
                 HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                 Background="{Binding AccentColor}" Foreground="White"
                 Command="{Binding DumpDiscCommand}">
@@ -71,15 +71,14 @@
 			        <Binding Path="!DumpingInProgress"></Binding>
 		        </MultiBinding>
 	        </Button.IsVisible>
-	        Start
+	        <TextBlock Text="{Binding StartButtonCaption}"/>
         </Button>
         
-        <ProgressBar Width="500"
+        <ProgressBar Width="500" Margin="0"
                      ShowProgressText="True" Foreground="{Binding AccentColor}"
-                     IsIndeterminate="{Binding !Progress}"
                      Minimum="0" Maximum="10000" Value="{Binding Progress}"
                      IsVisible="{Binding DumpingInProgress}"/>
-        <TextBlock Width="500" Margin="6"
+        <TextBlock Width="500" Margin="0 8"
                    TextAlignment="Center"
                    FontFamily="{Binding SmallFontFamily}" FontSize="10" RenderOptions.TextRenderingMode="Antialias"
                    Foreground="{Binding DimTextColor}"
