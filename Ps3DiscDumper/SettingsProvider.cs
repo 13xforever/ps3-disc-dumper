@@ -46,8 +46,12 @@ public static class SettingsProvider
             if (!Directory.Exists(settingsFolder))
                 Directory.CreateDirectory(settingsFolder);
 
+            var settingsContent = JsonSerializer.Serialize(tmp, serializerOptions);
+            Log.Info($"Updated settings: {settingsContent}");
             using var file = File.Open(settingsPath, FileMode.Create, FileAccess.Write, FileShare.Read);
-            JsonSerializer.Serialize(file, tmp, serializerOptions);
+            using var writer = new StreamWriter(file);
+            writer.Write(settingsContent);
+            writer.Flush();
             file.Flush();
             savedSettings = tmp;
         }

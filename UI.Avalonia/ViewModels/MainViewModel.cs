@@ -17,7 +17,12 @@ namespace UI.Avalonia.ViewModels;
 public partial class MainViewModel : ViewModelBase, IDisposable
 {
     private readonly SettingsViewModel settings;
-    public MainViewModel(SettingsViewModel settings) => this.settings = settings;
+    public MainViewModel(SettingsViewModel settings)
+    {
+        this.settings = settings;
+        pageTitle = "PS3 Disc Dumper v" + Dumper.Version;
+        Log.Info(pageTitle);
+    }
 
     [ObservableProperty] private string stepTitle = "Please insert a PS3 game disc";
     [ObservableProperty] private string stepSubtitle = "";
@@ -58,7 +63,6 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     [RelayCommand]
     private void ResetViewModel()
     {
-        PageTitle = "PS3 Disc Dumper v" + Dumper.Version;
         StepTitle = "Please insert a PS3 game disc";
         StepSubtitle = "";
         FoundDisc = false;
@@ -133,7 +137,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         }
         catch (Exception e)
         {
-            Log.Error(e, "Failed to find matching key");
+            Log.Error(e, "Failed to find a matching key");
             dumper.Cts.Cancel();
             FoundDisc = false;
             //MessageBox.Show(e.Message, "Disc check error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -192,6 +196,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         catch (Exception e)
         {
             Log.Error(e, "Failed to dump the disc");
+            // todo
             //MessageBox.Show(e.Message, "Disc dumping error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             dumper.Cts.Cancel();
         }
@@ -211,13 +216,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         {
             StepTitle = "Files are decrypted and copied";
             if (Success == true)
-            {
                 StepSubtitle = "Disc copy matches another verified copy";
-            }
             else
-            {
                 StepSubtitle = "No reading errors were detected";
-            }
         }
     }
 

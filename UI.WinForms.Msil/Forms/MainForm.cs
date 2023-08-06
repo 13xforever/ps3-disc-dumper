@@ -350,7 +350,7 @@ public partial class MainForm : Form
         }
         catch (Exception e)
         {
-            Log.Error(e, "Failed to find matching key");
+            Log.Error(e, "Failed to find a matching key");
             //                MessageBox.Show(e.Message, "Disc check error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             dumper.Cts.Cancel();
         }
