@@ -53,7 +53,8 @@
 	    <ExperimentalAcrylicBorder IsHitTestVisible="False">
 		    <ExperimentalAcrylicBorder.IsVisible>
 			    <MultiBinding Converter="{x:Static BoolConverters.And}">
-				    <Binding  Path="!CurrentPage.EnableTransparency"/>
+				    <Binding  Path="CurrentPage.EnableTransparency"/>
+				    <Binding  Path="!CurrentPage.MicaEnabled"/>
 				    <Binding  Path="CurrentPage.AcrylicEnabled"/>
 			    </MultiBinding>
 		    </ExperimentalAcrylicBorder.IsVisible>
@@ -62,7 +63,7 @@
 				    BackgroundSource="Digger"
 				    TintColor="{Binding CurrentPage.TintColor, Converter={StaticResource ColorConverter}}"
 				    TintOpacity="{Binding CurrentPage.TintOpacity}"
-				    MaterialOpacity="0.69"
+				    MaterialOpacity="0.5"
 				/>
 		    </ExperimentalAcrylicBorder.Material>
 	    </ExperimentalAcrylicBorder>

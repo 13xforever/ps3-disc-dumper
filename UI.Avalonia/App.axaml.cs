@@ -101,7 +101,7 @@ public partial class App : Application
     }
     
     
-    private void OnPlatformColorsChanged(object? sender, PlatformColorValues e)
+    internal static void OnPlatformColorsChanged(object? sender, PlatformColorValues e)
     {
         if (Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime
             {

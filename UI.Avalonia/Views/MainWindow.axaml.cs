@@ -5,8 +5,10 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
+using Avalonia.Platform;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using UI.Avalonia.Utils;
 using UI.Avalonia.ViewModels;
 
 namespace UI.Avalonia.Views;
@@ -40,6 +42,12 @@ public partial class MainWindow : Window
         }
         base.Show();
         App.OnThemeChanged(this, EventArgs.Empty);
+        App.OnPlatformColorsChanged(this, PlatformSettings?.GetColorValues() ?? new PlatformColorValues()
+        {
+            AccentColor1 = Color.Parse(ThemeConsts.AccentColor),
+            AccentColor2 = Color.Parse(ThemeConsts.AccentColor),
+            AccentColor3 = Color.Parse(ThemeConsts.AccentColor),
+        });
     }
 
     private void OnLoaded(object? sender, RoutedEventArgs e)
