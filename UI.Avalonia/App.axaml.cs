@@ -6,7 +6,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
 using Avalonia.Styling;
 using Ps3DiscDumper;
-using UI.Avalonia.Utils;
+using UI.Avalonia.Utils.ColorPalette;
 using UI.Avalonia.ViewModels;
 using UI.Avalonia.Views;
 
@@ -89,6 +89,7 @@ public partial class App : Application
             vm.DimTextColor = ThemeConsts.LightThemeDimGray;
             vm.Layer2BackgroundColor = ThemeConsts.LightThemeLayer2Background;
             vm.Layer2GroundedColor = ThemeConsts.LightThemeLayer2Grounded;
+            vm.ColorPalette = ThemeConsts.Light;
         }
         else if (window.ActualThemeVariant == ThemeVariant.Dark)
         {
@@ -97,6 +98,7 @@ public partial class App : Application
             vm.DimTextColor = ThemeConsts.DarkThemeDimGray;
             vm.Layer2BackgroundColor = ThemeConsts.DarkThemeLayer2Background;
             vm.Layer2GroundedColor = ThemeConsts.DarkThemeLayer2Grounded;
+            vm.ColorPalette = ThemeConsts.Dark;
         }
     }
     

@@ -17,6 +17,7 @@
     <Application.Resources>
         <FontFamily x:Key="FontAwesome">avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free</FontFamily>
         <lc:ColorConverter x:Key="ColorConverter"/>
+        <lc:BrushConverter x:Key="BrushConverter"/>
         <lc:ValidationColorConverter x:Key="ValidationColorConverter"/>
         <lc:UpdateColorConverter x:Key="UpdateColorConverter"/>
         <lc:ValidationSymbolConverter x:Key="ValidationSymbolConverter"/>

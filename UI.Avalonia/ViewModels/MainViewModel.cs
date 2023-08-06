@@ -28,8 +28,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private string stepTitle = "Please insert a PS3 game disc";
     [ObservableProperty] private string stepSubtitle = "";
     [ObservableProperty] private bool lastOperationSuccess = true;
-    [ObservableProperty] private string errorTitle = "";
-    [ObservableProperty] private string errorMessage = "";
+    [ObservableProperty] private bool lastOperationWarning = false;
     [ObservableProperty] private string startButtonCaption = "Start";
 
     [ObservableProperty] private bool foundDisc;
@@ -71,8 +70,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         StepTitle = "Please insert a PS3 game disc";
         StepSubtitle = "";
         LastOperationSuccess = true;
-        ErrorTitle = "";
-        ErrorMessage = "";
+        LastOperationWarning = false;
         StartButtonCaption = "Start";
         FoundDisc = false;
         DumperIsReady = false;
@@ -167,9 +165,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         if (Directory.Exists(destination))
         {
             StepTitle = "Dump already exists";
-            StepSubtitle = "All existing files will be overwritten";
+            StepSubtitle = "Existing dump files will be overwritten";
             StartButtonCaption = "Overwrite";
-            LastOperationSuccess = false;
+            LastOperationWarning = true;
         }
         else
         {
@@ -191,6 +189,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         StepTitle = "Dumping the disc";
         StepSubtitle = "Decrypting and copying the data…";
         LastOperationSuccess = true;
+        LastOperationWarning = false;
         DumpingInProgress = true;
         CanEditSettings = false;
         

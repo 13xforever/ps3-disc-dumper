@@ -1,6 +1,6 @@
-﻿namespace UI.Avalonia.Utils;
+﻿namespace UI.Avalonia.Utils.ColorPalette;
 
-public class ThemeConsts
+public static class ThemeConsts
 {
     // ref https://github.com/microsoft/microsoft-ui-xaml/blob/main/dev/Materials/Backdrop/MicaController.h#L34C61-L34C64
     public const string LightThemeTintColor = "#f3f3f3";
@@ -22,6 +22,10 @@ public class ThemeConsts
 
     public const string LightThemeLayer2Grounded = "ccf4f4f4";
     public const string DarkThemeLayer2Grounded = "#b3272727";
-    
+
+    public static readonly IPalette Debug = new DebugPalette();
+    public static readonly IPalette Dark = new FluentPaletteDark();
+    public static readonly IPalette Light = new FluentPaletteLight();
+
     public const string AccentColor = "#0094ff";
 }

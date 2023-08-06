@@ -22,14 +22,7 @@
         Title="{Binding CurrentPage.PageTitle}"
         
         Loaded="OnLoaded"
-        Closing="OnClosing"
-        >
-        <!--
-        Background:
-        accent: #0094ff
-        Mica Dark: #e0202020
-        Mica Light: #d0f3f3f3
-         -->
+        Closing="OnClosing">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,

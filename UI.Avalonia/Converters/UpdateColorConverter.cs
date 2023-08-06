@@ -7,6 +7,7 @@ using Avalonia.Data.Converters;
 using Avalonia.Media;
 using Avalonia.Styling;
 using UI.Avalonia.Utils;
+using UI.Avalonia.Utils.ColorPalette;
 
 namespace UI.Avalonia.Converters;
 

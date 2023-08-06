@@ -9,6 +9,7 @@ using Avalonia.Platform;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using UI.Avalonia.Utils;
+using UI.Avalonia.Utils.ColorPalette;
 using UI.Avalonia.ViewModels;
 
 namespace UI.Avalonia.Views;

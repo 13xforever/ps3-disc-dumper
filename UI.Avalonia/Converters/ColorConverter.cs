@@ -14,7 +14,7 @@ public class ColorConverter: IValueConverter
         return default(Color);
     }
 
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is Color c)
             return c.ToString();

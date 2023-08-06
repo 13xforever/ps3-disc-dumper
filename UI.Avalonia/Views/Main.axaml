@@ -18,16 +18,26 @@
         <TextBlock FontSize="28" FontWeight="SemiBold" RenderOptions.TextRenderingMode="Antialias"
                    Margin="0 12 0 0" TextAlignment="Center" VerticalAlignment="Bottom"
                    Text="{Binding StepTitle}"/>
-        <TextBlock TextAlignment="Center" RenderOptions.TextRenderingMode="Antialias"
-                   Margin="0 8 0 0"
-                   Text="{Binding StepSubtitle}">
-	        <TextBlock.IsVisible>
-		        <MultiBinding Converter="{x:Static BoolConverters.Or}">
-			        <Binding Path="StepSubtitle" Converter="{x:Static StringConverters.IsNotNullOrEmpty}"/>
-			        <Binding Path="ProductCode" Converter="{x:Static StringConverters.IsNullOrEmpty}"/>
-		        </MultiBinding>
-	        </TextBlock.IsVisible>
-        </TextBlock>
+        <StackPanel Margin="0 8 0 0" Orientation="Horizontal" HorizontalAlignment="Center">
+	        <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="16"
+	                   VerticalAlignment="Center" Margin="0 0 8 0"
+	                   Foreground="{Binding ColorPalette.StatusDangerForeground1, Converter={StaticResource BrushConverter}}"
+	                   Text="{Binding ValidationErrorSymbol}"
+	                   IsVisible="{Binding !LastOperationSuccess}"/>
+	        <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="16"
+	                   VerticalAlignment="Center" Margin="0 0 8 0"
+	                   Foreground="{Binding ColorPalette.StatusWarningForeground1, Converter={StaticResource BrushConverter}}"
+	                   Text="{Binding ValidationWarningSymbol}"
+	                   IsVisible="{Binding LastOperationWarning}"/>
+	        <TextBlock RenderOptions.TextRenderingMode="Antialias" Text="{Binding StepSubtitle}">
+		        <TextBlock.IsVisible>
+			        <MultiBinding Converter="{x:Static BoolConverters.Or}">
+				        <Binding Path="StepSubtitle" Converter="{x:Static StringConverters.IsNotNullOrEmpty}"/>
+				        <Binding Path="ProductCode" Converter="{x:Static StringConverters.IsNullOrEmpty}"/>
+			        </MultiBinding>
+		        </TextBlock.IsVisible>
+	        </TextBlock>
+        </StackPanel>
         
         <!-- middle -->
         <Expander IsExpanded="{Binding DiscInfoExpanded}" Margin="0 24" Width="500" CornerRadius="4"
