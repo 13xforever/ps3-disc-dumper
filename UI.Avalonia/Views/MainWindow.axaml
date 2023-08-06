@@ -41,6 +41,7 @@
 	    <Border IsHitTestVisible="False" Background="{Binding CurrentPage.TintColor}">
 		    <Border.IsVisible>
 			    <MultiBinding Converter="{x:Static BoolConverters.Or}">
+				    <Binding  Path="!CurrentPage.EnableTransparency"/>
 				    <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=Window}" Path="!IsActive"/>
 				    <MultiBinding Converter="{x:Static BoolConverters.And}">
 					    <Binding Path="!CurrentPage.MicaEnabled"/>
@@ -49,6 +50,22 @@
 			    </MultiBinding>
 		    </Border.IsVisible>
 	    </Border>
+	    <ExperimentalAcrylicBorder IsHitTestVisible="False">
+		    <ExperimentalAcrylicBorder.IsVisible>
+			    <MultiBinding Converter="{x:Static BoolConverters.And}">
+				    <Binding  Path="!CurrentPage.EnableTransparency"/>
+				    <Binding  Path="CurrentPage.AcrylicEnabled"/>
+			    </MultiBinding>
+		    </ExperimentalAcrylicBorder.IsVisible>
+		    <ExperimentalAcrylicBorder.Material>
+			    <ExperimentalAcrylicMaterial
+				    BackgroundSource="Digger"
+				    TintColor="{Binding CurrentPage.TintColor, Converter={StaticResource ColorConverter}}"
+				    TintOpacity="{Binding CurrentPage.TintOpacity}"
+				    MaterialOpacity="0.69"
+				/>
+		    </ExperimentalAcrylicBorder.Material>
+	    </ExperimentalAcrylicBorder>
 	    
 	    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4 6 -6 0">
 		    <!-- back button -->

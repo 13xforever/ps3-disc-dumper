@@ -16,140 +16,168 @@
 
     <ScrollViewer Name="SettingsPanel" IsHitTestVisible="True" AllowAutoHide="True" VerticalScrollBarVisibility="Auto"
                   Margin="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=WindowDecorationMargin}">
-        <StackPanel Grid.Column="0" Margin="16 0">
-            <!-- <TextBlock FontSize="28" FontWeight="SemiBold" Margin="0 0 0 12">Settings</TextBlock> -->
-            
-            <!-- output dir -->
-            <TextBlock FontWeight="SemiBold">Locations</TextBlock>
-            <Border Background="{Binding Layer2BackgroundColor}"
-                    CornerRadius="4" Padding="16"  Margin="0 8 0 0"
-                    BorderBrush="{Binding TintColor}" BorderThickness="1">
-                <Grid ColumnDefinitions="36,*,36">
-                    <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
-                               VerticalAlignment="Center" HorizontalAlignment="Left"
-                               Text="{Binding FolderSymbol}"/>
-                    <StackPanel Grid.Column="1">
-                        <TextBlock>Disc dumps will save to</TextBlock>
-                        <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
-                                   HorizontalAlignment="Left"
-                                   MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
-                                   Text="{Binding OutputDirPreview}"/>
-                    </StackPanel>
-                    <Button Grid.Column="2" Background="Transparent"
-                            VerticalAlignment="Center" HorizontalAlignment="Right"
-                            Command="{Binding  SelectFolderCommand}" CommandParameter="output">
-                        …
-                    </Button>
-                </Grid>
-            </Border>
-            
-            <!-- ird dir -->
-            <Border Background="{Binding Layer2BackgroundColor}"
-                    CornerRadius="4" Padding="16" Margin="0 3 0 0"
-                    BorderBrush="{Binding TintColor}" BorderThickness="1">
-                <Grid ColumnDefinitions="36,*,36">
-                    <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
-                               VerticalAlignment="Center" HorizontalAlignment="Left"
-                               Text="{Binding FolderSymbol}"/>
-                    <StackPanel Grid.Column="1">
-                        <TextBlock>Disc key copies will save to</TextBlock>
-                        <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
-                                   HorizontalAlignment="Left"
-                                   MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
-                                   Text="{Binding IrdDirPreview}"/>
-                    </StackPanel>
-                    <Button Grid.Column="2" Background="Transparent"
-                            VerticalAlignment="Center" HorizontalAlignment="Right"
-                            Command="{Binding  SelectFolderCommand}" CommandParameter="ird">
-                        …
-                    </Button>
-                </Grid>
-            </Border>
-            
-            <!-- pattern -->
-            <TextBlock FontWeight="SemiBold" Margin="0 31 0 0">Naming</TextBlock>
-            <Border Background="{Binding Layer2BackgroundColor}"
-                    CornerRadius="4 4 0 0" Padding="16" Margin="0 8 0 0"
-                    BorderBrush="{Binding TintColor}" BorderThickness="1 1 1 0">
-                <Grid ColumnDefinitions="36,*,100">
-                    <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
-                               VerticalAlignment="Center" HorizontalAlignment="Left"
-                               Text="{Binding RenameSymbol}"/>
-                    <StackPanel Grid.Column="1">
-                        <TextBlock HorizontalAlignment="Left">Dump name template</TextBlock>
-                        <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
-                                   HorizontalAlignment="Left"
-                                   ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis">
-                            Disc metadata will be used to substitute the values
-                        </TextBlock>
-                    </StackPanel>
-                    <Button Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
-                            VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
-                            Padding="16 4" MinWidth="90" Height="32"
-                            Command="{Binding ResetTemplateCommand}">
-                        Reset
-                    </Button>
-                </Grid>
-            </Border>
-            <Border Background="{Binding Layer2BackgroundColor}"
-                    CornerRadius="0" Padding="16"
-                    BorderBrush="{Binding TintColor}" BorderThickness="1 1 1 0">
-                <Grid ColumnDefinitions="36,*,240">
-                    <StackPanel Grid.Column="1">
-                        <TextBlock>Live Preview</TextBlock>
-                        <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
-                                   HorizontalAlignment="Left"
-                                   ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
-                                   Text="{Binding TemplatePreview}"/>
-                    </StackPanel>
-                    <TextBox Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
-                             Margin="8 0 0 0"
-                             Text="{Binding DumpNameTemplate}"/>
-                </Grid>
-            </Border>
-            <Border Background="{Binding Layer2BackgroundColor}"
-                    CornerRadius="0" Padding="16"
-                    BorderBrush="{Binding TintColor}" BorderThickness="1">
-                <Grid ColumnDefinitions="36,200,*">
-                    <StackPanel Grid.Column="1">
-                        <TextBlock FontSize="14" LineHeight="20">%product_code%</TextBlock>
-                        <TextBlock FontSize="14" LineHeight="20">%product_code_letters%</TextBlock>
-                        <TextBlock FontSize="14" LineHeight="20">%product_code_numbers%</TextBlock>
-                        <TextBlock FontSize="14" LineHeight="20">%title%</TextBlock>
-                        <TextBlock FontSize="14" LineHeight="20">%region%</TextBlock>
-                    </StackPanel>
-                    <StackPanel Grid.Column="2">
-                        <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestProductCode}"/>
-                        <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestProductCodeLetters}"/>
-                        <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestProductCodeNumbers}"/>
-                        <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestTitle}"/>
-                        <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestRegion}"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
-            
-            <!-- about -->
-            <TextBlock FontWeight="SemiBold" Margin="0 31 0 0">About this app</TextBlock>
-            <TextBlock Margin="0 12 0 0" Text="{Binding DumperVersion, StringFormat=PS3 Disc Dumper v{0}}"/>
-            <TextBlock Margin="0 8 0 0" Text="{Binding CurrentYear, StringFormat=© {0} 13xforever}"/>
-            <StackPanel Orientation="Horizontal" Margin="0 12 0 0">
-                <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="16"
-                           VerticalAlignment="Center" Margin="0 0 12 0" Text="{Binding HomeSymbol}"/>
-                <Button Padding="0"
-                        Background="Transparent" Foreground="{Binding SystemAccentColor1}" Cursor="Hand"
-                        Command="{Binding OpenUrlCommand}" CommandParameter="{Binding ProjectUrl}">
-                    Project page
+    <StackPanel Grid.Column="0" Margin="16 0">
+        <!-- <TextBlock FontSize="28" FontWeight="SemiBold" Margin="0 0 0 12">Settings</TextBlock> -->
+        
+        <!-- output dir -->
+        <TextBlock FontWeight="SemiBold">Locations</TextBlock>
+        <Border Background="{Binding Layer2BackgroundColor}"
+                CornerRadius="4" Padding="16"  Margin="0 8 0 0"
+                BorderBrush="{Binding TintColor}" BorderThickness="1">
+            <Grid ColumnDefinitions="36,*,36">
+                <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
+                           VerticalAlignment="Center" HorizontalAlignment="Left"
+                           Text="{Binding FolderSymbol}"/>
+                <StackPanel Grid.Column="1">
+                    <TextBlock>Disc dumps will save to</TextBlock>
+                    <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
+                               HorizontalAlignment="Left"
+                               MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
+                               Text="{Binding OutputDirPreview}"/>
+                </StackPanel>
+                <Button Grid.Column="2" Background="Transparent"
+                        VerticalAlignment="Center" HorizontalAlignment="Right"
+                        Command="{Binding  SelectFolderCommand}" CommandParameter="output">
+                    …
                 </Button>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0 8 0 0">
-                <TextBlock FontSize="16" FontFamily="{Binding SymbolFontFamily}"
-                           VerticalAlignment="Center" Margin="0 0 12 0" Text="{Binding FeedbackSymbol}"/>
-                <Button Padding="0"
-                        Background="Transparent" Foreground="{Binding SystemAccentColor1}" Cursor="Hand"
-                        Command="{Binding OpenUrlCommand}" CommandParameter="{Binding SubmitIssueUrl}">
-                    Give feedback
+            </Grid>
+        </Border>
+        
+        <!-- ird dir -->
+        <Border Background="{Binding Layer2BackgroundColor}"
+                CornerRadius="4" Padding="16" Margin="0 3 0 0"
+                BorderBrush="{Binding TintColor}" BorderThickness="1">
+            <Grid ColumnDefinitions="36,*,36">
+                <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
+                           VerticalAlignment="Center" HorizontalAlignment="Left"
+                           Text="{Binding FolderSymbol}"/>
+                <StackPanel Grid.Column="1">
+                    <TextBlock>Disc key copies will save to</TextBlock>
+                    <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
+                               HorizontalAlignment="Left"
+                               MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
+                               Text="{Binding IrdDirPreview}"/>
+                </StackPanel>
+                <Button Grid.Column="2" Background="Transparent"
+                        VerticalAlignment="Center" HorizontalAlignment="Right"
+                        Command="{Binding  SelectFolderCommand}" CommandParameter="ird">
+                    …
                 </Button>
-            </StackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- pattern -->
+        <TextBlock FontWeight="SemiBold" Margin="0 32 0 0">Naming</TextBlock>
+        <Border Background="{Binding Layer2BackgroundColor}"
+                CornerRadius="4 4 0 0" Padding="16" Margin="0 8 0 0"
+                BorderBrush="{Binding TintColor}" BorderThickness="1 1 1 0">
+            <Grid ColumnDefinitions="36,*,100">
+                <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
+                           VerticalAlignment="Center" HorizontalAlignment="Left"
+                           Text="{Binding RenameSymbol}"/>
+                <StackPanel Grid.Column="1">
+                    <TextBlock HorizontalAlignment="Left">Dump name template</TextBlock>
+                    <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
+                               HorizontalAlignment="Left"
+                               ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis">
+                        Disc metadata will be used to substitute the values
+                    </TextBlock>
+                </StackPanel>
+                <Button Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
+                        VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
+                        Padding="16 4" MinWidth="90" Height="32"
+                        Command="{Binding ResetTemplateCommand}">
+                    Reset
+                </Button>
+            </Grid>
+        </Border>
+        <Border Background="{Binding Layer2BackgroundColor}"
+                CornerRadius="0" Padding="16"
+                BorderBrush="{Binding TintColor}" BorderThickness="1 1 1 0">
+            <Grid ColumnDefinitions="36,*,240">
+                <StackPanel Grid.Column="1">
+                    <TextBlock>Live Preview</TextBlock>
+                    <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
+                               HorizontalAlignment="Left"
+                               ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
+                               Text="{Binding TemplatePreview}"/>
+                </StackPanel>
+                <TextBox Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
+                         Margin="8 0 0 0"
+                         Text="{Binding DumpNameTemplate}"/>
+            </Grid>
+        </Border>
+        <Border Background="{Binding Layer2BackgroundColor}"
+                CornerRadius="0 0 4 4" Padding="16"
+                BorderBrush="{Binding TintColor}" BorderThickness="1">
+            <Grid ColumnDefinitions="36,200,*">
+                <StackPanel Grid.Column="1">
+                    <TextBlock FontSize="14" LineHeight="20">%product_code%</TextBlock>
+                    <TextBlock FontSize="14" LineHeight="20">%product_code_letters%</TextBlock>
+                    <TextBlock FontSize="14" LineHeight="20">%product_code_numbers%</TextBlock>
+                    <TextBlock FontSize="14" LineHeight="20">%title%</TextBlock>
+                    <TextBlock FontSize="14" LineHeight="20">%region%</TextBlock>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestProductCode}"/>
+                    <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestProductCodeLetters}"/>
+                    <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestProductCodeNumbers}"/>
+                    <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestTitle}"/>
+                    <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestRegion}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- transparency -->
+        <TextBlock FontWeight="SemiBold" Margin="0 32 0 0">Personalization</TextBlock>
+        <Border Background="{Binding Layer2BackgroundColor}"
+                CornerRadius="4" Padding="16" Margin="0 8 0 0"
+                BorderBrush="{Binding TintColor}" BorderThickness="1">
+            <Border.IsVisible>
+                <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                    <Binding Path="MicaEnabled"/>
+                    <Binding Path="AcrylicEnabled"/>
+                </MultiBinding>
+            </Border.IsVisible>
+            <Grid ColumnDefinitions="36,*,100">
+                <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
+                           VerticalAlignment="Center" HorizontalAlignment="Left"
+                           Text="{Binding BackgroundSymbol}"/>
+                <StackPanel Grid.Column="1">
+                    <TextBlock>Transparency effects</TextBlock>
+                    <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
+                               HorizontalAlignment="Left">
+                        Windows and surfaces appear translucent
+                    </TextBlock>
+                </StackPanel>
+                <ToggleSwitch Grid.Column="2" FlowDirection="RightToLeft"
+                              VerticalAlignment="Center" HorizontalAlignment="Right"
+                              IsChecked="{Binding EnableTransparency}"/>
+            </Grid>
+        </Border>
+        
+        <!-- about -->
+        <TextBlock FontWeight="SemiBold" Margin="0 31 0 0">About this app</TextBlock>
+        <TextBlock Margin="0 12 0 0" Text="{Binding DumperVersion, StringFormat=PS3 Disc Dumper v{0}}"/>
+        <TextBlock Margin="0 8 0 0" Text="{Binding CurrentYear, StringFormat=© {0} 13xforever}"/>
+        <StackPanel Orientation="Horizontal" Margin="0 12 0 0">
+            <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="16"
+                       VerticalAlignment="Center" Margin="0 0 12 0" Text="{Binding HomeSymbol}"/>
+            <Button Padding="0"
+                    Background="Transparent" Foreground="{Binding SystemAccentColor1}" Cursor="Hand"
+                    Command="{Binding OpenUrlCommand}" CommandParameter="{Binding ProjectUrl}">
+                Project page
+            </Button>
         </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0 8 0 0">
+            <TextBlock FontSize="16" FontFamily="{Binding SymbolFontFamily}"
+                       VerticalAlignment="Center" Margin="0 0 12 0" Text="{Binding FeedbackSymbol}"/>
+            <Button Padding="0"
+                    Background="Transparent" Foreground="{Binding SystemAccentColor1}" Cursor="Hand"
+                    Command="{Binding OpenUrlCommand}" CommandParameter="{Binding SubmitIssueUrl}">
+                Give feedback
+            </Button>
+        </StackPanel>
+    </StackPanel>
     </ScrollViewer>
 </UserControl>

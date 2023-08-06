@@ -30,7 +30,7 @@
         </TextBlock>
         
         <!-- middle -->
-        <Expander IsExpanded="{Binding DiscInfoExpanded}" Margin="20" Width="500"
+        <Expander IsExpanded="{Binding DiscInfoExpanded}" Margin="20" Width="500" CornerRadius="4"
                   Background="{Binding Layer2BackgroundColor}"
                   IsVisible="{Binding ProductCode, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
 	        <Expander.Header >

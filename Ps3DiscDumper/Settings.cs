@@ -15,6 +15,7 @@ public struct Settings
     public string IrdDir { get; set; } = "ird";
     public string DumpNameTemplate { get; set; } = DefaultPattern;
     public bool ShowDetails { get; set; } = true;
+    public bool EnableTransparency { get; set; } = true;
 
     private static StringComparison Comparison => OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
     private static StringComparer Comparer => OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
@@ -26,6 +27,7 @@ public struct Settings
         => string.Equals(OutputDir, other.OutputDir, Comparison)
            && string.Equals(IrdDir, other.IrdDir, Comparison)
            && string.Equals(DumpNameTemplate, other.DumpNameTemplate, Comparison)
+           && EnableTransparency == other.EnableTransparency
            && ShowDetails == other.ShowDetails;
 
     public override int GetHashCode()
@@ -34,6 +36,7 @@ public struct Settings
         hashCode.Add(OutputDir, Comparer);
         hashCode.Add(IrdDir, Comparer);
         hashCode.Add(DumpNameTemplate, Comparer);
+        hashCode.Add(EnableTransparency);
         hashCode.Add(ShowDetails);
         return hashCode.ToHashCode();
     }

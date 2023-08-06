@@ -5,6 +5,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
 using Avalonia.Styling;
+using Ps3DiscDumper;
 using UI.Avalonia.Utils;
 using UI.Avalonia.ViewModels;
 using UI.Avalonia.Views;
@@ -59,7 +60,7 @@ public partial class App : Application
         if (sender is not Window w)
             return;
 
-        if (isMicaCapable.Value)
+        if (isMicaCapable.Value && SettingsProvider.Settings.EnableTransparency)
             w.TransparencyLevelHint = DesiredTransparencyHints;
     }
 
@@ -84,6 +85,7 @@ public partial class App : Application
         if (window.ActualThemeVariant == ThemeVariant.Light)
         {
             vm.TintColor = ThemeConsts.LightThemeTintColor;
+            vm.TintOpacity = ThemeConsts.LightThemeTintOpacity;
             vm.DimTextColor = ThemeConsts.LightThemeDimGray;
             vm.Layer2BackgroundColor = ThemeConsts.LightThemeLayer2Background;
             vm.Layer2GroundedColor = ThemeConsts.LightThemeLayer2Grounded;
@@ -91,6 +93,7 @@ public partial class App : Application
         else if (window.ActualThemeVariant == ThemeVariant.Dark)
         {
             vm.TintColor = ThemeConsts.DarkThemeTintColor;
+            vm.TintOpacity = ThemeConsts.DarkThemeTintOpacity;
             vm.DimTextColor = ThemeConsts.DarkThemeDimGray;
             vm.Layer2BackgroundColor = ThemeConsts.DarkThemeLayer2Background;
             vm.Layer2GroundedColor = ThemeConsts.DarkThemeLayer2Grounded;

@@ -16,7 +16,7 @@ namespace UI.Avalonia.ViewModels;
 public partial class SettingsViewModel: ViewModelBase
 {
     public SettingsViewModel() => pageTitle = "Settings";
-    
+
     [NotifyPropertyChangedFor(nameof(OutputDirPreview))]
     [ObservableProperty] private string outputDir = SettingsProvider.Settings.OutputDir;
     [NotifyPropertyChangedFor(nameof(IrdDirPreview))]
