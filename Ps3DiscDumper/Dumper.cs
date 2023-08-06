@@ -7,6 +7,7 @@ using System.Management;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -30,6 +31,8 @@ public class Dumper: IDisposable
     public const string Version = "4.0.0-alpha4";
 
     private static readonly Regex VersionParts = new(@"(?<ver>\d+(\.\d+){0,2})[ \-]*(?<pre>.*)", RegexOptions.Singleline | RegexOptions.ExplicitCapture);
+    private static readonly Regex ScsiInfoParts = new(@"Host: .+$\s*Vendor: (?<vendor>.+?)\s* Model: (?<model>.+?)\s* Rev: (?<revision>.+)$\s*Type: \s*(?<type>.+?)\s* ANSI  ?SCSI revision: (?<scsi_rev>.+?)\s*$",
+        RegexOptions.Multiline | RegexOptions.ExplicitCapture);
     private static readonly HashSet<char> InvalidChars = new(Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()));
     private static readonly char[] MultilineSplit = {'\r', '\n'};
     private long currentSector;
@@ -96,6 +99,7 @@ public class Dumper: IDisposable
         }
     }
 
+    [SupportedOSPlatform("Windows")]
     private List<string> EnumeratePhysicalDrivesWindows()
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -105,13 +109,20 @@ public class Dumper: IDisposable
 #if !NATIVE
         try
         {
-            using var mgmtObjSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMedia");
-            var drives = mgmtObjSearcher.Get();
+            using var physicalMediaQuery = new ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMedia");
+            var drives = physicalMediaQuery.Get();
             foreach (var drive in drives)
             {
-                var tag = drive.Properties["Tag"].Value as string;
-                if (tag?.IndexOf("CDROM", StringComparison.InvariantCultureIgnoreCase) > -1)
+                if (drive.Properties["Tag"].Value is string tag
+                    && tag.StartsWith(@"\\.\CDROM"))
                     physicalDrives.Add(tag);
+            }
+            using var cdromQuery = new ManagementObjectSearcher("SELECT * FROM Win32_CDROMDrive");
+            drives = cdromQuery.Get();
+            foreach (var drive in drives)
+            {
+                // Name and Caption are the same, so idk if they can be different
+                Log.Info($"Found optical media drive {drive.Properties["Name"].Value} ({drive.Properties["Drive"].Value})");
             }
         }
         catch (Exception e)
@@ -127,12 +138,27 @@ public class Dumper: IDisposable
         return physicalDrives;
     }
 
+    [SupportedOSPlatform("Linux")]
     private List<string> EnumeratePhysicalDrivesLinux()
     {
         var cdInfo = "";
         try
         {
             cdInfo = File.ReadAllText("/proc/sys/dev/cdrom/info");
+            if (File.Exists("/proc/scsi/scsi"))
+            {
+                var scsiInfo = File.ReadAllText("/proc/scsi/scsi");
+                if (scsiInfo is { Length: > 0 })
+                {
+                    foreach (Match m in ScsiInfoParts.Matches(scsiInfo))
+                    {
+                        if (m.Groups["type"].Value is not "CD-ROM")
+                            continue;
+
+                        Log.Info($"Found optical media drive {m.Groups["vendor"].Value} {m.Groups["model"].Value}");
+                    }
+                }
+            }
         }
         catch (Exception e)
         {
