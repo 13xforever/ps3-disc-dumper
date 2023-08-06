@@ -679,8 +679,8 @@ public class Dumper: IDisposable
                 return (latestVer, latest);
             }
                 
-            if (latestBetaVer > latestVer
-                || (latestVer == latestBetaVer
+            if (latestBetaVer > curVer
+                || (latestBetaVer == curVer
                     && curVerPre is {Length: >0}
                     && (latestBetaVerPre is {Length: >0} && StringComparer.OrdinalIgnoreCase.Compare(latestBetaVerPre, curVerPre) > 0
                         || latestBetaVerStr is null or "")))
