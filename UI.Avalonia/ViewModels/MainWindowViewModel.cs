@@ -20,7 +20,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     public bool InSettings => CurrentPage is SettingsViewModel;
  
     [ObservableProperty] private GitHubReleaseInfo? updateInfo;
-    [ObservableProperty] private bool updateIsPrerelease;
+    [ObservableProperty] private bool? updateIsPrerelease;
     [ObservableProperty] private string formattedUpdateInfoHeader = "";
     [ObservableProperty] private string formattedUpdateInfoBody = "";
     [ObservableProperty] private string formattedUpdateInfoUrl = $"{SettingsViewModel.ProjectUrl}/releases/latest";

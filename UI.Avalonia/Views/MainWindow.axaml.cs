@@ -26,21 +26,7 @@ public partial class MainWindow : Window
 
     public override void Show()
     {
-        var systemFonts = FontManager.Current.SystemFonts;
-        if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Text", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-            FontFamily = new("Segoe UI Variable Text");
-        else if (systemFonts.TryGetGlyphTypeface("Segoe UI", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-            FontFamily = new("Segoe UI");
-        
-        if (DataContext is MainWindowViewModel vm)
-        {
-            if (systemFonts.TryGetGlyphTypeface("Segoe Fluent Icons", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-                vm.CurrentPage.SymbolFontFamily = new("Segoe Fluent Icons");
-            if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Small", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-                vm.CurrentPage.SmallFontFamily = new("Segoe UI Variable Small");
-            if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Display", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-                vm.CurrentPage.LargeFontFamily = new("Segoe UI Variable Display");
-        }
+
         base.Show();
         App.OnThemeChanged(this, EventArgs.Empty);
         App.OnPlatformColorsChanged(this, PlatformSettings?.GetColorValues() ?? new PlatformColorValues()

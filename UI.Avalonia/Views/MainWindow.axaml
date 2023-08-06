@@ -90,7 +90,7 @@
 		    >
 				<TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="18" RenderOptions.TextRenderingMode="Antialias"
 		                   Text="{Binding CurrentPage.UpdateSymbol}"
-		                   Foreground="{Binding UpdateIsPrerelease, Converter={StaticResource UpdateColorConverter}, ConverterParameter={Binding CurrentPage.DimTextColor}}"/>
+		                   Foreground="{Binding UpdateIsPrerelease, Converter={StaticResource UpdateColorConverter}}"/>
 				<Button.Flyout>
 					<Flyout>
 						<StackPanel>

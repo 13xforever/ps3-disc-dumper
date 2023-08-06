@@ -5,10 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Management;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -28,7 +26,7 @@ namespace Ps3DiscDumper;
 
 public class Dumper: IDisposable
 {
-    public const string Version = "4.0.0-alpha4";
+    public const string Version = "4.0.0-alpha5";
 
     private static readonly Regex VersionParts = new(@"(?<ver>\d+(\.\d+){0,2})[ \-]*(?<pre>.*)", RegexOptions.Singleline | RegexOptions.ExplicitCapture);
     private static readonly Regex ScsiInfoParts = new(@"Host: .+$\s*Vendor: (?<vendor>.+?)\s* Model: (?<model>.+?)\s* Rev: (?<revision>.+)$\s*Type: \s*(?<type>.+?)\s* ANSI  ?SCSI revision: (?<scsi_rev>.+?)\s*$",
@@ -383,7 +381,7 @@ public class Dumper: IDisposable
             }
         }
         if (physicalDevice == null)
-            throw new AccessViolationException("Couldn't get physical access to the drive");
+            throw new AccessViolationException("Direct disk access to the drive was denied");
 
         Log.Debug($"Selected physical drive {physicalDevice}");
         driveStream = File.Open(physicalDevice, FileMode.Open, FileAccess.Read, FileShare.Read);

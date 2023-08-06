@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Styling;
 using Ps3DiscDumper;
@@ -32,25 +33,30 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainWindowViewModel(),
-            };
+            var vm = new MainWindowViewModel();
+            
+            var systemFonts = FontManager.Current.SystemFonts;
+            if (systemFonts.TryGetGlyphTypeface("Segoe Fluent Icons", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
+                vm.CurrentPage.SymbolFontFamily = new("Segoe Fluent Icons");
+            if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Small", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
+                vm.CurrentPage.SmallFontFamily = new("Segoe UI Variable Small");
+            if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Display", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
+                vm.CurrentPage.LargeFontFamily = new("Segoe UI Variable Display");
+
+            var w = new MainWindow { DataContext = vm, };
+            desktop.MainWindow = w;
             desktop.MainWindow.Activated += OnActivated;
             desktop.MainWindow.Deactivated += OnDeactivated;
             desktop.MainWindow.ActualThemeVariantChanged += OnThemeChanged;
-            if (desktop.MainWindow.PlatformSettings is { } ps)
+            if (w.PlatformSettings is { } ps)
                 ps.ColorValuesChanged += OnPlatformColorsChanged;
 
-            if (desktop is { MainWindow: { DataContext: MainWindowViewModel vm } w})
-            {
-                vm.CurrentPage.MicaEnabled = isMicaCapable.Value;
-                vm.CurrentPage.AcrylicEnabled = w.ActualTransparencyLevel == WindowTransparencyLevel.AcrylicBlur;
-            }
-            /*
-            if (isMicaCapable.Value && desktop.MainWindow is Window w)
-                RenderOptions.SetTextRenderingMode(w, TextRenderingMode.Antialias);
-            */
+            vm.CurrentPage.MicaEnabled = isMicaCapable.Value;
+            vm.CurrentPage.AcrylicEnabled = w.ActualTransparencyLevel == WindowTransparencyLevel.AcrylicBlur;
+            if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Text", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
+                w.FontFamily = new("Segoe UI Variable Text");
+            else if (systemFonts.TryGetGlyphTypeface("Segoe UI", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
+                w.FontFamily = new("Segoe UI");
         }
         base.OnFrameworkInitializationCompleted();
     }
