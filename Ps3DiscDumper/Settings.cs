@@ -16,6 +16,7 @@ public struct Settings
     public string DumpNameTemplate { get; set; } = DefaultPattern;
     public bool ShowDetails { get; set; } = true;
     public bool EnableTransparency { get; set; } = true;
+    public bool StayOnTop { get; set; } = true;
 
     private static StringComparison Comparison => OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
     private static StringComparer Comparer => OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
@@ -27,8 +28,9 @@ public struct Settings
         => string.Equals(OutputDir, other.OutputDir, Comparison)
            && string.Equals(IrdDir, other.IrdDir, Comparison)
            && string.Equals(DumpNameTemplate, other.DumpNameTemplate, Comparison)
+           && ShowDetails == other.ShowDetails
            && EnableTransparency == other.EnableTransparency
-           && ShowDetails == other.ShowDetails;
+           && StayOnTop == other.StayOnTop;
 
     public override int GetHashCode()
     {
@@ -36,8 +38,9 @@ public struct Settings
         hashCode.Add(OutputDir, Comparer);
         hashCode.Add(IrdDir, Comparer);
         hashCode.Add(DumpNameTemplate, Comparer);
-        hashCode.Add(EnableTransparency);
         hashCode.Add(ShowDetails);
+        hashCode.Add(EnableTransparency);
+        hashCode.Add(StayOnTop);
         return hashCode.ToHashCode();
     }
 }

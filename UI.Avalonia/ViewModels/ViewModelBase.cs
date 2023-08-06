@@ -4,7 +4,6 @@ using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ps3DiscDumper;
-using UI.Avalonia.Utils;
 using UI.Avalonia.Utils.ColorPalette;
 
 namespace UI.Avalonia.ViewModels;
@@ -22,6 +21,8 @@ public partial class ViewModelBase: ObservableObject
     [ObservableProperty] private static bool micaEnabled = true;
     [ObservableProperty] private static bool acrylicEnabled = false;
     [ObservableProperty] private static bool enableTransparency = SettingsProvider.Settings.EnableTransparency;
+    [ObservableProperty] private static bool stayOnTop = SettingsProvider.Settings.StayOnTop;
+    
     [ObservableProperty] private static string dimTextColor = "#00ff00"; //ThemeConsts.LightThemeDimGray;
     [ObservableProperty] private static IPalette colorPalette = ThemeConsts.Debug;
     [ObservableProperty] private static string layer2BackgroundColor = "#ff0000"; //ThemeConsts.LightThemeLayerHover;
@@ -40,7 +41,8 @@ public partial class ViewModelBase: ObservableObject
     public string HelpSymbol => UseSegoeIcons ? "\ue8ac" : "\uf573";
     public string HomeSymbol => UseSegoeIcons ? "\ue80f" : "\uf015";
     public string FeedbackSymbol => UseSegoeIcons ? "\ue939" : "\uf086";
-    public string BackgroundSymbol => UseSegoeIcons ? "\uef20" : "\uf853"; //e8b3
+    public string TransparencySymbol => UseSegoeIcons ? "\uef20" : "\uf853"; //e8b3
+    public string PinSymbol => UseSegoeIcons ? "\ue718" : "\uf08d";
     public string ValidationErrorSymbol => UseSegoeIcons ? "\ue783" : "\uf06a";
     public string ValidationWarningSymbol => UseSegoeIcons ? "\ue7ba" : "\uf071";
     
@@ -58,7 +60,8 @@ public partial class ViewModelBase: ObservableObject
     }
 
     partial void OnEnableTransparencyChanged(bool value)
-    {
-        SettingsProvider.Settings = SettingsProvider.Settings with { EnableTransparency = value };
-    }
+        => SettingsProvider.Settings = SettingsProvider.Settings with { EnableTransparency = value };
+
+    partial void OnStayOnTopChanged(bool value)
+        => SettingsProvider.Settings = SettingsProvider.Settings with { StayOnTop = value };
 }

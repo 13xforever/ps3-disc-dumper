@@ -128,10 +128,31 @@
             </Grid>
         </Border>
 
-        <!-- transparency -->
+        <!-- window options -->
         <TextBlock FontWeight="SemiBold" Margin="0 32 0 0">Personalization</TextBlock>
+        <!-- stay on top -->
         <Border Background="{Binding Layer2BackgroundColor}"
                 CornerRadius="4" Padding="16" Margin="0 8 0 0"
+                BorderBrush="{Binding TintColor}" BorderThickness="1">
+            <Grid ColumnDefinitions="36,*,100">
+                <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
+                           VerticalAlignment="Center" HorizontalAlignment="Left"
+                           Text="{Binding PinSymbol}"/>
+                <StackPanel Grid.Column="1">
+                    <TextBlock>Stay on top</TextBlock>
+                    <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
+                               HorizontalAlignment="Left">
+                        Window will stay always visible on top of normal windows
+                    </TextBlock>
+                </StackPanel>
+                <ToggleSwitch Grid.Column="2" FlowDirection="RightToLeft"
+                              VerticalAlignment="Center" HorizontalAlignment="Right"
+                              IsChecked="{Binding StayOnTop}"/>
+            </Grid>
+        </Border>
+        <!-- transparency -->
+        <Border Background="{Binding Layer2BackgroundColor}"
+                CornerRadius="4" Padding="16" Margin="0 3 0 0"
                 BorderBrush="{Binding TintColor}" BorderThickness="1">
             <Border.IsVisible>
                 <MultiBinding Converter="{x:Static BoolConverters.Or}">
@@ -142,7 +163,7 @@
             <Grid ColumnDefinitions="36,*,100">
                 <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                            VerticalAlignment="Center" HorizontalAlignment="Left"
-                           Text="{Binding BackgroundSymbol}"/>
+                           Text="{Binding TransparencySymbol}"/>
                 <StackPanel Grid.Column="1">
                     <TextBlock>Transparency effects</TextBlock>
                     <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"

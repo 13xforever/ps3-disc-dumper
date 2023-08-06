@@ -13,7 +13,7 @@
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="PreferSystemChrome"
         SystemDecorations="Full"
-        Topmost="True"
+        Topmost="{Binding CurrentPage.StayOnTop}"
         
 		Background="Transparent"
         TransparencyLevelHint="Mica, AcrylicBlur, None"
