@@ -6,8 +6,7 @@
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
              x:Class="UI.Avalonia.Views.Settings"
              x:DataType="vm:SettingsViewModel"
-             Loaded="OnLoad"
-             >
+             Loaded="OnLoad">
 
     <Design.DataContext>
         <vm:SettingsViewModel/>
@@ -144,9 +143,12 @@
                         Window will stay always visible on top of normal windows
                     </TextBlock>
                 </StackPanel>
-                <ToggleSwitch Grid.Column="2" FlowDirection="RightToLeft"
-                              VerticalAlignment="Center" HorizontalAlignment="Right"
-                              IsChecked="{Binding StayOnTop}"/>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0 0 -12 0"
+                            VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <TextBlock VerticalAlignment="Center" Margin="0 0 12 0"
+                               Text="{Binding StayOnTop, Converter={StaticResource OnOffConverter}}"/>
+                    <ToggleSwitch OnContent="" OffContent="" IsChecked="{Binding StayOnTop}"/>
+                </StackPanel>
             </Grid>
         </Border>
         <!-- transparency -->
@@ -170,9 +172,12 @@
                         Windows and surfaces appear translucent
                     </TextBlock>
                 </StackPanel>
-                <ToggleSwitch Grid.Column="2" FlowDirection="RightToLeft"
-                              VerticalAlignment="Center" HorizontalAlignment="Right"
-                              IsChecked="{Binding EnableTransparency}"/>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0 0 -12 0"
+                            VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <TextBlock VerticalAlignment="Center" Margin="0 0 12 0"
+                               Text="{Binding EnableTransparency, Converter={StaticResource OnOffConverter}}"/>
+                    <ToggleSwitch OnContent="" OffContent="" IsChecked="{Binding EnableTransparency}"/>
+                </StackPanel>
             </Grid>
         </Border>
         

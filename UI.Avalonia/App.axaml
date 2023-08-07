@@ -22,6 +22,7 @@
         <lc:UpdateColorConverter x:Key="UpdateColorConverter"/>
         <lc:ValidationSymbolConverter x:Key="ValidationSymbolConverter"/>
         <lc:PageTransitionConverter x:Key="PageTransitionConverter"/>
+        <lc:OnOffConverter x:Key="OnOffConverter"/>
     </Application.Resources>
              
 </Application>
