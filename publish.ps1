@@ -27,7 +27,7 @@ if (($PSVersionTable.Platform -eq 'Win32NT') -or $IsWindows)
         dotnet publish -v:q -r win-x64 --self-contained -c Release -o distrib/gui/win-legacy/ UI.WinForms.Msil/UI.WinForms.Msil.csproj /p:PublishTrimmed=False /p:PublishSingleFile=True
     }
     dotnet build -v:q -r win-x64 -f net7.0-windows --self-contained -c Release UI.Avalonia/UI.Avalonia.csproj
-    dotnet publish -v:q -r win-x64 -f net7.0-windows --self-contained -c Release -o distrib/gui/win/ UI.Avalonia/UI.Avalonia.csproj /p:PublishTrimmed=True /p:PublishSingleFile=True
+    dotnet publish -v:q -r win-x64 -f net7.0-windows --self-contained -c Release -o distrib/gui/win/ UI.Avalonia/UI.Avalonia.csproj /p:PublishTrimmed=False /p:PublishSingleFile=True
 }
 
 Write-Host 'Building Linux binary...' -ForegroundColor Cyan
@@ -37,7 +37,7 @@ if ($BuildLegacyVersions)
     dotnet publish -v:q -r linux-x64 --self-contained -c Release -o distrib/cli/lin/ UI.Console/UI.Console.csproj /p:PublishTrimmed=False /p:PublishSingleFile=True
 }
 dotnet build -v:q -r linux-x64 -f net7.0 --self-contained -c Release UI.Avalonia/UI.Avalonia.csproj
-dotnet publish -v:q -r linux-x64 -f net7.0 --self-contained -c Release -o distrib/gui/lin/ UI.Avalonia/UI.Avalonia.csproj /p:PublishTrimmed=True /p:PublishSingleFile=True
+dotnet publish -v:q -r linux-x64 -f net7.0 --self-contained -c Release -o distrib/gui/lin/ UI.Avalonia/UI.Avalonia.csproj /p:PublishTrimmed=False /p:PublishSingleFile=True
 if (($LASTEXITCODE -eq 0) -and (($PSVersionTable.Platform -eq 'Unix') -or $IsLinux))
 {
     if ($BuildLegacyVersions)
