@@ -22,7 +22,12 @@ public static class Log
             var folder = Path.GetDirectoryName(path) ?? ".";
             if (!Directory.Exists(folder))
                 Directory.CreateDirectory(folder);
-            var filestream = File.Open(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+            var filestream = File.Open(path, new FileStreamOptions
+            {
+                Mode = FileMode.OpenOrCreate,
+                Access = FileAccess.Write,
+                Options = FileOptions.Asynchronous | FileOptions.SequentialScan,
+            });
             filestream.Seek(0, SeekOrigin.End);
             FileLog = new(filestream, new UTF8Encoding(false));
             LogPath = path;
@@ -61,7 +66,7 @@ public static class Log
         try
         {
 #if DEBUG
-                const LogLevel minLevel = LogLevel.TRACE;
+            const LogLevel minLevel = LogLevel.TRACE;
 #else
             const LogLevel minLevel = LogLevel.DEBUG;
 #endif

@@ -75,8 +75,7 @@ public partial class MainWindow
                     else if (line.Contains("busy inodes on changed media sr"))
                     {
                         var match = Regex.Match(line, @"media (?<device>sr\d+)", RegexOptions.Singleline | RegexOptions.ExplicitCapture);
-                        if (match.Success
-                            && match.Groups["device"].Value is { Length: > 0 } mdn)
+                        if (match.Success && match.Groups["device"].Value is { Length: > 0 } mdn)
                         {
                             Dispatcher.UIThread.Post(() =>
                             {
@@ -84,10 +83,7 @@ public partial class MainWindow
                                     {
                                         CurrentPage: MainViewModel
                                         {
-                                            dumper:
-                                            {
-                                                SelectedPhysicalDevice: { Length: > 0 } spd
-                                            } dumper
+                                            dumper: { SelectedPhysicalDevice: { Length: > 0 } spd } dumper
                                         } vm
                                     }
                                     && spd == $"/dev/{mdn}")

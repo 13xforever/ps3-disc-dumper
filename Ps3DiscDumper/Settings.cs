@@ -16,7 +16,7 @@ public struct Settings
     public string DumpNameTemplate { get; set; } = DefaultPattern;
     public bool ShowDetails { get; set; } = true;
     public bool EnableTransparency { get; set; } = true;
-    public bool StayOnTop { get; set; } = true;
+    public bool StayOnTop { get; set; } = false;
 
     private static StringComparison Comparison => OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
     private static StringComparer Comparer => OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;

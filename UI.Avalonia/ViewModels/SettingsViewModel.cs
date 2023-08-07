@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Avalonia;
@@ -8,8 +9,11 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using IrdLibraryClient;
 using Ps3DiscDumper;
 using Ps3DiscDumper.Utils;
+
+using SpecialFolder = System.Environment.SpecialFolder;
 
 namespace UI.Avalonia.ViewModels;
 
@@ -47,6 +51,8 @@ public partial class SettingsViewModel: ViewModelBase
     public string TestTitle => testItems[Patterns.Title]!;
     public string TestRegion => testItems[Patterns.Region]!;
 
+    public bool LogAvailable => File.Exists(Log.LogPath); 
+    public string LogPath => FormatPathPreview(Log.LogPath);
     public string DumperVersion => Dumper.Version;
     public string CurrentYear => DateTime.Now.Year.ToString();
     public static string ProjectUrl => "https://github.com/13xforever/ps3-disc-dumper";
@@ -54,10 +60,21 @@ public partial class SettingsViewModel: ViewModelBase
 
     private static string FormatPathPreview(string path)
     {
+        if (path is "<n/a>")
+            return "Couldn't create file due to permission or other issues";
+
+        if (OperatingSystem.IsLinux())
+        {
+            var homePath = Environment.GetFolderPath(SpecialFolder.UserProfile);
+            if (path.StartsWith(homePath))
+                return Path.Combine("~", Path.GetRelativePath(homePath, path));
+        }
+
         if (path is "."
             || path.StartsWith("./")
             || OperatingSystem.IsWindows() && path.StartsWith(@".\"))
             return "<current folder>" + path[1..];
+        
         return Path.IsPathRooted(path)
             ? path
             : Path.Combine("<current folder>", path);
@@ -125,6 +142,23 @@ public partial class SettingsViewModel: ViewModelBase
                 OutputDir = newPath;
             else if (purpose is "ird")
                 IrdDir = newPath;
+        }
+    }
+
+    [RelayCommand]
+    private void OpenLogs()
+    {
+        var folder = $"\"{Path.GetDirectoryName(Log.LogPath)}\"";
+        ProcessStartInfo psi = OperatingSystem.IsWindows()
+            ? new() { Verb = "open", FileName = folder, UseShellExecute = true, }
+            : new () { FileName = "open", Arguments = folder, };
+        try
+        {
+            Process.Start(psi);
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "Failed to open log folder");
         }
     }
 }

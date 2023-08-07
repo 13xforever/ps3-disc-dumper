@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using IrdLibraryClient;
 using Ps3DiscDumper;
 using UI.Avalonia.Utils.ColorPalette;
 
@@ -45,6 +46,7 @@ public partial class ViewModelBase: ObservableObject
     public string PinSymbol => UseSegoeIcons ? "\ue718" : "\uf08d";
     public string ValidationErrorSymbol => UseSegoeIcons ? "\ue783" : "\uf06a";
     public string ValidationWarningSymbol => UseSegoeIcons ? "\ue7ba" : "\uf071";
+    public string DiagnosticsSymbol => UseSegoeIcons ? "\ue9d9" : "\uf478";
 
     [ObservableProperty] protected string pageTitle = "PS3 Disc Dumper v" + Dumper.Version;
     [ObservableProperty] private bool canEditSettings = true;
@@ -56,7 +58,14 @@ public partial class ViewModelBase: ObservableObject
             ? new() { FileName = url, UseShellExecute = true, }
             : new() { FileName = "open", Arguments = url, };
         psi.CreateNoWindow = true;
-        try { using var _ = Process.Start(psi); } catch { }
+        try
+        {
+            using var _ = Process.Start(psi);
+        }
+        catch (Exception e)
+        {
+            Log.Warn(e, "Failed to open web URL");
+        }
     }
 
     partial void OnEnableTransparencyChanged(bool value)
