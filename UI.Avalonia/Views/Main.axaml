@@ -84,16 +84,22 @@
 	        <TextBlock Text="{Binding StartButtonCaption}"/>
         </Button>
         
-        <ProgressBar Width="500" Margin="0"
-                     ShowProgressText="True" Foreground="{Binding AccentColor}"
-                     Minimum="0" Maximum="{Binding ProgressMax}" Value="{Binding Progress}"
-                     IsVisible="{Binding DumpingInProgress}"/>
-        <TextBlock Width="500" Margin="0 8"
-                   TextAlignment="Center"
-                   FontFamily="{Binding SmallFontFamily}" FontSize="10"
-                   Foreground="{Binding DimTextColor}"
-                   IsVisible="{Binding DumpingInProgress}"
-                   Text="{Binding ProgressInfo}"
-                   ></TextBlock>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
+                    IsVisible="{Binding DumpingInProgress}">
+	        <StackPanel Margin="0 6 12 0" Name="ProgressBar">
+		        <ProgressBar ShowProgressText="True" Foreground="{Binding AccentColor}"
+		                     Minimum="0" Maximum="{Binding ProgressMax}" Value="{Binding Progress}"/>
+		        
+		        <TextBlock Margin="0 8"
+		                   TextAlignment="Center"
+		                   FontFamily="{Binding SmallFontFamily}" FontSize="10"
+		                   Foreground="{Binding DimTextColor}"
+		                   IsVisible="{Binding DumpingInProgress}"
+		                   Text="{Binding ProgressInfo}"/>
+	        </StackPanel>
+	        <Button HorizontalAlignment="Right" VerticalAlignment="Top"
+	                Command="{Binding CancelDumpCommand}"
+	                Name="ProgressCancel" SizeChanged="OnResized">Cancel</Button>
+        </StackPanel>
     </StackPanel>
 </UserControl>

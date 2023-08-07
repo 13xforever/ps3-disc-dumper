@@ -73,6 +73,8 @@ public partial class MainWindow : Window
     {
         if (DataContext is not MainWindowViewModel vm)
             return;
+        if (vm.CurrentPage is MainViewModel mvm)
+            mvm.dumper?.Cts.Cancel(false);
         
         vm.Dispose();
     }

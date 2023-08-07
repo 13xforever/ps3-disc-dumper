@@ -91,6 +91,12 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     [RelayCommand]
     private void DumpDisc() => Dispatcher.UIThread.Post(DumpDiscAsync, DispatcherPriority.Background);
+
+    [RelayCommand]
+    private void CancelDump()
+    {
+        dumper?.Cts.Cancel(false);
+    }
     
     private async void ScanDiscsAsync()
     {
@@ -185,7 +191,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         CanEditSettings = false;
         if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
             EnableTaskbarProgress();
-        
+
         try
         {
             var threadCts = new CancellationTokenSource();
@@ -199,17 +205,27 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                         if (dumper.TotalSectors > 0 && !dumper.Cts.IsCancellationRequested)
                         {
                             Progress = (int)(dumper.CurrentSector * 10000L / dumper.TotalSectors);
-                            ProgressInfo = $"Sector data {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
+                            ProgressInfo =
+                                $"Sector data {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
                         }
                         Task.Delay(200, combinedToken.Token).GetAwaiter().GetResult();
                     } while (!combinedToken.Token.IsCancellationRequested);
                 }
-                catch (TaskCanceledException) { }
+                catch (TaskCanceledException)
+                {
+                }
             });
             monitor.Start();
             await dumper.DumpAsync(settings.OutputDir).WaitAsync(dumper.Cts.Token);
             threadCts.Cancel();
             monitor.Join(100);
+        }
+        catch (OperationCanceledException e)
+        {
+            Log.Warn(e, "Cancellation requested");
+            StepTitle = "Dump is not valid";
+            StepSubtitle = "Operation was cancelled";
+            Success = false;
         }
         catch (Exception e)
         {
@@ -226,12 +242,18 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         CanEditSettings = true;
         DumperIsReady = false;
         FoundDisc = false;
+        if (dumper.Cts.IsCancellationRequested
+            || LastOperationSuccess is false
+            || LastOperationWarning is true)
+            return;
+
         Success = dumper.ValidationStatus is not false;
         if (Success == false)
         {
-            StepTitle = "Dump is corrupted";
+            StepTitle = "Dump is not valid";
             if (dumper.BrokenFiles.Count > 0)
-                StepSubtitle = $"{dumper.BrokenFiles.Count} invalid file{(dumper.BrokenFiles.Count == 1 ? "" : "s")}";
+                StepSubtitle =
+                    $"{dumper.BrokenFiles.Count} invalid file{(dumper.BrokenFiles.Count == 1 ? "" : "s")}";
         }
         else
         {
