@@ -64,8 +64,7 @@ public partial class MainWindow
             if ((vol.dbcv_unitmask & driveId) == 0)
                 return;
 
-            if (vm.DumpingInProgress)
-                dumper!.Cts.Cancel();
+            dumper?.Cts.Cancel();
             vm.ResetViewModelCommand.Execute(null);
         }
     }

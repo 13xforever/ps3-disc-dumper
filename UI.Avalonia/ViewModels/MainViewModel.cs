@@ -95,7 +95,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     [RelayCommand]
     private void CancelDump()
     {
-        dumper?.Cts.Cancel(false);
+        dumper?.Cts.Cancel();
     }
     
     private async void ScanDiscsAsync()

@@ -26,7 +26,6 @@ public partial class MainWindow : Window
 
     public override void Show()
     {
-
         base.Show();
         App.OnThemeChanged(this, EventArgs.Empty);
         App.OnPlatformColorsChanged(this, PlatformSettings?.GetColorValues() ?? new PlatformColorValues
@@ -68,13 +67,16 @@ public partial class MainWindow : Window
     }
 
     partial void OnLoadedPlatform();
+    partial void OnClosingPlatform();
 
     private void OnClosing(object? sender, WindowClosingEventArgs e)
     {
+        OnClosingPlatform();
         if (DataContext is not MainWindowViewModel vm)
             return;
+        
         if (vm.CurrentPage is MainViewModel mvm)
-            mvm.dumper?.Cts.Cancel(false);
+            mvm.dumper?.Cts.Cancel();
         
         vm.Dispose();
     }

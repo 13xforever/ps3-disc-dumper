@@ -74,7 +74,8 @@ public class Dumper: IDisposable
     public string Title { get; private set; }
     public string OutputDir { get; private set; }
     public char Drive { get; set; }
-    private string input;
+    public string SelectedPhysicalDevice { get; private set; }
+    public string InputDevicePath { get; private set; }
     private List<FileRecord> filesystemStructure;
     private List<DirRecord> emptyDirStructure;
     private CDReader discReader;
@@ -233,7 +234,7 @@ public class Dumper: IDisposable
                     if (!File.Exists(discSfbPath))
                         continue;
 
-                    input = drive.Name;
+                    InputDevicePath = drive.Name;
                     Drive = drive.Name[0];
                     break;
                 }
@@ -243,7 +244,7 @@ public class Dumper: IDisposable
                 discSfbPath = Path.Combine(inDir, "PS3_DISC.SFB");
                 if (File.Exists(discSfbPath))
                 {
-                    input = Path.GetPathRoot(discSfbPath);
+                    InputDevicePath = Path.GetPathRoot(discSfbPath);
                     Drive = discSfbPath[0];
                 }
             }
@@ -255,20 +256,20 @@ public class Dumper: IDisposable
                 : DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.CDRom).Select(d => d.RootDirectory.FullName); 
             discSfbPath = mountList.SelectMany(mp => IOEx.GetFilepaths(mp, "PS3_DISC.SFB", 2)) .FirstOrDefault();
             if (!string.IsNullOrEmpty(discSfbPath))
-                input = Path.GetDirectoryName(discSfbPath)!;
+                InputDevicePath = Path.GetDirectoryName(discSfbPath)!;
         }
         else
             throw new NotImplementedException("Current OS is not supported");
 
-        if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(discSfbPath))
+        if (string.IsNullOrEmpty(InputDevicePath) || string.IsNullOrEmpty(discSfbPath))
             throw new DriveNotFoundException("No valid PS3 disc was detected. Disc must be detected and mounted.");
 
-        Log.Info("Selected disc: " + input);
+        Log.Info("Selected disc: " + InputDevicePath);
         discSfbData = File.ReadAllBytes(discSfbPath);
         var titleId = CheckDiscSfb(discSfbData);
-        var paramSfoPath = Path.Combine(input, "PS3_GAME", "PARAM.SFO");
+        var paramSfoPath = Path.Combine(InputDevicePath, "PS3_GAME", "PARAM.SFO");
         if (!File.Exists(paramSfoPath))
-            throw new InvalidOperationException($"Specified folder is not a valid PS3 disc root (param.sfo is missing): {input}");
+            throw new InvalidOperationException($"Specified folder is not a valid PS3 disc root (param.sfo is missing): {InputDevicePath}");
 
         using (var stream = File.Open(paramSfoPath, FileMode.Open, FileAccess.Read, FileShare.Read))
             ParamSfo = ParamSfo.ReadFrom(stream);
@@ -277,10 +278,10 @@ public class Dumper: IDisposable
             Log.Warn($"Product codes in ps3_disc.sfb ({titleId}) and in param.sfo ({ProductCode}) do not match");
 
         // todo: maybe use discutils instead to read TOC as one block
-        var files = IOEx.GetFilepaths(input, "*", SearchOption.AllDirectories);
+        var files = IOEx.GetFilepaths(InputDevicePath, "*", SearchOption.AllDirectories);
         DiscFilenames = new();
         var totalFilesize = 0L;
-        var rootLength = input.Length;
+        var rootLength = InputDevicePath.Length;
         foreach (var f in files)
         {
             try { totalFilesize += new FileInfo(f).Length; } catch { }
@@ -336,8 +337,6 @@ public class Dumper: IDisposable
         if (untestedKeys.Count == 0)
             throw new KeyNotFoundException("No valid disc decryption key was found");
 
-        // select physical device
-        string physicalDevice = null;
         List<string> physicalDrives = new List<string>();
         Log.Trace("Trying to enumerate physical drives...");
         try
@@ -384,7 +383,7 @@ public class Dumper: IDisposable
                         discStream.ReadExact(buf, 0, buf.Length);
                         if (buf.SequenceEqual(discSfbData))
                         {
-                            physicalDevice = drive;
+                            SelectedPhysicalDevice = drive;
                             break;
                         }
                         Log.Trace("SFB content check failed, skipping the drive");
@@ -396,11 +395,11 @@ public class Dumper: IDisposable
                 Log.Debug($"Skipping drive {drive}: {e.Message}");
             }
         }
-        if (physicalDevice == null)
+        if (SelectedPhysicalDevice == null)
             throw new AccessViolationException("Direct disk access to the drive was denied");
 
-        Log.Debug($"Selected physical drive {physicalDevice}");
-        driveStream = File.Open(physicalDevice, FileMode.Open, FileAccess.Read, FileShare.Read);
+        Log.Debug($"Selected physical drive {SelectedPhysicalDevice}");
+        driveStream = File.Open(SelectedPhysicalDevice, FileMode.Open, FileAccess.Read, FileShare.Read);
 
         // find disc license file
         discReader = new(driveStream, true, true);
@@ -551,7 +550,7 @@ public class Dumper: IDisposable
                 Log.Info($"Reading {file.TargetFileName} ({file.Length.AsStorageUnit()})");
                 CurrentFileNumber++;
                 var convertedFilename = Path.DirectorySeparatorChar == '\\' ? file.TargetFileName : file.TargetFileName.Replace('\\', Path.DirectorySeparatorChar);
-                var inputFilename = Path.Combine(input, convertedFilename);
+                var inputFilename = Path.Combine(InputDevicePath, convertedFilename);
 
                 if (!File.Exists(inputFilename))
                 {
