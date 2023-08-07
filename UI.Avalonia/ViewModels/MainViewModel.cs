@@ -237,9 +237,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         {
             StepTitle = "Files are decrypted and copied";
             if (Success == true)
-                StepSubtitle = "Disc copy matches a verified copy";
-            else
-                StepSubtitle = "No reading errors were detected";
+                StepSubtitle = "All files match a verified copy";
         }
     }
 
