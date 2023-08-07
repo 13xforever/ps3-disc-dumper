@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using Avalonia.Threading;
 using TerraFX.Interop.Windows;
 using UI.Avalonia.Utils;
@@ -23,12 +24,11 @@ public partial class MainWindow
 
     partial void OnLoadedPlatform()
     {
-        if (OperatingSystem.IsWindows())
+        if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
             WndProcHelper.Register(this, WndProc);
     }
     
-#pragma warning disable CA1416
-    //[SupportedOSPlatform("windows6.1")]
+    [SupportedOSPlatform("windows6.1")]
     private void WndProc(HWND hwnd, uint msg, WPARAM wParam, LPARAM lParam)
     {
         if (DataContext is not MainWindowViewModel {CurrentPage: MainViewModel vm})
@@ -69,6 +69,5 @@ public partial class MainWindow
             vm.ResetViewModelCommand.Execute(null);
         }
     }
-#pragma warning restore CA1416
 }
 #endif

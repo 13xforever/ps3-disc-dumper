@@ -20,6 +20,8 @@ static class Program
             MessageBox.Show("Please do not run software as Administrator unless application was designed to properly handle it, and it is explicitly required.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
             Environment.Exit(-1);
         }
+#pragma warning disable CA1416
         Application.Run(new MainForm());
+#pragma warning restore CA1416
     }
 }

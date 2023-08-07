@@ -75,15 +75,15 @@ public static class SettingsProvider
             if (xml.Root?.Element("userSettings")?.FirstNode is not XElement settingsNode)
                 return null;
 
-            var template = settingsNode.Descendants("setting")
-                .FirstOrDefault(el => (string?)el.Attribute("name") == "DumpNameTemplate")?
-                .Element("value")?.Value;
-            var output = settingsNode.Descendants("setting")
-                .FirstOrDefault(el => (string?)el.Attribute("name") == "OutputDir")?
-                .Element("value")?.Value;
-            var ird = settingsNode.Descendants("setting")
-                .FirstOrDefault(el => (string?)el.Attribute("name") == "IrdDir")?
-                .Element("value")?.Value;
+            var template = (string)settingsNode.Descendants("setting")
+                .FirstOrDefault(el => (string)el.Attribute("name") == "DumpNameTemplate")?
+                .Element("value");
+            var output = (string)settingsNode.Descendants("setting")
+                .FirstOrDefault(el => (string)el.Attribute("name") == "OutputDir")?
+                .Element("value");
+            var ird = (string)settingsNode.Descendants("setting")
+                .FirstOrDefault(el => (string)el.Attribute("name") == "IrdDir")?
+                .Element("value");
             var result = new Settings();
             if (template is { Length: > 0 })
                 result = result with { DumpNameTemplate = template };

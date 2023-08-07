@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -18,6 +19,7 @@ using UI.WinForms.Msil.Utils;
 
 namespace UI.WinForms.Msil;
 
+[SupportedOSPlatform("Windows7.0")]
 public partial class MainForm : Form
 {
     private BackgroundWorker discBackgroundWorker;
