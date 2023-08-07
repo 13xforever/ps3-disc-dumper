@@ -18,7 +18,7 @@ public static class Log
         {
             var path = Path.Combine("logs", DateTime.Now.ToString("yyyy-MM-dd") + ".log");
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ps3-iso-dumper", path);
+                path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ps3-iso-dumper", path);
             var folder = Path.GetDirectoryName(path) ?? ".";
             if (!Directory.Exists(folder))
                 Directory.CreateDirectory(folder);

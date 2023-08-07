@@ -27,9 +27,9 @@ namespace Ps3DiscDumper;
 
 public class Dumper: IDisposable
 {
-    public const string Version = "4.0.0-beta2";
+    public const string Version = "4.0.0";
 
-    static Dumper() => Log.Info("PS3 Disc Dumper v" + Dumper.Version);
+    static Dumper() => Log.Info("PS3 Disc Dumper v" + Version);
 
     private static readonly Regex VersionParts = new(@"(?<ver>\d+(\.\d+){0,2})[ \-]*(?<pre>.*)", RegexOptions.Singleline | RegexOptions.ExplicitCapture);
     private static readonly Regex ScsiInfoParts = new(@"Host: .+$\s*Vendor: (?<vendor>.+?)\s* Model: (?<model>.+?)\s* Rev: (?<revision>.+)$\s*Type: \s*(?<type>.+?)\s* ANSI  ?SCSI revision: (?<scsi_rev>.+?)\s*$",

@@ -48,7 +48,7 @@ public partial class ViewModelBase: ObservableObject
     public string ValidationWarningSymbol => UseSegoeIcons ? "\ue7ba" : "\uf071";
     public string DiagnosticsSymbol => UseSegoeIcons ? "\ue9d9" : "\uf478";
 
-    [ObservableProperty] protected string pageTitle = "PS3 Disc Dumper v" + Dumper.Version;
+    [ObservableProperty] protected string pageTitle = "PS3 Disc Dumper";// + Dumper.Version;
     [ObservableProperty] private bool canEditSettings = true;
     
     [RelayCommand]

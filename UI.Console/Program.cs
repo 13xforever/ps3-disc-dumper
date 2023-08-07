@@ -127,7 +127,7 @@ internal static class Program
 
             var dumper = new Dumper(ApiConfig.Cts);
             dumper.DetectDisc(inDir);
-            await dumper.FindDiscKeyAsync(ApiConfig.IrdCachePath).ConfigureAwait(false);
+            await dumper.FindDiscKeyAsync(SettingsProvider.Settings.IrdDir).ConfigureAwait(false);
             if (string.IsNullOrEmpty(dumper.OutputDir))
             {
                 Log.Info("No compatible disc was found, exiting");

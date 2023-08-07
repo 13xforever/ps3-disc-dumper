@@ -1,6 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Text.Json.Serialization;
 using Ps3DiscDumper.Utils;
+
+using SpecialFolder = System.Environment.SpecialFolder;
 
 namespace Ps3DiscDumper;
 
@@ -12,7 +15,7 @@ public struct Settings
     public const string DefaultPattern = $"%{Patterns.Title}% [%{Patterns.ProductCode}%]";
 
     public string OutputDir { get; set; } = ".";
-    public string IrdDir { get; set; } = "ird";
+    public string IrdDir { get; set; } = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData) ,"ps3-iso-dumper", "ird");
     public string DumpNameTemplate { get; set; } = DefaultPattern;
     public bool ShowDetails { get; set; } = true;
     public bool EnableTransparency { get; set; } = true;
