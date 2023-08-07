@@ -42,18 +42,6 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     internal Dumper? dumper;
 
-    private static readonly NameValueCollection RegionMapping = new()
-    {
-        ["A"] = "ASIA",
-        ["E"] = "EU",
-        ["H"] = "HK",
-        ["J"] = "JP",
-        ["K"] = "KR",
-        ["P"] = "JP",
-        ["T"] = "JP",
-        ["U"] = "US",
-    };
-
     partial void OnDiscInfoExpandedChanged(bool value)
     {
         SettingsProvider.Settings = SettingsProvider.Settings with { ShowDetails = value };
@@ -116,10 +104,10 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                         [Patterns.ProductCodeLetters] = d.ProductCode?[..4],
                         [Patterns.ProductCodeNumbers] = d.ProductCode?[4..],
                         [Patterns.Title] = d.Title,
-                        [Patterns.Region] = RegionMapping[d.ProductCode?[2..3] ?? ""],
+                        [Patterns.Region] = Dumper.RegionMapping[d.ProductCode?[2..3] ?? ""],
                     };
                     settings.TestItems = items;
-                    return PatternFormatter.Format($"%{Patterns.Title}% [%{Patterns.ProductCode}%]", items);
+                    return PatternFormatter.Format(SettingsProvider.Settings.DumpNameTemplate, items);
                 });
         } catch {}
         if (dumper.ProductCode is not { Length: > 0 } || dumper.Cts.IsCancellationRequested)

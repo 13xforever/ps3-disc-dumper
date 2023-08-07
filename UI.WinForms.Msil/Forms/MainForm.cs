@@ -36,18 +36,6 @@ public partial class MainForm : Form
     private const int DBTF_MEDIA = 0x0001;
     private const int DBTF_MOUNT_ISO = 0x001b0000; // ???????
 
-    private static readonly NameValueCollection RegionMapping = new()
-    {
-        ["A"] = "ASIA",
-        ["E"] = "EU",
-        ["H"] = "HK",
-        ["J"] = "JP",
-        ["K"] = "KR",
-        ["P"] = "JP",
-        ["T"] = "JP",
-        ["U"] = "US",
-    };
-
     public MainForm()
     {
         InitializeComponent();
@@ -100,7 +88,6 @@ public partial class MainForm : Form
     private void MainForm_Load(object sender, EventArgs e)
     {
         Text = "PS3 Disc Dumper v" + Dumper.Version;
-        Log.Info(Text);
         ResetForm();
 
         updateCheckWorker = new() { WorkerSupportsCancellation = false, WorkerReportsProgress = false, };
@@ -283,19 +270,7 @@ public partial class MainForm : Form
         var dumper = (Dumper)doWorkEventArgs.Argument;
         try
         {
-            dumper.DetectDisc("",
-                d =>
-                {
-                    var items = new NameValueCollection
-                    {
-                        [Patterns.ProductCode] = d.ProductCode,
-                        [Patterns.ProductCodeLetters] = d.ProductCode?.Substring(0, 4),
-                        [Patterns.ProductCodeNumbers] = d.ProductCode?.Substring(4),
-                        [Patterns.Title] = d.Title,
-                        [Patterns.Region] = RegionMapping[d.ProductCode?.Substring(2, 1) ?? ""],
-                    };
-                    return PatternFormatter.Format(Settings.DumpNameTemplate, items);
-                });
+            dumper.DetectDisc();
         }
         catch { }
         doWorkEventArgs.Result = dumper;

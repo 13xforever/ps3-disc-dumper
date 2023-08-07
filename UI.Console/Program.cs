@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using IrdLibraryClient;
 using Mono.Options;
 using Ps3DiscDumper;
+using Ps3DiscDumper.POCOs;
 
 namespace UIConsole;
 
@@ -15,12 +16,11 @@ internal static class Program
 {
     internal static async Task<int> Main(string[] args)
     {
-        Log.Info("PS3 Disc Dumper v" + Dumper.Version);
         Log.Debug($"Log file location: {Log.LogPath}");
-
         await Dumper.CheckUpdatesAsync().ConfigureAwait(false);
 
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && Console.WindowHeight < 1 && Console.WindowWidth < 1)
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+            && Console.WindowHeight < 1 && Console.WindowWidth < 1)
             try
             {
                 Log.Error("Looks like there's no console present, restarting...");
@@ -73,7 +73,7 @@ internal static class Program
         const string titleBase = "PS3 Disc Dumper";
         var title = titleBase;
         Console.Title = title;
-        var output = ".";
+        var output = SettingsProvider.Settings.OutputDir;
         var inDir = "";
         var showHelp = false;
         var interactive = true;
@@ -87,7 +87,7 @@ internal static class Program
                 }
             },
             {
-                "o|output=", "Path to the output folder. Subfolder for each disc will be created automatically", v =>
+                "o|output=", $"Path to the output folder. Subfolder for each disc will be created automatically. Default is {output}", v =>
                 {
                     if (v is string outd)
                         output = outd;
@@ -133,6 +133,7 @@ internal static class Program
                 Log.Info("No compatible disc was found, exiting");
                 return 2;
             }
+            
             if (lastDiscId == dumper.ProductCode)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;

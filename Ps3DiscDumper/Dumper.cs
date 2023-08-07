@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Management;
@@ -50,11 +51,21 @@ public class Dumper: IDisposable
     private byte[] sectorIV;
     private Stream driveStream;
     private static readonly byte[] Iso9660PrimaryVolumeDescriptorHeader = {0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0x00};
-
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = new SnakeCasePolicy(),
         WriteIndented = true,
+    };
+    public static readonly NameValueCollection RegionMapping = new()
+    {
+        ["A"] = "ASIA",
+        ["E"] = "EU",
+        ["H"] = "HK",
+        ["J"] = "JP",
+        ["K"] = "KR",
+        ["P"] = "JP",
+        ["T"] = "JP",
+        ["U"] = "US",
     };
 
     public ParamSfo ParamSfo { get; private set; }
@@ -202,10 +213,13 @@ public class Dumper: IDisposable
 
     public void DetectDisc(string inDir = "", Func<Dumper, string> outputDirFormatter = null)
     {
-        outputDirFormatter ??= d => PatternFormatter.Format($"%{Patterns.Title}% [%{Patterns.ProductCode}%]", new()
+        outputDirFormatter ??= d => PatternFormatter.Format(SettingsProvider.Settings.DumpNameTemplate, new()
         {
             [Patterns.ProductCode] = d.ProductCode,
+            [Patterns.ProductCodeLetters] = d.ProductCode?[..4],
+            [Patterns.ProductCodeNumbers] = d.ProductCode?[4..],
             [Patterns.Title] = d.Title,
+            [Patterns.Region] = RegionMapping[d.ProductCode?[2..3] ?? ""],
         });
         string discSfbPath = null;
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
