@@ -36,6 +36,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private string discSizeInfo = "";
     [ObservableProperty] private string discKeyName = "";
     [ObservableProperty] private int progress;
+    [ObservableProperty] private int progressMax = 10_000;
     [ObservableProperty] private string progressInfo = "";
     [ObservableProperty] private bool? success;
     [ObservableProperty] private bool? validated;
@@ -47,6 +48,12 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         SettingsProvider.Settings = SettingsProvider.Settings with { ShowDetails = value };
     }
 
+    partial void OnProgressChanged(int value)
+    {
+        if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
+            SetTaskbarProgress(value);
+    }
+    
     [RelayCommand]
     private void ResetViewModel()
     {
@@ -67,6 +74,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         ProgressInfo = "";
         Success = null;
         Validated = null;
+        ResetTaskbarProgress();
     }
 
     [RelayCommand]
@@ -175,6 +183,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         LastOperationWarning = false;
         DumpingInProgress = true;
         CanEditSettings = false;
+        if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
+            EnableTaskbarProgress();
         
         try
         {
@@ -210,6 +220,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             dumper.Cts.Cancel();
         }
 
+        if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
+            ResetTaskbarProgress();
         DumpingInProgress = false;
         CanEditSettings = true;
         DumperIsReady = false;
@@ -231,6 +243,10 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         }
     }
 
+    partial void ResetTaskbarProgress();
+    partial void EnableTaskbarProgress();
+    partial void SetTaskbarProgress(int position);
+    
     public void Dispose()
     {
         dumper?.Dispose();

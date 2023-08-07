@@ -28,7 +28,7 @@ public partial class MainWindow
             WndProcHelper.Register(this, WndProc);
     }
     
-    [SupportedOSPlatform("windows6.1")]
+    [SupportedOSPlatform("Windows6.1")]
     private void WndProc(HWND hwnd, uint msg, WPARAM wParam, LPARAM lParam)
     {
         if (DataContext is not MainWindowViewModel {CurrentPage: MainViewModel vm})

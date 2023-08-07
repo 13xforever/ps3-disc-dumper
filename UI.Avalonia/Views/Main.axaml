@@ -86,7 +86,7 @@
         
         <ProgressBar Width="500" Margin="0"
                      ShowProgressText="True" Foreground="{Binding AccentColor}"
-                     Minimum="0" Maximum="10000" Value="{Binding Progress}"
+                     Minimum="0" Maximum="{Binding ProgressMax}" Value="{Binding Progress}"
                      IsVisible="{Binding DumpingInProgress}"/>
         <TextBlock Width="500" Margin="0 8"
                    TextAlignment="Center"

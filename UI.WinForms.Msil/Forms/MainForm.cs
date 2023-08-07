@@ -19,7 +19,7 @@ using UI.WinForms.Msil.Utils;
 
 namespace UI.WinForms.Msil;
 
-[SupportedOSPlatform("Windows7.0")]
+[SupportedOSPlatform("Windows6.1")]
 public partial class MainForm : Form
 {
     private BackgroundWorker discBackgroundWorker;
