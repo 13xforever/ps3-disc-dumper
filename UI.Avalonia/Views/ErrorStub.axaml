@@ -1,0 +1,92 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:UI.Avalonia.ViewModels"
+        x:Class="UI.Avalonia.Views.ErrorStub"
+        x:DataType="vm:ErrorStubViewModel"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="400"
+        Width="600" Height="400"
+        
+        WindowStartupLocation="CenterScreen"
+        CanResize="False"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="PreferSystemChrome"
+        SystemDecorations="Full"
+        Topmost="{Binding StayOnTop}"
+        
+        Background="Transparent"
+        TransparencyLevelHint="Mica, AcrylicBlur, None"
+        RenderOptions.TextRenderingMode="Antialias"
+        
+        Icon="/Assets/icon.ico"
+        Title="{Binding PageTitle}"
+        >
+        
+        <Design.DataContext>
+                <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+                <vm:ErrorStubViewModel/>
+        </Design.DataContext>
+    
+        <Panel>
+            <Border IsHitTestVisible="False" Background="{Binding TintColor}">
+                <Border.IsVisible>
+                    <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                        <Binding  Path="!EnableTransparency"/>
+                        <Binding RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=Window}" Path="!IsActive"/>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="!MicaEnabled"/>
+                            <Binding Path="!AcrylicEnabled"/>
+                        </MultiBinding>
+                    </MultiBinding>
+                </Border.IsVisible>
+            </Border>
+            <ExperimentalAcrylicBorder IsHitTestVisible="False">
+                <ExperimentalAcrylicBorder.IsVisible>
+                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                        <Binding  Path="EnableTransparency"/>
+                        <Binding  Path="!MicaEnabled"/>
+                        <Binding  Path="AcrylicEnabled"/>
+                    </MultiBinding>
+                </ExperimentalAcrylicBorder.IsVisible>
+                <ExperimentalAcrylicBorder.Material>
+                    <ExperimentalAcrylicMaterial
+                        BackgroundSource="Digger"
+                        TintColor="{Binding TintColor, Converter={StaticResource ColorConverter}}"
+                        TintOpacity="{Binding TintOpacity}"
+                        MaterialOpacity="0.5"
+                    />
+                </ExperimentalAcrylicBorder.Material>
+            </ExperimentalAcrylicBorder>
+
+            <!-- title -->
+            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="11 11 0 0"
+                       FontSize="12"
+                       IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=IsExtendedIntoWindowDecorations}"
+                       Text="{Binding PageTitle}"/>
+            
+            <!-- message -->
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Margin="16 64 16 16">
+                <StackPanel Orientation="Horizontal" MaxWidth="568">
+                    <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="36"
+                               Margin="0 0 16 0" Padding="0 4 0 0"
+                               Foreground="{Binding ColorPalette.StatusDangerForeground1, Converter={StaticResource BrushConverter}}"
+                               Text="{Binding ValidationErrorSymbol}"/>
+                    <TextBlock FontSize="28" TextWrapping="Wrap" ClipToBounds="True" MaxWidth="500">
+                        Please do not run software as Administrator unless application was designed to properly handle it, and it is explicitly required.
+                    </TextBlock>
+                </StackPanel>
+                
+                <Button Margin="0 44 0 0" Padding="32 8" FontSize="24"
+                        HorizontalAlignment="Center"
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                        Click="Exit">
+                    Exit
+                </Button>
+            </StackPanel>
+
+        </Panel>
+
+</Window>

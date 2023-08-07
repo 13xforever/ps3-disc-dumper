@@ -1,0 +1,28 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="UI.Avalonia.App"
+             xmlns:local="using:UI.Avalonia"
+             xmlns:lc="using:UI.Avalonia.Converters"
+             RequestedThemeVariant="Default">
+             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+  
+    <Application.Styles>
+        <FluentTheme />
+    </Application.Styles>
+             
+    <Application.Resources>
+        <FontFamily x:Key="FontAwesome">avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free</FontFamily>
+        <lc:ColorConverter x:Key="ColorConverter"/>
+        <lc:BrushConverter x:Key="BrushConverter"/>
+        <lc:ValidationColorConverter x:Key="ValidationColorConverter"/>
+        <lc:UpdateColorConverter x:Key="UpdateColorConverter"/>
+        <lc:ValidationSymbolConverter x:Key="ValidationSymbolConverter"/>
+        <lc:PageTransitionConverter x:Key="PageTransitionConverter"/>
+        <lc:OnOffConverter x:Key="OnOffConverter"/>
+    </Application.Resources>
+             
+</Application>

@@ -5,13 +5,13 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using Ps3DiscDumper;
 using Ps3DiscDumper.Utils;
 
 namespace UI.WinForms.Msil;
 
 public partial class SettingsForm : Form
 {
-    private readonly Settings Settings = new();
     private readonly HashSet<char> InvalidFileNameChars = new HashSet<char>(Path.GetInvalidFileNameChars());
     private Color defaultTextBoxBackground;
 
@@ -32,10 +32,10 @@ public partial class SettingsForm : Form
 
     private void SettingsForm_Load(object sender, EventArgs e)
     {
-        Settings.Reload();
-        outputTextBox.Text = Settings.OutputDir;
-        irdTextBox.Text = Settings.IrdDir;
-        namePatternTextBox.Text = Settings.DumpNameTemplate;
+        var settings = SettingsProvider.Settings;
+        outputTextBox.Text = settings.OutputDir;
+        irdTextBox.Text = settings.IrdDir;
+        namePatternTextBox.Text = settings.DumpNameTemplate;
         namePatternTextBox_TextChanged();
     }
 
@@ -46,11 +46,12 @@ public partial class SettingsForm : Form
 
     private void saveButton_Click(object sender, EventArgs e)
     {
-        Settings.OutputDir = outputTextBox.Text;
-        Settings.IrdDir = irdTextBox.Text;
-        Settings.DumpNameTemplate = namePatternTextBox.Text.Trim();
-        Settings.Configured = true;
-        Settings.Save();
+        var settings = SettingsProvider.Settings;
+        settings.OutputDir = outputTextBox.Text;
+        settings.IrdDir = irdTextBox.Text;
+        settings.DumpNameTemplate = namePatternTextBox.Text.Trim();
+        SettingsProvider.Settings = settings;
+        SettingsProvider.Save();
         Close();
     }
 
@@ -148,9 +149,10 @@ public partial class SettingsForm : Form
 
     private void defaultsButton_Click(object sender, EventArgs e)
     {
-        outputTextBox.Text = (string)Settings.Properties[nameof(Settings.OutputDir)].DefaultValue;
-        irdTextBox.Text = (string)Settings.Properties[nameof(Settings.IrdDir)].DefaultValue;
-        namePatternTextBox.Text = (string)Settings.Properties[nameof(Settings.DumpNameTemplate)].DefaultValue;
+        var defaultSettings = new Settings();
+        outputTextBox.Text = defaultSettings.OutputDir;
+        irdTextBox.Text = defaultSettings.IrdDir;
+        namePatternTextBox.Text = defaultSettings.DumpNameTemplate;
         namePatternTextBox_TextChanged();
     }
 }

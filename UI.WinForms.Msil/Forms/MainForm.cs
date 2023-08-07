@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -18,9 +19,9 @@ using UI.WinForms.Msil.Utils;
 
 namespace UI.WinForms.Msil;
 
+[SupportedOSPlatform("Windows6.1")]
 public partial class MainForm : Form
 {
-    private readonly Settings settings = new();
     private BackgroundWorker discBackgroundWorker;
     private BackgroundWorker updateCheckWorker;
     private Dumper currentDumper;
@@ -30,23 +31,12 @@ public partial class MainForm : Form
 
     private const int DBT_DEVNODES_CHANGED = 0x0007;
     private const int DBT_DEVICEARRIVAL = 0x8000;
+    private const int DBT_DEVICEREMOVEPENDING = 0x8003;
     private const int DBT_DEVICEREMOVECOMPLETE = 0x8004;
 
     private const int DBT_DEVTYP_VOLUME = 0x2;
     private const int DBTF_MEDIA = 0x0001;
     private const int DBTF_MOUNT_ISO = 0x001b0000; // ???????
-
-    private static readonly NameValueCollection RegionMapping = new()
-    {
-        ["A"] = "ASIA",
-        ["E"] = "EU",
-        ["H"] = "HK",
-        ["J"] = "JP",
-        ["K"] = "KR",
-        ["P"] = "JP",
-        ["T"] = "JP",
-        ["U"] = "US",
-    };
 
     public MainForm()
     {
@@ -62,6 +52,7 @@ public partial class MainForm : Form
             switch (msgType)
             {
                 case DBT_DEVICEARRIVAL:
+                case DBT_DEVICEREMOVEPENDING:
                 case DBT_DEVICEREMOVECOMPLETE:
                     var hdr = (DEV_BROADCAST_HDR)Marshal.PtrToStructure(msg.LParam, typeof(DEV_BROADCAST_HDR));
                     if (hdr.dbch_devicetype == DBT_DEVTYP_VOLUME)
@@ -94,13 +85,11 @@ public partial class MainForm : Form
         }
     }
 
+    private static Settings Settings => SettingsProvider.Settings;
+    
     private void MainForm_Load(object sender, EventArgs e)
     {
         Text = "PS3 Disc Dumper v" + Dumper.Version;
-        Log.Info(Text);
-        settings.Reload();
-        Log.Info("User settings:");
-        LogCurrentSettings();
         ResetForm();
 
         updateCheckWorker = new() { WorkerSupportsCancellation = false, WorkerReportsProgress = false, };
@@ -108,21 +97,14 @@ public partial class MainForm : Form
         updateCheckWorker.RunWorkerCompleted += ShowUpdateCheckResults;
         updateCheckWorker.RunWorkerAsync();
 
-        if (string.IsNullOrEmpty(settings.OutputDir) || string.IsNullOrEmpty(settings.IrdDir) || string.IsNullOrWhiteSpace(settings.DumpNameTemplate))
+        if (string.IsNullOrEmpty(Settings.OutputDir)
+            || string.IsNullOrEmpty(Settings.IrdDir)
+            || string.IsNullOrWhiteSpace(Settings.DumpNameTemplate))
             settingsButton_Click(sender, e);
     }
 
     private void settingsButton_Click(object sender, EventArgs e)
-    {
-        var settingsForm = new SettingsForm();
-        var result = settingsForm.ShowDialog();
-        if (result == DialogResult.OK)
-        {
-            settings.Reload();
-            Log.Info("Changed user settings:");
-            LogCurrentSettings();
-        }
-    }
+        => new SettingsForm().ShowDialog();
 
     private void ResetForm()
     {
@@ -190,7 +172,7 @@ public partial class MainForm : Form
             FilterIndex = 2,
             Title = "Select a disc key file",
             SupportMultiDottedExtensions = true,
-            InitialDirectory = settings.IrdDir,
+            InitialDirectory = Settings.IrdDir,
         };
         var dialogResult = dialog.ShowDialog();
         if (dialogResult != DialogResult.OK || string.IsNullOrEmpty(dialog.FileName) || !File.Exists(dialog.FileName))
@@ -209,12 +191,12 @@ public partial class MainForm : Form
             else
                 keyInfo = new(null, discKey, discKeyPath, KeyType.Redump, discKey.ToHexString());
             var discKeyFilename = Path.GetFileName(discKeyPath);
-            var cacheFilename = Path.Combine(settings.IrdDir, discKeyFilename);
+            var cacheFilename = Path.Combine(Settings.IrdDir, discKeyFilename);
             if (!File.Exists(cacheFilename))
                 File.Copy(discKeyPath, cacheFilename);
 
             //todo: proper check
-            currentDumper.FindDiscKeyAsync(settings.IrdDir).GetAwaiter().GetResult();
+            currentDumper.FindDiscKeyAsync(Settings.IrdDir).GetAwaiter().GetResult();
             if (!currentDumper.IsValidDiscKey(discKey))
             {
                 MessageBox.Show("Selected disk key file contains incompatible file set, and cannot be used with the selected PS3 game disc.", "IRD file check", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -234,7 +216,7 @@ public partial class MainForm : Form
 
     private void startDumpingButton_Click(object sender, EventArgs e)
     {
-        var outputDir = Path.Combine(settings.OutputDir, currentDumper.OutputDir);
+        var outputDir = Path.Combine(SettingsProvider.Settings.OutputDir, currentDumper.OutputDir);
         if (Directory.Exists(outputDir))
         {
             var msgResult = MessageBox.Show(
@@ -290,19 +272,7 @@ public partial class MainForm : Form
         var dumper = (Dumper)doWorkEventArgs.Argument;
         try
         {
-            dumper.DetectDisc("",
-                d =>
-                {
-                    var items = new NameValueCollection
-                    {
-                        [Patterns.ProductCode] = d.ProductCode,
-                        [Patterns.ProductCodeLetters] = d.ProductCode?.Substring(0, 4),
-                        [Patterns.ProductCodeNumbers] = d.ProductCode?.Substring(4),
-                        [Patterns.Title] = d.Title,
-                        [Patterns.Region] = RegionMapping[d.ProductCode?.Substring(2, 1) ?? ""],
-                    };
-                    return PatternFormatter.Format(settings.DumpNameTemplate, items);
-                });
+            dumper.DetectDisc();
         }
         catch { }
         doWorkEventArgs.Result = dumper;
@@ -344,11 +314,11 @@ public partial class MainForm : Form
         var dumper = (Dumper)doWorkEventArgs.Argument;
         try
         {
-            dumper.FindDiscKeyAsync(settings.IrdDir).Wait(dumper.Cts.Token);
+            dumper.FindDiscKeyAsync(Settings.IrdDir).Wait(dumper.Cts.Token);
         }
         catch (Exception e)
         {
-            Log.Error(e, "Failed to find matching key");
+            Log.Error(e, "Failed to find a matching key");
             //                MessageBox.Show(e.Message, "Disc check error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             dumper.Cts.Cancel();
         }
@@ -415,7 +385,7 @@ public partial class MainForm : Form
                 }
             });
             monitor.Start();
-            dumper.DumpAsync(settings.OutputDir).Wait(dumper.Cts.Token);
+            dumper.DumpAsync(Settings.OutputDir).Wait(dumper.Cts.Token);
             threadCts.Cancel();
             monitor.Join(100);
         }
@@ -520,13 +490,5 @@ public partial class MainForm : Form
     {
         var psi = new ProcessStartInfo(UpdateUrl) { UseShellExecute = true };
         Process.Start(psi);
-    }
-
-    private void LogCurrentSettings()
-    {
-        Log.Info($"\t{nameof(settings.Configured)}: {settings.Configured}");
-        Log.Info($"\t{nameof(settings.OutputDir)}: {settings.OutputDir}");
-        Log.Info($"\t{nameof(settings.IrdDir)}: {settings.IrdDir}");
-        Log.Info($"\t{nameof(settings.DumpNameTemplate)}: {settings.DumpNameTemplate}");
     }
 }

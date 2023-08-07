@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Management;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
-using System.Text;
+using System.Runtime.Versioning;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -27,9 +27,13 @@ namespace Ps3DiscDumper;
 
 public class Dumper: IDisposable
 {
-    public const string Version = "3.3.6";
+    public const string Version = "4.0.0";
+
+    static Dumper() => Log.Info("PS3 Disc Dumper v" + Version);
 
     private static readonly Regex VersionParts = new(@"(?<ver>\d+(\.\d+){0,2})[ \-]*(?<pre>.*)", RegexOptions.Singleline | RegexOptions.ExplicitCapture);
+    private static readonly Regex ScsiInfoParts = new(@"Host: .+$\s*Vendor: (?<vendor>.+?)\s* Model: (?<model>.+?)\s* Rev: (?<revision>.+)$\s*Type: \s*(?<type>.+?)\s* ANSI  ?SCSI revision: (?<scsi_rev>.+?)\s*$",
+        RegexOptions.Multiline | RegexOptions.ExplicitCapture);
     private static readonly HashSet<char> InvalidChars = new(Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()));
     private static readonly char[] MultilineSplit = {'\r', '\n'};
     private long currentSector;
@@ -47,11 +51,21 @@ public class Dumper: IDisposable
     private byte[] sectorIV;
     private Stream driveStream;
     private static readonly byte[] Iso9660PrimaryVolumeDescriptorHeader = {0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0x00};
-
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = new SnakeCasePolicy(),
         WriteIndented = true,
+    };
+    public static readonly NameValueCollection RegionMapping = new()
+    {
+        ["A"] = "ASIA",
+        ["E"] = "EU",
+        ["H"] = "HK",
+        ["J"] = "JP",
+        ["K"] = "KR",
+        ["P"] = "JP",
+        ["T"] = "JP",
+        ["U"] = "US",
     };
 
     public ParamSfo ParamSfo { get; private set; }
@@ -60,7 +74,8 @@ public class Dumper: IDisposable
     public string Title { get; private set; }
     public string OutputDir { get; private set; }
     public char Drive { get; set; }
-    private string input;
+    public string SelectedPhysicalDevice { get; private set; }
+    public string InputDevicePath { get; private set; }
     private List<FileRecord> filesystemStructure;
     private List<DirRecord> emptyDirStructure;
     private CDReader discReader;
@@ -96,6 +111,7 @@ public class Dumper: IDisposable
         }
     }
 
+    [SupportedOSPlatform("Windows")]
     private List<string> EnumeratePhysicalDrivesWindows()
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -105,13 +121,20 @@ public class Dumper: IDisposable
 #if !NATIVE
         try
         {
-            using var mgmtObjSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMedia");
-            var drives = mgmtObjSearcher.Get();
+            using var physicalMediaQuery = new ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMedia");
+            var drives = physicalMediaQuery.Get();
             foreach (var drive in drives)
             {
-                var tag = drive.Properties["Tag"].Value as string;
-                if (tag?.IndexOf("CDROM", StringComparison.InvariantCultureIgnoreCase) > -1)
+                if (drive.Properties["Tag"].Value is string tag
+                    && tag.StartsWith(@"\\.\CDROM"))
                     physicalDrives.Add(tag);
+            }
+            using var cdromQuery = new ManagementObjectSearcher("SELECT * FROM Win32_CDROMDrive");
+            drives = cdromQuery.Get();
+            foreach (var drive in drives)
+            {
+                // Name and Caption are the same, so idk if they can be different
+                Log.Info($"Found optical media drive {drive.Properties["Name"].Value} ({drive.Properties["Drive"].Value})");
             }
         }
         catch (Exception e)
@@ -127,12 +150,27 @@ public class Dumper: IDisposable
         return physicalDrives;
     }
 
+    [SupportedOSPlatform("Linux")]
     private List<string> EnumeratePhysicalDrivesLinux()
     {
         var cdInfo = "";
         try
         {
             cdInfo = File.ReadAllText("/proc/sys/dev/cdrom/info");
+            if (File.Exists("/proc/scsi/scsi"))
+            {
+                var scsiInfo = File.ReadAllText("/proc/scsi/scsi");
+                if (scsiInfo is { Length: > 0 })
+                {
+                    foreach (Match m in ScsiInfoParts.Matches(scsiInfo))
+                    {
+                        if (m.Groups["type"].Value is not "CD-ROM")
+                            continue;
+
+                        Log.Info($"Found optical media drive {m.Groups["vendor"].Value} {m.Groups["model"].Value}");
+                    }
+                }
+            }
         }
         catch (Exception e)
         {
@@ -176,10 +214,13 @@ public class Dumper: IDisposable
 
     public void DetectDisc(string inDir = "", Func<Dumper, string> outputDirFormatter = null)
     {
-        outputDirFormatter ??= d => PatternFormatter.Format($"%{Patterns.Title}% [%{Patterns.ProductCode}%]", new()
+        outputDirFormatter ??= d => PatternFormatter.Format(SettingsProvider.Settings.DumpNameTemplate, new()
         {
             [Patterns.ProductCode] = d.ProductCode,
+            [Patterns.ProductCodeLetters] = d.ProductCode?[..4],
+            [Patterns.ProductCodeNumbers] = d.ProductCode?[4..],
             [Patterns.Title] = d.Title,
+            [Patterns.Region] = RegionMapping[d.ProductCode?[2..3] ?? ""],
         });
         string discSfbPath = null;
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -193,7 +234,7 @@ public class Dumper: IDisposable
                     if (!File.Exists(discSfbPath))
                         continue;
 
-                    input = drive.Name;
+                    InputDevicePath = drive.Name;
                     Drive = drive.Name[0];
                     break;
                 }
@@ -203,7 +244,7 @@ public class Dumper: IDisposable
                 discSfbPath = Path.Combine(inDir, "PS3_DISC.SFB");
                 if (File.Exists(discSfbPath))
                 {
-                    input = Path.GetPathRoot(discSfbPath);
+                    InputDevicePath = Path.GetPathRoot(discSfbPath);
                     Drive = discSfbPath[0];
                 }
             }
@@ -215,20 +256,20 @@ public class Dumper: IDisposable
                 : DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.CDRom).Select(d => d.RootDirectory.FullName); 
             discSfbPath = mountList.SelectMany(mp => IOEx.GetFilepaths(mp, "PS3_DISC.SFB", 2)) .FirstOrDefault();
             if (!string.IsNullOrEmpty(discSfbPath))
-                input = Path.GetDirectoryName(discSfbPath)!;
+                InputDevicePath = Path.GetDirectoryName(discSfbPath)!;
         }
         else
             throw new NotImplementedException("Current OS is not supported");
 
-        if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(discSfbPath))
+        if (string.IsNullOrEmpty(InputDevicePath) || string.IsNullOrEmpty(discSfbPath))
             throw new DriveNotFoundException("No valid PS3 disc was detected. Disc must be detected and mounted.");
 
-        Log.Info("Selected disc: " + input);
+        Log.Info("Selected disc: " + InputDevicePath);
         discSfbData = File.ReadAllBytes(discSfbPath);
         var titleId = CheckDiscSfb(discSfbData);
-        var paramSfoPath = Path.Combine(input, "PS3_GAME", "PARAM.SFO");
+        var paramSfoPath = Path.Combine(InputDevicePath, "PS3_GAME", "PARAM.SFO");
         if (!File.Exists(paramSfoPath))
-            throw new InvalidOperationException($"Specified folder is not a valid PS3 disc root (param.sfo is missing): {input}");
+            throw new InvalidOperationException($"Specified folder is not a valid PS3 disc root (param.sfo is missing): {InputDevicePath}");
 
         using (var stream = File.Open(paramSfoPath, FileMode.Open, FileAccess.Read, FileShare.Read))
             ParamSfo = ParamSfo.ReadFrom(stream);
@@ -237,10 +278,10 @@ public class Dumper: IDisposable
             Log.Warn($"Product codes in ps3_disc.sfb ({titleId}) and in param.sfo ({ProductCode}) do not match");
 
         // todo: maybe use discutils instead to read TOC as one block
-        var files = IOEx.GetFilepaths(input, "*", SearchOption.AllDirectories);
+        var files = IOEx.GetFilepaths(InputDevicePath, "*", SearchOption.AllDirectories);
         DiscFilenames = new();
         var totalFilesize = 0L;
-        var rootLength = input.Length;
+        var rootLength = InputDevicePath.Length;
         foreach (var f in files)
         {
             try { totalFilesize += new FileInfo(f).Length; } catch { }
@@ -296,8 +337,6 @@ public class Dumper: IDisposable
         if (untestedKeys.Count == 0)
             throw new KeyNotFoundException("No valid disc decryption key was found");
 
-        // select physical device
-        string physicalDevice = null;
         List<string> physicalDrives = new List<string>();
         Log.Trace("Trying to enumerate physical drives...");
         try
@@ -324,7 +363,12 @@ public class Dumper: IDisposable
             try
             {
                 Log.Trace($"Checking physical drive {drive}...");
-                await using var discStream = File.Open(drive, FileMode.Open, FileAccess.Read, FileShare.Read);
+                await using var discStream = File.Open(drive, new FileStreamOptions
+                {
+                    Mode = FileMode.Open,
+                    Access = FileAccess.Read,
+                    Options = FileOptions.Asynchronous | FileOptions.SequentialScan
+                });
                 var tmpDiscReader = new CDReader(discStream, true, true);
                 if (tmpDiscReader.FileExists("PS3_DISC.SFB"))
                 {
@@ -339,7 +383,7 @@ public class Dumper: IDisposable
                         discStream.ReadExact(buf, 0, buf.Length);
                         if (buf.SequenceEqual(discSfbData))
                         {
-                            physicalDevice = drive;
+                            SelectedPhysicalDevice = drive;
                             break;
                         }
                         Log.Trace("SFB content check failed, skipping the drive");
@@ -351,11 +395,11 @@ public class Dumper: IDisposable
                 Log.Debug($"Skipping drive {drive}: {e.Message}");
             }
         }
-        if (physicalDevice == null)
-            throw new AccessViolationException("Couldn't get physical access to the drive");
+        if (SelectedPhysicalDevice == null)
+            throw new AccessViolationException("Direct disk access to the drive was denied");
 
-        Log.Debug($"Selected physical drive {physicalDevice}");
-        driveStream = File.Open(physicalDevice, FileMode.Open, FileAccess.Read, FileShare.Read);
+        Log.Debug($"Selected physical drive {SelectedPhysicalDevice}");
+        driveStream = File.Open(SelectedPhysicalDevice, FileMode.Open, FileAccess.Read, FileShare.Read);
 
         // find disc license file
         discReader = new(driveStream, true, true);
@@ -416,7 +460,9 @@ public class Dumper: IDisposable
 
         lock (AllKnownDiscKeys)
             AllKnownDiscKeys.TryGetValue(discKey, out allMatchingKeys);
-        var discKeyInfo = allMatchingKeys?.First();
+        var discKeyInfo = allMatchingKeys?.FirstOrDefault(k => k.FullPath.Contains(ProductCode, StringComparison.OrdinalIgnoreCase) && k.FullPath.EndsWith(".ird", StringComparison.OrdinalIgnoreCase))
+                          ?? allMatchingKeys?.FirstOrDefault(k => k.FullPath.EndsWith(".ird", StringComparison.OrdinalIgnoreCase))
+                          ?? allMatchingKeys?.First();
         DiscKeyFilename = Path.GetFileName(discKeyInfo?.FullPath);
         DiscKeyType = discKeyInfo?.KeyType ?? default;
     }
@@ -504,7 +550,7 @@ public class Dumper: IDisposable
                 Log.Info($"Reading {file.TargetFileName} ({file.Length.AsStorageUnit()})");
                 CurrentFileNumber++;
                 var convertedFilename = Path.DirectorySeparatorChar == '\\' ? file.TargetFileName : file.TargetFileName.Replace('\\', Path.DirectorySeparatorChar);
-                var inputFilename = Path.Combine(input, convertedFilename);
+                var inputFilename = Path.Combine(InputDevicePath, convertedFilename);
 
                 if (!File.Exists(inputFilename))
                 {
@@ -646,8 +692,8 @@ public class Dumper: IDisposable
                 return (latestVer, latest);
             }
                 
-            if (latestBetaVer > latestVer
-                || (latestVer == latestBetaVer
+            if (latestBetaVer > curVer
+                || (latestBetaVer == curVer
                     && curVerPre is {Length: >0}
                     && (latestBetaVerPre is {Length: >0} && StringComparer.OrdinalIgnoreCase.Compare(latestBetaVerPre, curVerPre) > 0
                         || latestBetaVerStr is null or "")))
