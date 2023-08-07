@@ -22,6 +22,10 @@
         <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
         <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
     </PropertyGroup>
+    
+    <PropertyGroup Condition=" '$(TargetFramework)' == 'net7.0-windows' ">
+        <DefineConstants>WINDOWS</DefineConstants>
+    </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)'=='Release'">
         <PublishSingleFile>true</PublishSingleFile>
