@@ -50,8 +50,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     partial void OnProgressChanged(int value)
     {
-        if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
-            SetTaskbarProgress(value);
+        SetTaskbarProgress(value);
     }
     
     [RelayCommand]
@@ -189,8 +188,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         LastOperationWarning = false;
         DumpingInProgress = true;
         CanEditSettings = false;
-        if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
-            EnableTaskbarProgress();
+        EnableTaskbarProgress();
 
         try
         {
@@ -236,8 +234,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             dumper.Cts.Cancel();
         }
 
-        if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
-            ResetTaskbarProgress();
+        ResetTaskbarProgress();
         DumpingInProgress = false;
         CanEditSettings = true;
         DumperIsReady = false;
