@@ -67,13 +67,15 @@
         <!-- bottom -->
         <Button HorizontalAlignment="Center" Width="200" Height="48" Margin="0"
                 HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                Background="{Binding AccentColor}" Foreground="White"
+                Background="{Binding AccentColor, Converter={StaticResource BrushConverter}}"
+                Foreground="{Binding ButtonAccentForegroundColor, Converter={StaticResource BrushConverter}}"
                 IsVisible="{Binding !FoundDisc}"
                 Command="{Binding ScanDiscsCommand}"
 	    >Rescan disc devices</Button>
         <Button HorizontalAlignment="Center" Width="200" Height="48" Margin="0"
                 HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                Background="{Binding AccentColor}" Foreground="White"
+                Background="{Binding AccentColor, Converter={StaticResource BrushConverter}}"
+                Foreground="{Binding ButtonAccentForegroundColor, Converter={StaticResource BrushConverter}}"
                 Command="{Binding DumpDiscCommand}">
 	        <Button.IsVisible>
 		        <MultiBinding Converter="{x:Static BoolConverters.And}">

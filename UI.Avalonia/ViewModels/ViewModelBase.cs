@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Diagnostics;
 using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media;
+using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using IrdLibraryClient;
 using Ps3DiscDumper;
 using UI.Avalonia.Converters;
+using UI.Avalonia.Utils;
 using UI.Avalonia.Utils.ColorPalette;
 
 namespace UI.Avalonia.ViewModels;
@@ -19,7 +23,9 @@ public partial class ViewModelBase: ObservableObject
     [ObservableProperty] private static double tintOpacity = 1.0;
     [ObservableProperty] private static double materialOpacity = 0.69;
     [ObservableProperty] private static double luminosityOpacity = 1.0;
-    [ObservableProperty] private static string accentColor = ThemeConsts.AccentColor;
+    [ObservableProperty] private static string accentColor = "#000000";
+    [ObservableProperty] private static string buttonAccentForegroundColor = "#ffffff";
+    [ObservableProperty] private static string systemAccentColor = ThemeConsts.AccentColor;
     [ObservableProperty] private static string systemAccentColor1 = ThemeConsts.AccentColor;
     [ObservableProperty] private static string systemAccentColor2 = ThemeConsts.AccentColor;
     [ObservableProperty] private static string systemAccentColor3 = ThemeConsts.AccentColor;
@@ -86,29 +92,69 @@ public partial class ViewModelBase: ObservableObject
 
     partial void OnAccentColorChanged(string value)
     {
-        if (Application.Current is not {} app)
+        if (Application.Current is not {ApplicationLifetime: IClassicDesktopStyleApplicationLifetime
+            {
+                MainWindow.ActualThemeVariant: {} t
+            }} app)
             return;
 
-        var c = ColorConverter.Parse(value);
-        app.Resources["SystemAccentColor"] = c;
-        app.Resources["SystemAccentColorDark1"] = ChangeColorLuminosity(c, -0.3);
-        app.Resources["SystemAccentColorDark2"] = ChangeColorLuminosity(c, -0.5);
-        app.Resources["SystemAccentColorDark3"] = ChangeColorLuminosity(c, -0.7);
-        app.Resources["SystemAccentColorLight1"] = ChangeColorLuminosity(c, 0.3);
-        app.Resources["SystemAccentColorLight2"] = ChangeColorLuminosity(c, 0.5);
-        app.Resources["SystemAccentColorLight3"] = ChangeColorLuminosity(c, 0.7);
+        if (t == ThemeVariant.Light)
+            ButtonAccentForegroundColor = PreferSystemAccent ? "#000000" : "#ffffff";
+        else if (t == ThemeVariant.Dark)
+            ButtonAccentForegroundColor = PreferSystemAccent ? "#ffffff" : "#000000";
+        AccentColorInfo accentInfo;
+        if (!PreferSystemAccent || !OperatingSystem.IsWindowsVersionAtLeast(10))
+        {
+            var accent = ColorConverter.Parse(value);
+            var light1 = ChangeColorLuminosity(accent, 0.3);
+            var light2 = ChangeColorLuminosity(accent, 0.5);
+            var light3 = ChangeColorLuminosity(accent, 0.7);
+            var dark1 = ChangeColorLuminosity(accent, -0.3);
+            var dark2 = ChangeColorLuminosity(accent, -0.5);
+            var dark3 = ChangeColorLuminosity(accent, -0.7);
+            accentInfo = new(accent, light1, light2, light3, dark1, dark2, dark3);
+        }
+        else
+        {
+            accentInfo = CustomPlatformSettings.GetColorValues();
+        }
+        app.Resources["SystemAccentColor"] = accentInfo.Accent;
+        app.Resources["SystemAccentColorDark1"] = accentInfo.Dark1;
+        app.Resources["SystemAccentColorDark2"] = accentInfo.Dark2;
+        app.Resources["SystemAccentColorDark3"] = accentInfo.Dark3;
+        app.Resources["SystemAccentColorLight1"] = accentInfo.Light1;
+        app.Resources["SystemAccentColorLight2"] = accentInfo.Light2;
+        app.Resources["SystemAccentColorLight3"] = accentInfo.Light3;
+        if (t == ThemeVariant.Light)
+        {
+            accentColor = accentInfo.Dark1.ToString();
+            ButtonAccentForegroundColor = "#ffffff";
+            app.Resources["SystemAccentColor"] = accentInfo.Dark1;
+            SystemAccentColor1 = accentInfo.Light1.ToString();
+            SystemAccentColor2 = accentInfo.Light2.ToString();
+            SystemAccentColor3 = accentInfo.Light3.ToString();
+        }
+        else if (t == ThemeVariant.Dark)
+        {
+            accentColor = accentInfo.Light2.ToString();
+            ButtonAccentForegroundColor = "#000000";
+            app.Resources["SystemAccentColor"] = accentInfo.Light2;
+            SystemAccentColor1 = accentInfo.Dark1.ToString();
+            SystemAccentColor2 = accentInfo.Dark2.ToString();
+            SystemAccentColor3 = accentInfo.Dark3.ToString();
+        }
     }
 
     partial void OnPreferSystemAccentChanged(bool value)
     {
         SettingsProvider.Settings = SettingsProvider.Settings with { PreferSystemAccent = value };
-        AccentColor = value ? SystemAccentColor1 : ThemeConsts.AccentColor;
+        AccentColor = value ? SystemAccentColor : ThemeConsts.AccentColor;
     }
 
     partial void OnStayOnTopChanged(bool value)
         => SettingsProvider.Settings = SettingsProvider.Settings with { StayOnTop = value };
-    
-    static Color ChangeColorLuminosity(Color color, double luminosityFactor)
+
+    private static Color ChangeColorLuminosity(Color color, double luminosityFactor)
     {
         var red = (double)color.R;
         var green = (double)color.G;
@@ -128,6 +174,6 @@ public partial class ViewModelBase: ObservableObject
             blue = (255 - blue) * luminosityFactor + blue;
         }
 
-        return new Color(color.A, (byte)red, (byte)green, (byte)blue);
+        return new(color.A, (byte)red, (byte)green, (byte)blue);
     }
 }

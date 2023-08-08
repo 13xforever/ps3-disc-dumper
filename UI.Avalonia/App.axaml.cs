@@ -140,10 +140,11 @@ public partial class App : Application
                 MainWindow.DataContext: MainWindowViewModel { CurrentPage: ViewModelBase vm }
             })
             return;
+
+        vm.SystemAccentColor = e.AccentColor1.ToString();
         if (SettingsProvider.Settings.PreferSystemAccent)
             vm.AccentColor = e.AccentColor1.ToString();
-        vm.SystemAccentColor1 = e.AccentColor1.ToString();
-        vm.SystemAccentColor2 = e.AccentColor2.ToString();
-        vm.SystemAccentColor3 = e.AccentColor3.ToString();
+        else
+            vm.AccentColor = ThemeConsts.AccentColor;
     }
 }
