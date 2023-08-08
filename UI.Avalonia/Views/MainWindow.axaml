@@ -91,11 +91,18 @@
 		            IsVisible="{Binding UpdateInfo, Converter={x:Static ObjectConverters.IsNotNull}}"
 		    >
 				<TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="18"
-		                   Text="{Binding CurrentPage.UpdateSymbol}"
-		                   Foreground="{Binding UpdateIsPrerelease, Converter={StaticResource UpdateColorConverter}}"/>
+		                   Text="{Binding CurrentPage.UpdateSymbol}">
+					<TextBlock.Foreground>
+						<MultiBinding Converter="{StaticResource UpdateColorConverter}">
+							<Binding Path="UpdateIsPrerelease"/>
+							<Binding Path="CurrentPage.DimTextColor"/>
+							<Binding Path="CurrentPage.AccentColor"/>
+						</MultiBinding>
+					</TextBlock.Foreground>
+				</TextBlock>
 				<Button.Flyout>
 					<Flyout>
-						<ScrollViewer AllowAutoHide="True" VerticalScrollBarVisibility="Auto" MaxHeight="300" FocusAdorner="">
+						<ScrollViewer AllowAutoHide="True" VerticalScrollBarVisibility="Auto" MaxHeight="300">
 						<StackPanel>
 							<TextBlock Text="{Binding FormattedUpdateInfoHeader}" TextWrapping="Wrap" Width="400"
 							           FontSize="18" Margin="2 2 2 12" Focusable="True"

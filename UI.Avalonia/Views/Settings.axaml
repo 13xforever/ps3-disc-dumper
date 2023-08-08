@@ -26,7 +26,7 @@
                 <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                            VerticalAlignment="Center" HorizontalAlignment="Left"
                            Text="{Binding FolderSymbol}"/>
-                <StackPanel Grid.Column="1">
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock>Disc dumps will save to</TextBlock>
                     <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
                                HorizontalAlignment="Left"
@@ -48,7 +48,7 @@
                 <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                            VerticalAlignment="Center" HorizontalAlignment="Left"
                            Text="{Binding FolderSymbol}"/>
-                <StackPanel Grid.Column="1">
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock>Disc key copies will save to</TextBlock>
                     <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
                                HorizontalAlignment="Left"
@@ -72,7 +72,7 @@
                 <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                            VerticalAlignment="Center" HorizontalAlignment="Left"
                            Text="{Binding RenameSymbol}"/>
-                <StackPanel Grid.Column="1">
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock HorizontalAlignment="Left">Dump name template</TextBlock>
                     <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
                                HorizontalAlignment="Left"
@@ -92,7 +92,7 @@
                 CornerRadius="0" Padding="16"
                 BorderBrush="{Binding TintColor}" BorderThickness="1 1 1 0">
             <Grid ColumnDefinitions="36,*,240">
-                <StackPanel Grid.Column="1">
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock>Live Preview</TextBlock>
                     <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
                                HorizontalAlignment="Left"
@@ -125,17 +125,17 @@
             </Grid>
         </Border>
 
-        <!-- window options -->
+        <!-- personalization -->
         <TextBlock FontWeight="SemiBold" Margin="0 32 0 0">Personalization</TextBlock>
         <!-- stay on top -->
         <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
                 CornerRadius="4" Padding="16" Margin="0 8 0 0"
                 BorderBrush="{Binding TintColor}" BorderThickness="1">
-            <Grid ColumnDefinitions="36,*,100">
+            <Grid ColumnDefinitions="36,*,120">
                 <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                            VerticalAlignment="Center" HorizontalAlignment="Left"
                            Text="{Binding PinSymbol}"/>
-                <StackPanel Grid.Column="1">
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock>Stay on top</TextBlock>
                     <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
                                HorizontalAlignment="Left">
@@ -150,6 +150,25 @@
                 </StackPanel>
             </Grid>
         </Border>
+        <!-- system accent color -->
+        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
+                CornerRadius="4" Padding="16" Margin="0 3 0 0"
+                BorderBrush="{Binding TintColor}" BorderThickness="1"
+                IsVisible="{Binding HasSystemAccentColor}">
+            <Grid ColumnDefinitions="36,*,120">
+                <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
+                           VerticalAlignment="Center" HorizontalAlignment="Left"
+                           Text="{Binding ColorSymbol}"/>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock>Accent color</TextBlock>
+                </StackPanel>
+                <ComboBox Grid.Column="2" HorizontalAlignment="Right"
+                          SelectedIndex="{Binding PreferSystemAccent}">
+                    <ComboBoxItem>Branded</ComboBoxItem>
+                    <ComboBoxItem>System</ComboBoxItem>
+                </ComboBox>
+            </Grid>
+        </Border>
         <!-- transparency -->
         <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
                 CornerRadius="4" Padding="16" Margin="0 3 0 0"
@@ -160,11 +179,11 @@
                     <Binding Path="AcrylicEnabled"/>
                 </MultiBinding>
             </Border.IsVisible>
-            <Grid ColumnDefinitions="36,*,100">
+            <Grid ColumnDefinitions="36,*,120">
                 <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                            VerticalAlignment="Center" HorizontalAlignment="Left"
                            Text="{Binding TransparencySymbol}"/>
-                <StackPanel Grid.Column="1">
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock>Transparency effects</TextBlock>
                     <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
                                HorizontalAlignment="Left">
@@ -189,7 +208,7 @@
                 <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                            VerticalAlignment="Center" HorizontalAlignment="Left"
                            Text="{Binding DiagnosticsSymbol}"/>
-                <StackPanel Grid.Column="1">
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock>Diagnostics will save to</TextBlock>
                     <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
                                HorizontalAlignment="Left"
@@ -214,7 +233,7 @@
             <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="16"
                        VerticalAlignment="Center" Margin="0 0 12 0" Text="{Binding HomeSymbol}"/>
             <Button Padding="0"
-                    Background="Transparent" Foreground="{Binding SystemAccentColor1}" Cursor="Hand"
+                    Background="Transparent" Foreground="{Binding AccentColor}" Cursor="Hand"
                     Command="{Binding OpenUrlCommand}" CommandParameter="{Binding ProjectUrl}">
                 Project page
             </Button>
@@ -223,7 +242,7 @@
             <TextBlock FontSize="16" FontFamily="{Binding SymbolFontFamily}"
                        VerticalAlignment="Center" Margin="0 0 12 0" Text="{Binding FeedbackSymbol}"/>
             <Button Padding="0"
-                    Background="Transparent" Foreground="{Binding SystemAccentColor1}" Cursor="Hand"
+                    Background="Transparent" Foreground="{Binding AccentColor}" Cursor="Hand"
                     Command="{Binding OpenUrlCommand}" CommandParameter="{Binding SubmitIssueUrl}">
                 Give feedback
             </Button>

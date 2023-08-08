@@ -15,7 +15,7 @@ namespace UI.Avalonia.Views;
 
 public partial class MainWindow
 {
-    private Thread dmesgMonitorThread;
+    private Thread? dmesgMonitorThread;
     private bool closing;
     
     partial void OnLoadedPlatform()
@@ -23,7 +23,9 @@ public partial class MainWindow
         if (!OperatingSystem.IsLinux())
             return;
         
-        dmesgMonitorThread = new(() => MonitorDmesg());
+#pragma warning disable CA1416
+        dmesgMonitorThread = new(MonitorDmesg);
+#pragma warning restore CA1416
         dmesgMonitorThread.Start();
     }
 

@@ -25,7 +25,7 @@ public class BrushConverter: IValueConverter
         if (KnownBrushes.TryGetValue(color, out var result))
             return result;
 
-        var c = Color.Parse(color);
+        var c = ColorConverter.Parse(color);
         result = new SolidColorBrush(c, c.A / 255.0);
         KnownBrushes.TryAdd(color, result);
         return result;

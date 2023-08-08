@@ -19,6 +19,7 @@ public struct Settings
     public string DumpNameTemplate { get; set; } = DefaultPattern;
     public bool ShowDetails { get; set; } = true;
     public bool EnableTransparency { get; set; } = true;
+    public bool PreferSystemAccent { get; set; } = false;
     public bool StayOnTop { get; set; } = false;
 
     private static StringComparison Comparison => OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
@@ -33,6 +34,7 @@ public struct Settings
            && string.Equals(DumpNameTemplate, other.DumpNameTemplate, Comparison)
            && ShowDetails == other.ShowDetails
            && EnableTransparency == other.EnableTransparency
+           && PreferSystemAccent == other.PreferSystemAccent
            && StayOnTop == other.StayOnTop;
 
     public override int GetHashCode()
@@ -43,6 +45,7 @@ public struct Settings
         hashCode.Add(DumpNameTemplate, Comparer);
         hashCode.Add(ShowDetails);
         hashCode.Add(EnableTransparency);
+        hashCode.Add(PreferSystemAccent);
         hashCode.Add(StayOnTop);
         return hashCode.ToHashCode();
     }

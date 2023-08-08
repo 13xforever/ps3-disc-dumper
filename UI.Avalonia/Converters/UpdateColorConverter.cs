@@ -1,32 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
-using Avalonia.Styling;
-using UI.Avalonia.Utils;
-using UI.Avalonia.Utils.ColorPalette;
 
 namespace UI.Avalonia.Converters;
 
-public class UpdateColorConverter: IValueConverter
+public class UpdateColorConverter: IMultiValueConverter
 {
-    private static readonly IBrush AccentBrush = BrushConverter.Parse(ThemeConsts.AccentColor);
-    
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public object Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
-        IBrush dimGrey = Brushes.Red;
-        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime { MainWindow: Window w })
-            return dimGrey;
+        if (values is not [bool prerelease, string dimGrey, string accent])
+            return Brushes.Red;
 
-        if (w.ActualThemeVariant == ThemeVariant.Light)
-            dimGrey = BrushConverter.Parse(ThemeConsts.LightThemeDimGray);
-        else if (w.ActualThemeVariant == ThemeVariant.Dark)
-            dimGrey = BrushConverter.Parse(ThemeConsts.DarkThemeDimGray);
-        return value is true ? dimGrey : AccentBrush;
+        return BrushConverter.Parse(prerelease ? dimGrey : accent);
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

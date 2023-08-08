@@ -133,7 +133,6 @@ public partial class App : Application
         }
     }
 
-
     internal static void OnPlatformColorsChanged(object? sender, PlatformColorValues e)
     {
         if (Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime
@@ -141,7 +140,8 @@ public partial class App : Application
                 MainWindow.DataContext: MainWindowViewModel { CurrentPage: ViewModelBase vm }
             })
             return;
-        
+        if (SettingsProvider.Settings.PreferSystemAccent)
+            vm.AccentColor = e.AccentColor1.ToString();
         vm.SystemAccentColor1 = e.AccentColor1.ToString();
         vm.SystemAccentColor2 = e.AccentColor2.ToString();
         vm.SystemAccentColor3 = e.AccentColor3.ToString();
