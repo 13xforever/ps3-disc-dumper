@@ -9,20 +9,52 @@
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
-  
+
+     <Application.Resources>
+         <FontFamily x:Key="FontAwesome">avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free</FontFamily>
+         <lc:ColorConverter x:Key="ColorConverter"/>
+         <lc:BrushConverter x:Key="BrushConverter"/>
+         <lc:ValidationColorConverter x:Key="ValidationColorConverter"/>
+         <lc:UpdateColorConverter x:Key="UpdateColorConverter"/>
+         <lc:ValidationSymbolConverter x:Key="ValidationSymbolConverter"/>
+         <lc:PageTransitionConverter x:Key="PageTransitionConverter"/>
+         <lc:OnOffConverter x:Key="OnOffConverter"/>
+     </Application.Resources>
+             
     <Application.Styles>
-        <FluentTheme />
+        <FluentTheme/>
+
+        <Styles>
+            <Styles.Resources>
+                <ResourceDictionary>
+                    <ResourceDictionary.ThemeDictionaries>
+                        <ResourceDictionary x:Key="Light">
+                            <SolidColorBrush x:Key="ToggleSwitchKnobFillOff">#5d5d5d</SolidColorBrush>
+                            <SolidColorBrush x:Key="ToggleSwitchKnobFillOn">White</SolidColorBrush>
+                        </ResourceDictionary>
+                        <ResourceDictionary x:Key="Dark">
+                            <SolidColorBrush x:Key="ToggleSwitchKnobFillOff">#cecece</SolidColorBrush>
+                            <SolidColorBrush x:Key="ToggleSwitchKnobFillOn">Black</SolidColorBrush>
+                        </ResourceDictionary>
+                    </ResourceDictionary.ThemeDictionaries>
+                </ResourceDictionary>               
+            </Styles.Resources>
+        </Styles>
+
+        <Style Selector="ToggleSwitch:unchecked /template/ Ellipse#SwitchKnobOff">
+            <Setter Property="Width" Value="12"/>
+            <Setter Property="Height" Value="12"/>
+            <Setter Property="Fill" Value="{DynamicResource ToggleSwitchKnobFillOff}"/>
+        </Style>
+        <Style Selector="ToggleSwitch:checked /template/ Ellipse#SwitchKnobOn">
+            <Setter Property="Width" Value="12"/>
+            <Setter Property="Height" Value="12"/>
+            <Setter Property="Fill" Value="{DynamicResource ToggleSwitchKnobFillOn}"/>
+        </Style>
+        <Style Selector="ToggleSwitch:pointerover /template/ Ellipse">
+            <Setter Property="Width" Value="14"/>
+            <Setter Property="Height" Value="14"/>
+        </Style>
     </Application.Styles>
-             
-    <Application.Resources>
-        <FontFamily x:Key="FontAwesome">avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free</FontFamily>
-        <lc:ColorConverter x:Key="ColorConverter"/>
-        <lc:BrushConverter x:Key="BrushConverter"/>
-        <lc:ValidationColorConverter x:Key="ValidationColorConverter"/>
-        <lc:UpdateColorConverter x:Key="UpdateColorConverter"/>
-        <lc:ValidationSymbolConverter x:Key="ValidationSymbolConverter"/>
-        <lc:PageTransitionConverter x:Key="PageTransitionConverter"/>
-        <lc:OnOffConverter x:Key="OnOffConverter"/>
-    </Application.Resources>
-             
+
 </Application>

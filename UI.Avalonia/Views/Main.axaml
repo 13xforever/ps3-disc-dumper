@@ -65,14 +65,14 @@
         </Expander>
         
         <!-- bottom -->
-        <Button HorizontalAlignment="Center" Width="200" Height="48" Margin="0"
+        <Button HorizontalAlignment="Center" Width="200" Height="48" Margin="0" IsDefault="True"
                 HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                 Background="{Binding AccentColor, Converter={StaticResource BrushConverter}}"
                 Foreground="{Binding ButtonAccentForegroundColor, Converter={StaticResource BrushConverter}}"
                 IsVisible="{Binding !FoundDisc}"
                 Command="{Binding ScanDiscsCommand}"
 	    >Rescan disc devices</Button>
-        <Button HorizontalAlignment="Center" Width="200" Height="48" Margin="0"
+        <Button HorizontalAlignment="Center" Width="200" Height="48" Margin="0" IsDefault="True"
                 HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                 Background="{Binding AccentColor, Converter={StaticResource BrushConverter}}"
                 Foreground="{Binding ButtonAccentForegroundColor, Converter={StaticResource BrushConverter}}"
