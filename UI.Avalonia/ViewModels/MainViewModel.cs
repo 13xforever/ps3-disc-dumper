@@ -76,20 +76,13 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         ResetTaskbarProgress();
     }
 
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     [RelayCommand]
-    private void ScanDiscs() => Dispatcher.UIThread.Post(ScanDiscsAsync, DispatcherPriority.Background);
-        /*
-         => Dispatcher.UIThread.Post(() =>
-        {
-            var thread = new Thread(async () => ScanDiscsAsync());
-            thread.Start();
-            while (!thread.Join(15))
-                Thread.Yield();
-        }, DispatcherPriority.Background);
-        */
+    private void ScanDiscs() => Dispatcher.UIThread.Post(() => ScanDiscsAsync(), DispatcherPriority.Background);
 
     [RelayCommand]
-    private void DumpDisc() => Dispatcher.UIThread.Post(DumpDiscAsync, DispatcherPriority.Background);
+    private void DumpDisc() => Dispatcher.UIThread.Post(() => DumpDiscAsync(), DispatcherPriority.Background);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
     [RelayCommand]
     private void CancelDump()
@@ -97,7 +90,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         dumper?.Cts.Cancel();
     }
     
-    private async void ScanDiscsAsync()
+    private async Task ScanDiscsAsync()
     {
         ResetViewModel();
         
@@ -151,6 +144,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             LastOperationSuccess = false;
             return;
         }
+        
         StepSubtitle = "";
         if (dumper.DiscKeyFilename is {Length: >0})
             DiscKeyName = Path.GetFileName(dumper.DiscKeyFilename);
@@ -172,7 +166,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         DumperIsReady = true;
     }
     
-    private async void DumpDiscAsync()
+    private async Task DumpDiscAsync()
     {
         if (dumper is null)
         {
@@ -184,6 +178,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
         StepTitle = "Dumping the disc";
         StepSubtitle = "Decrypting and copying the data…";
+        ProgressInfo = "Analyzing the file structure";
         LastOperationSuccess = true;
         LastOperationWarning = false;
         DumpingInProgress = true;
@@ -203,8 +198,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                         if (dumper.TotalSectors > 0 && !dumper.Cts.IsCancellationRequested)
                         {
                             Progress = (int)(dumper.CurrentSector * 10000L / dumper.TotalSectors);
-                            ProgressInfo =
-                                $"Sector data {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
+                            ProgressInfo = $"Sector data {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
                         }
                         Task.Delay(200, combinedToken.Token).GetAwaiter().GetResult();
                     } while (!combinedToken.Token.IsCancellationRequested);
@@ -249,8 +243,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         {
             StepTitle = "Dump is not valid";
             if (dumper.BrokenFiles.Count > 0)
-                StepSubtitle =
-                    $"{dumper.BrokenFiles.Count} invalid file{(dumper.BrokenFiles.Count == 1 ? "" : "s")}";
+                StepSubtitle = $"{dumper.BrokenFiles.Count} invalid file{(dumper.BrokenFiles.Count == 1 ? "" : "s")}";
         }
         else
         {

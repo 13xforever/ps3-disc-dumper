@@ -65,7 +65,7 @@ public partial class MainWindow
                 return;
 
             dumper?.Cts.Cancel();
-            vm.ResetViewModelCommand.Execute(null);
+            Dispatcher.UIThread.Post(() => vm.ResetViewModelCommand.Execute(null));
         }
     }
 }
