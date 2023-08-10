@@ -66,7 +66,7 @@
         <Setter Property="Height" Value="14"/>
     </Style>
     
-    <!-- control island -->
+    <!-- card -->
     <Style Selector="Border.Card">
         <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}"/>
         <!-- todo: settings have more pronounced border, like ControlStrokeColorOnAccentTertiaryBrush -->
@@ -74,5 +74,40 @@
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="Padding" Value="16"/>
+    </Style>
+    
+    <!-- buttons -->
+    <Style Selector="Button /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ControlFillColorDefaultBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}"/>
+        <Setter Property="CornerRadius" Value="4"/>
+    </Style>
+    <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ControlFillColorSecondaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorSecondaryBrush}"/>
+    </Style>
+    <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource ControlFillColorTertiaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}"/>
+    </Style>
+    <!-- system buttons -->
+    <Style Selector="CaptionButtons /template/ Button /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="CornerRadius" Value="0"/>
+    </Style>
+    <Style Selector="CaptionButtons /template/ Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SystemAccentColor}"/>
+    </Style>
+    <Style Selector="CaptionButtons /template/ Button#PART_CloseButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource CaptionCloseButtonBackgroundHover}"/>
+    </Style>
+    <Style Selector="CaptionButtons /template/ Button#PART_CloseButton:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource CaptionCloseButtonBackgroundPressed}"/>
+    </Style>
+    <!-- todo: Path fill color = accent light 1? -->
+
+    <!-- custom buttons -->
+    <Style Selector="Button.Transparent">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
     </Style>
 </Styles>

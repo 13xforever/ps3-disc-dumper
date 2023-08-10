@@ -1,4 +1,7 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="CaptionCloseButtonBackgroundHover">#c42b1c</SolidColorBrush>
+    <SolidColorBrush x:Key="CaptionCloseButtonBackgroundPressed">#b3271c</SolidColorBrush>
+    
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="ToggleSwitchKnobFillOff">#5d5d5d</SolidColorBrush>

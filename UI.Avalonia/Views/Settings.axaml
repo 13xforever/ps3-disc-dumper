@@ -28,7 +28,7 @@
                                MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
                                Text="{Binding OutputDirPreview}"/>
                 </StackPanel>
-                <Button Grid.Column="2" Background="Transparent"
+                <Button Grid.Column="2" Classes="Transparent"
                         VerticalAlignment="Center" HorizontalAlignment="Right"
                         Command="{Binding  SelectFolderCommand}" CommandParameter="output">
                     …
@@ -47,7 +47,7 @@
                                MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
                                Text="{Binding IrdDirPreview}"/>
                 </StackPanel>
-                <Button Grid.Column="2" Background="Transparent"
+                <Button Grid.Column="2" Classes="Transparent"
                         VerticalAlignment="Center" HorizontalAlignment="Right"
                         Command="{Binding  SelectFolderCommand}" CommandParameter="ird">
                     …

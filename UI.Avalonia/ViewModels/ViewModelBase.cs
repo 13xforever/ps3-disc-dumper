@@ -133,18 +133,14 @@ public partial class ViewModelBase: ObservableObject
         app.Resources["SystemAccentColorLight3"] = accentInfo.Light3;
         if (t == ThemeVariant.Light)
         {
-            accentColor = accentInfo.Dark1.ToString();
             ButtonAccentForegroundColor = "#ffffff";
-            app.Resources["SystemAccentColor"] = accentInfo.Dark1;
             SystemAccentColor1 = accentInfo.Light1.ToString();
             SystemAccentColor2 = accentInfo.Light2.ToString();
             SystemAccentColor3 = accentInfo.Light3.ToString();
         }
         else if (t == ThemeVariant.Dark)
         {
-            accentColor = accentInfo.Light2.ToString();
             ButtonAccentForegroundColor = "#000000";
-            app.Resources["SystemAccentColor"] = accentInfo.Light2;
             SystemAccentColor1 = accentInfo.Dark1.ToString();
             SystemAccentColor2 = accentInfo.Dark2.ToString();
             SystemAccentColor3 = accentInfo.Dark3.ToString();
