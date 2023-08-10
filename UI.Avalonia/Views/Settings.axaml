@@ -15,13 +15,9 @@
     <ScrollViewer Name="SettingsPanel" IsHitTestVisible="True" AllowAutoHide="True" VerticalScrollBarVisibility="Auto"
                   Margin="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=WindowDecorationMargin}">
     <StackPanel Grid.Column="0" Margin="16 0">
-        <!-- <TextBlock FontSize="28" FontWeight="SemiBold" Margin="0 0 0 12">Settings</TextBlock> -->
-        
         <!-- output dir -->
         <TextBlock Classes="BodyStrongTextBlockStyle">Locations</TextBlock>
-        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
-                CornerRadius="4" Padding="16"  Margin="0 8 0 0"
-                BorderBrush="{Binding TintColor}" BorderThickness="1">
+        <Border Classes="Card" Margin="0 8 0 0">
             <Grid ColumnDefinitions="36,*,36">
                 <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                            VerticalAlignment="Center" HorizontalAlignment="Left"
@@ -40,9 +36,7 @@
             </Grid>
         </Border>
         <!-- ird dir -->
-        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
-                CornerRadius="4" Padding="16" Margin="0 3 0 0"
-                BorderBrush="{Binding TintColor}" BorderThickness="1">
+        <Border Classes="Card" Margin="0 3 0 0">
             <Grid ColumnDefinitions="36,*,36">
                 <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                            VerticalAlignment="Center" HorizontalAlignment="Left"
@@ -63,9 +57,7 @@
         
         <!-- pattern -->
         <TextBlock Classes="BodyStrongTextBlockStyle" Margin="0 32 0 0">Naming</TextBlock>
-        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
-                CornerRadius="4 4 0 0" Padding="16" Margin="0 8 0 0"
-                BorderBrush="{Binding TintColor}" BorderThickness="1 1 1 0">
+        <Border Classes="Card" Margin="0 8 0 0" CornerRadius="4 4 0 0">
             <Grid ColumnDefinitions="36,*,120">
                 <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                            VerticalAlignment="Center" HorizontalAlignment="Left"
@@ -85,9 +77,7 @@
                 </Button>
             </Grid>
         </Border>
-        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
-                CornerRadius="0" Padding="16"
-                BorderBrush="{Binding TintColor}" BorderThickness="1 1 1 0">
+        <Border Classes="Card" CornerRadius="0" BorderThickness="1 0 1 1">
             <Grid ColumnDefinitions="36,*,240">
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock Classes="BodyTextBlockStyle">Live Preview</TextBlock>
@@ -100,9 +90,7 @@
                          Text="{Binding DumpNameTemplate}"/>
             </Grid>
         </Border>
-        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
-                CornerRadius="0 0 4 4" Padding="16"
-                BorderBrush="{Binding TintColor}" BorderThickness="1">
+        <Border Classes="Card" CornerRadius="0 0 4 4" BorderThickness="1 0 1 1">
             <Grid ColumnDefinitions="36,200,*">
                 <StackPanel Grid.Column="1">
                     <TextBlock Classes="BodyTextBlockStyle">%product_code%</TextBlock>
@@ -124,9 +112,7 @@
         <!-- personalization -->
         <TextBlock Classes="BodyStrongTextBlockStyle" Margin="0 32 0 0">Personalization</TextBlock>
         <!-- stay on top -->
-        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
-                CornerRadius="4" Padding="16" Margin="0 8 0 0"
-                BorderBrush="{Binding TintColor}" BorderThickness="1">
+        <Border Classes="Card" Margin="0 8 0 0">
             <Grid ColumnDefinitions="36,*,120">
                 <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                            VerticalAlignment="Center" HorizontalAlignment="Left"
@@ -146,9 +132,7 @@
             </Grid>
         </Border>
         <!-- system accent color -->
-        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
-                CornerRadius="4" Padding="16" Margin="0 3 0 0"
-                BorderBrush="{Binding TintColor}" BorderThickness="1"
+        <Border Classes="Card" Margin="0 3 0 0"
                 IsVisible="{Binding HasSystemAccentColor}">
             <Grid ColumnDefinitions="36,*,120">
                 <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
@@ -164,9 +148,7 @@
             </Grid>
         </Border>
         <!-- transparency -->
-        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
-                CornerRadius="4" Padding="16" Margin="0 3 0 0"
-                BorderBrush="{Binding TintColor}" BorderThickness="1">
+        <Border Classes="Card" Margin="0 3 0 0">
             <Border.IsVisible>
                 <MultiBinding Converter="{x:Static BoolConverters.Or}">
                     <Binding Path="MicaEnabled"/>
@@ -194,9 +176,7 @@
 
         <!-- log -->
         <TextBlock Classes="BodyStrongTextBlockStyle" Margin="0 32 0 0">Diagnostics</TextBlock>
-        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
-                CornerRadius="4" Padding="16"  Margin="0 8 0 0"
-                BorderBrush="{Binding TintColor}" BorderThickness="1">
+        <Border Classes="Card" Margin="0 8 0 0">
             <Grid ColumnDefinitions="36,*,120">
                 <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                            VerticalAlignment="Center" HorizontalAlignment="Left"
@@ -219,9 +199,7 @@
 
         <!-- test -->
         <TextBlock Classes="BodyStrongTextBlockStyle" Margin="0 32 0 0" IsVisible="{Binding IsDebug}">Test block</TextBlock>
-        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
-                CornerRadius="4" Padding="16"  Margin="0 8 0 0"
-                BorderBrush="{Binding TintColor}" BorderThickness="1"
+        <Border Classes="Card" Margin="0 8 0 0"
                 IsVisible="{Binding IsDebug}">
             <Grid ColumnDefinitions="*,*,*" RowDefinitions="*,*">
                 <Button Grid.Row="0" Grid.Column="0" Width="50" Background="{Binding SystemAccentColor1, Converter={StaticResource BrushConverter}}">ac1</Button>

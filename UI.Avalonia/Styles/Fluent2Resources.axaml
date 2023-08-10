@@ -1,0 +1,12 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOff">#5d5d5d</SolidColorBrush>
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOn">White</SolidColorBrush>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOff">#cecece</SolidColorBrush>
+            <SolidColorBrush x:Key="ToggleSwitchKnobFillOn">Black</SolidColorBrush>
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

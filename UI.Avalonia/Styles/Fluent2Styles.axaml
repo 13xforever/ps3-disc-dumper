@@ -1,0 +1,78 @@
+﻿<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+    <Styles.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="WinUICommon.axaml"/>
+                <ResourceInclude Source="Fluent2Resources.axaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Styles.Resources>
+    
+    <!-- typography -->
+    <Style Selector="TextBlock.CaptionTextBlockStyle">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="LineHeight" Value="16"/>
+    </Style>
+    <Style Selector="TextBlock.BodyTextBlockStyle">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="LineHeight" Value="20"/>
+    </Style>
+    <Style Selector="TextBlock.BodyStrongTextBlockStyle">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="LineHeight" Value="20"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+    <!-- todo: Display font style variant -->
+    <Style Selector="TextBlock.SubtitleTextBlockStyle">
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="LineHeight" Value="28"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+    <Style Selector="TextBlock.TitleTextBlockStyle">
+        <Setter Property="FontSize" Value="28"/>
+        <Setter Property="LineHeight" Value="36"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+    <Style Selector="TextBlock.TitleLargeTextBlockStyle">
+        <Setter Property="FontSize" Value="40"/>
+        <Setter Property="LineHeight" Value="52"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+    <Style Selector="TextBlock.DisplayTextBlockStyle">
+        <Setter Property="FontSize" Value="68"/>
+        <Setter Property="LineHeight" Value="92"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+    
+    <!-- toggleswitch -->
+    <Style Selector="ToggleSwitch:unchecked /template/ Ellipse#SwitchKnobOff">
+        <Setter Property="Width" Value="12"/>
+        <Setter Property="Height" Value="12"/>
+        <Setter Property="Fill" Value="{DynamicResource ToggleSwitchKnobFillOff}"/>
+    </Style>
+    <Style Selector="ToggleSwitch:checked /template/ Ellipse#SwitchKnobOn">
+        <Setter Property="Width" Value="12"/>
+        <Setter Property="Height" Value="12"/>
+        <Setter Property="Fill" Value="{DynamicResource ToggleSwitchKnobFillOn}"/>
+    </Style>
+    <Style Selector="ToggleSwitch:pointerover /template/ Ellipse">
+        <Setter Property="Width" Value="14"/>
+        <Setter Property="Height" Value="14"/>
+    </Style>
+    
+    <!-- control island -->
+    <Style Selector="Border.Card">
+        <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}"/>
+        <!-- todo: settings have more pronounced border, like ControlStrokeColorOnAccentTertiaryBrush -->
+        <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="16"/>
+    </Style>
+</Styles>
