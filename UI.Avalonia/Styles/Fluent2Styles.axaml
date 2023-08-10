@@ -65,6 +65,16 @@
         <Setter Property="Width" Value="14"/>
         <Setter Property="Height" Value="14"/>
     </Style>
+    <Style Selector="ToggleSwitch:unchecked:pressed /template/ Ellipse">
+        <Setter Property="Width" Value="18"/>
+        <Setter Property="Height" Value="14"/>
+        <Setter Property="Margin" Value="4 0 0 0"></Setter>
+    </Style>
+    <Style Selector="ToggleSwitch:checked:pressed /template/ Ellipse">
+        <Setter Property="Width" Value="18"/>
+        <Setter Property="Height" Value="14"/>
+        <Setter Property="Margin" Value="0 0 4 0"></Setter>
+    </Style>
     
     <!-- card -->
     <Style Selector="Border.Card">
