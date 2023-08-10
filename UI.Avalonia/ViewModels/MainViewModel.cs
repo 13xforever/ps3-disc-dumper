@@ -146,7 +146,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         }
         
         StepSubtitle = "";
-        if (dumper.DiscKeyFilename is {Length: >0})
+        if (dumper.DiscKeyFilename is { Length: > 0 })
             DiscKeyName = Path.GetFileName(dumper.DiscKeyFilename);
         else
             DiscKeyName = "No match found";

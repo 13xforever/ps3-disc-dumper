@@ -63,7 +63,9 @@
 		        <StackPanel Grid.Column="1" Margin="0 2 0 0">
 			        <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding ProductCode}"/>
 			        <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding DiscSizeInfo}"/>
-			        <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding DiscKeyName}"/>
+			        <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}"
+			                   ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
+			                   Text="{Binding DiscKeyName}"/>
 		        </StackPanel>
 	        </Grid>
         </Expander>
