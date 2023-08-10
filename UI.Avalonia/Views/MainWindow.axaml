@@ -105,10 +105,9 @@
 						<ScrollViewer AllowAutoHide="True" VerticalScrollBarVisibility="Auto" MaxHeight="300">
 						<StackPanel>
 							<TextBlock Text="{Binding FormattedUpdateInfoHeader}" TextWrapping="Wrap" Width="400"
-							           FontSize="18" Margin="2 2 2 12" Focusable="True"
-							           />
+							           Classes="SubtitleTextBlockStyle" Margin="2 2 2 12" Focusable="True"/>
 							<TextBlock Text="{Binding FormattedUpdateInfoBody}" TextWrapping="Wrap" Width="400"
-							           Margin="2 0 2 0"/>
+							           Classes="BodyTextBlockStyle" Margin="2 0 2 0"/>
 							<Button Margin="2 12 2 4"
 							        Command="{Binding CurrentPage.OpenUrlCommand}" CommandParameter="{Binding FormattedUpdateInfoUrl}"
 							>

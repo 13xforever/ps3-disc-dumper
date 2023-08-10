@@ -15,7 +15,7 @@
 
     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="16">
         <!-- top -->
-        <TextBlock FontSize="28" FontWeight="SemiBold"
+        <TextBlock Classes="TitleTextBlockStyle"
                    Margin="0 12 0 0" TextAlignment="Center" VerticalAlignment="Bottom"
                    Text="{Binding StepTitle}"/>
         <StackPanel Margin="0 8 0 0" Orientation="Horizontal" HorizontalAlignment="Center">
@@ -29,7 +29,7 @@
 	                   Foreground="{Binding ColorPalette.StatusWarningForeground1, Converter={StaticResource BrushConverter}}"
 	                   Text="{Binding ValidationWarningSymbol}"
 	                   IsVisible="{Binding LastOperationWarning}"/>
-	        <TextBlock Text="{Binding StepSubtitle}">
+	        <TextBlock Classes="BodyTextBlockStyle" Text="{Binding StepSubtitle}">
 		        <TextBlock.IsVisible>
 			        <MultiBinding Converter="{x:Static BoolConverters.Or}">
 				        <Binding Path="StepSubtitle" Converter="{x:Static StringConverters.IsNotNullOrEmpty}"/>
@@ -47,20 +47,24 @@
 		        <!-- 436 for container, 414 for title without checkmark -->
 		        <StackPanel Orientation="Horizontal">
 			        <!-- PrefixCharacterEllipsis or CharacterEllipsis -->
-			        <TextBlock Text="{Binding GameTitle}" MaxWidth="414" ClipToBounds="True" TextTrimming="CharacterEllipsis"/>
+			        <TextBlock Classes="BodyTextBlockStyle" Text="{Binding GameTitle}" MaxWidth="414" ClipToBounds="True" TextTrimming="CharacterEllipsis"/>
 			        <TextBlock FontFamily="{Binding SymbolFontFamily}"
 			                   Margin="8 0 0 0" VerticalAlignment="Center"
 			                   Foreground="{Binding Success, Converter={StaticResource ValidationColorConverter}}"
 			                   Text="{Binding Success, Converter={StaticResource ValidationSymbolConverter}}"/>
 		        </StackPanel>
 	        </Expander.Header>
-	        <Grid ColumnDefinitions="100,*" RowDefinitions="*,*,*" VerticalAlignment="Bottom">
-		        <TextBlock Grid.Row="0" Grid.Column="0" >Product Code</TextBlock>
-		        <TextBlock Grid.Row="0" Grid.Column="1" Foreground="{Binding DimTextColor}" Text="{Binding ProductCode}" Name="ProductCode"></TextBlock>
-		        <TextBlock Grid.Row="1" Grid.Column="0">Dump Size</TextBlock>
-		        <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{Binding DimTextColor}" Text="{Binding DiscSizeInfo}"></TextBlock>
-		        <TextBlock Grid.Row="2" Grid.Column="0">Disc Key</TextBlock>
-		        <TextBlock Grid.Row="2" Grid.Column="1" Foreground="{Binding DimTextColor}" Text="{Binding DiscKeyName}"></TextBlock>
+	        <Grid ColumnDefinitions="100,*">
+		        <StackPanel Grid.Column="0">
+			        <TextBlock Classes="BodyTextBlockStyle">Product Code</TextBlock>
+			        <TextBlock Classes="BodyTextBlockStyle">Dump Size</TextBlock>
+			        <TextBlock Classes="BodyTextBlockStyle">Disc Key</TextBlock>
+		        </StackPanel>
+		        <StackPanel Grid.Column="1" Margin="0 2 0 0">
+			        <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding ProductCode}"/>
+			        <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding DiscSizeInfo}"/>
+			        <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding DiscKeyName}"/>
+		        </StackPanel>
 	        </Grid>
         </Expander>
         
@@ -70,8 +74,9 @@
                 Background="{Binding AccentColor, Converter={StaticResource BrushConverter}}"
                 Foreground="{Binding ButtonAccentForegroundColor, Converter={StaticResource BrushConverter}}"
                 IsVisible="{Binding !FoundDisc}"
-                Command="{Binding ScanDiscsCommand}"
-	    >Rescan disc devices</Button>
+                Command="{Binding ScanDiscsCommand}">
+	        <TextBlock Classes="SubtitleTextBlockStyle">Rescan disc devices</TextBlock>
+        </Button>
         <Button HorizontalAlignment="Center" Width="200" Height="48" Margin="0" IsDefault="True"
                 HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                 Background="{Binding AccentColor, Converter={StaticResource BrushConverter}}"
@@ -83,7 +88,7 @@
 			        <Binding Path="!DumpingInProgress"></Binding>
 		        </MultiBinding>
 	        </Button.IsVisible>
-	        <TextBlock Text="{Binding StartButtonCaption}"/>
+	        <TextBlock Classes="SubtitleTextBlockStyle" Text="{Binding StartButtonCaption}"/>
         </Button>
         
         <!-- progress -->
@@ -94,15 +99,16 @@
 		                     Minimum="0" Maximum="{Binding ProgressMax}" Value="{Binding Progress}"/>
 		        
 		        <TextBlock Margin="0 8"
-		                   TextAlignment="Center"
-		                   FontFamily="{Binding SmallFontFamily}" FontSize="10"
+		                   Classes="CaptionTextBlockStyle" TextAlignment="Center"
 		                   Foreground="{Binding DimTextColor}"
 		                   IsVisible="{Binding DumpingInProgress}"
 		                   Text="{Binding ProgressInfo}"/>
 	        </StackPanel>
 	        <Button HorizontalAlignment="Right" VerticalAlignment="Top"
 	                Command="{Binding CancelDumpCommand}"
-	                Name="ProgressCancel" SizeChanged="OnResized">Cancel</Button>
+	                Name="ProgressCancel" SizeChanged="OnResized">
+		        Cancel
+	        </Button>
         </StackPanel>
     </StackPanel>
 </UserControl>

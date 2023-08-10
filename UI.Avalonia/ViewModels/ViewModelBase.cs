@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media;
 using Avalonia.Styling;
@@ -60,6 +59,13 @@ public partial class ViewModelBase: ObservableObject
     public string ValidationWarningSymbol => UseSegoeIcons ? "\ue7ba" : "\uf071";
     public string DiagnosticsSymbol => UseSegoeIcons ? "\ue9d9" : "\uf478";
     public string ColorSymbol => UseSegoeIcons ? "\ue790" : "\uf53f";
+
+    public static bool IsDebug =>
+#if DEBUG
+        true;
+#else
+        false;
+#endif
 
     [ObservableProperty] protected string pageTitle = "PS3 Disc Dumper";// + Dumper.Version;
     [ObservableProperty] private bool canEditSettings = true;

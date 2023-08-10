@@ -18,7 +18,7 @@
         <!-- <TextBlock FontSize="28" FontWeight="SemiBold" Margin="0 0 0 12">Settings</TextBlock> -->
         
         <!-- output dir -->
-        <TextBlock FontWeight="SemiBold">Locations</TextBlock>
+        <TextBlock Classes="BodyStrongTextBlockStyle">Locations</TextBlock>
         <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
                 CornerRadius="4" Padding="16"  Margin="0 8 0 0"
                 BorderBrush="{Binding TintColor}" BorderThickness="1">
@@ -27,9 +27,8 @@
                            VerticalAlignment="Center" HorizontalAlignment="Left"
                            Text="{Binding FolderSymbol}"/>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock>Disc dumps will save to</TextBlock>
-                    <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
-                               HorizontalAlignment="Left"
+                    <TextBlock Classes="BodyTextBlockStyle">Disc dumps will save to</TextBlock>
+                    <TextBlock Classes="CaptionTextBlockStyle" Foreground="{Binding DimTextColor}"
                                MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
                                Text="{Binding OutputDirPreview}"/>
                 </StackPanel>
@@ -49,9 +48,8 @@
                            VerticalAlignment="Center" HorizontalAlignment="Left"
                            Text="{Binding FolderSymbol}"/>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock>Disc key copies will save to</TextBlock>
-                    <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
-                               HorizontalAlignment="Left"
+                    <TextBlock Classes="BodyTextBlockStyle">Disc key copies will save to</TextBlock>
+                    <TextBlock Classes="CaptionTextBlockStyle" Foreground="{Binding DimTextColor}"
                                MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
                                Text="{Binding IrdDirPreview}"/>
                 </StackPanel>
@@ -64,7 +62,7 @@
         </Border>
         
         <!-- pattern -->
-        <TextBlock FontWeight="SemiBold" Margin="0 32 0 0">Naming</TextBlock>
+        <TextBlock Classes="BodyStrongTextBlockStyle" Margin="0 32 0 0">Naming</TextBlock>
         <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
                 CornerRadius="4 4 0 0" Padding="16" Margin="0 8 0 0"
                 BorderBrush="{Binding TintColor}" BorderThickness="1 1 1 0">
@@ -73,9 +71,8 @@
                            VerticalAlignment="Center" HorizontalAlignment="Left"
                            Text="{Binding RenameSymbol}"/>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock HorizontalAlignment="Left">Dump name template</TextBlock>
-                    <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
-                               HorizontalAlignment="Left"
+                    <TextBlock Classes="BodyTextBlockStyle">Dump name template</TextBlock>
+                    <TextBlock Classes="CaptionTextBlockStyle" Foreground="{Binding DimTextColor}"
                                ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis">
                         Disc metadata will be used to substitute the values
                     </TextBlock>
@@ -93,9 +90,8 @@
                 BorderBrush="{Binding TintColor}" BorderThickness="1 1 1 0">
             <Grid ColumnDefinitions="36,*,240">
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock>Live Preview</TextBlock>
-                    <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
-                               HorizontalAlignment="Left"
+                    <TextBlock Classes="BodyTextBlockStyle">Live Preview</TextBlock>
+                    <TextBlock Classes="CaptionTextBlockStyle" Foreground="{Binding DimTextColor}"
                                ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
                                Text="{Binding TemplatePreview}"/>
                 </StackPanel>
@@ -109,24 +105,24 @@
                 BorderBrush="{Binding TintColor}" BorderThickness="1">
             <Grid ColumnDefinitions="36,200,*">
                 <StackPanel Grid.Column="1">
-                    <TextBlock FontSize="14" LineHeight="20">%product_code%</TextBlock>
-                    <TextBlock FontSize="14" LineHeight="20">%product_code_letters%</TextBlock>
-                    <TextBlock FontSize="14" LineHeight="20">%product_code_numbers%</TextBlock>
-                    <TextBlock FontSize="14" LineHeight="20">%title%</TextBlock>
-                    <TextBlock FontSize="14" LineHeight="20">%region%</TextBlock>
+                    <TextBlock Classes="BodyTextBlockStyle">%product_code%</TextBlock>
+                    <TextBlock Classes="BodyTextBlockStyle">%product_code_letters%</TextBlock>
+                    <TextBlock Classes="BodyTextBlockStyle">%product_code_numbers%</TextBlock>
+                    <TextBlock Classes="BodyTextBlockStyle">%title%</TextBlock>
+                    <TextBlock Classes="BodyTextBlockStyle">%region%</TextBlock>
                 </StackPanel>
-                <StackPanel Grid.Column="2">
-                    <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestProductCode}"/>
-                    <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestProductCodeLetters}"/>
-                    <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestProductCodeNumbers}"/>
-                    <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestTitle}"/>
-                    <TextBlock Foreground="{Binding DimTextColor}" FontSize="12" LineHeight="20" Text="{Binding TestRegion}"/>
+                <StackPanel Grid.Column="2" Margin="0 2 0 0">
+                    <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding TestProductCode}"/>
+                    <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding TestProductCodeLetters}"/>
+                    <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding TestProductCodeNumbers}"/>
+                    <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding TestTitle}"/>
+                    <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding TestRegion}"/>
                 </StackPanel>
             </Grid>
         </Border>
 
         <!-- personalization -->
-        <TextBlock FontWeight="SemiBold" Margin="0 32 0 0">Personalization</TextBlock>
+        <TextBlock Classes="BodyStrongTextBlockStyle" Margin="0 32 0 0">Personalization</TextBlock>
         <!-- stay on top -->
         <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
                 CornerRadius="4" Padding="16" Margin="0 8 0 0"
@@ -136,9 +132,8 @@
                            VerticalAlignment="Center" HorizontalAlignment="Left"
                            Text="{Binding PinSymbol}"/>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock>Stay on top</TextBlock>
-                    <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
-                               HorizontalAlignment="Left">
+                    <TextBlock Classes="BodyTextBlockStyle">Stay on top</TextBlock>
+                    <TextBlock Classes="CaptionTextBlockStyle" Foreground="{Binding DimTextColor}">
                         Window will stay always visible on top of normal windows
                     </TextBlock>
                 </StackPanel>
@@ -160,10 +155,9 @@
                            VerticalAlignment="Center" HorizontalAlignment="Left"
                            Text="{Binding ColorSymbol}"/>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock>Accent color</TextBlock>
+                    <TextBlock Classes="BodyTextBlockStyle">Accent color</TextBlock>
                 </StackPanel>
-                <ComboBox Grid.Column="2" HorizontalAlignment="Right"
-                          SelectedIndex="{Binding PreferSystemAccent}">
+                <ComboBox Grid.Column="2" HorizontalAlignment="Right" SelectedIndex="{Binding PreferSystemAccent}">
                     <ComboBoxItem>Branded</ComboBoxItem>
                     <ComboBoxItem>System</ComboBoxItem>
                 </ComboBox>
@@ -184,9 +178,8 @@
                            VerticalAlignment="Center" HorizontalAlignment="Left"
                            Text="{Binding TransparencySymbol}"/>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock>Transparency effects</TextBlock>
-                    <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
-                               HorizontalAlignment="Left">
+                    <TextBlock Classes="BodyTextBlockStyle">Transparency effects</TextBlock>
+                    <TextBlock Classes="CaptionTextBlockStyle" Foreground="{Binding DimTextColor}">
                         Windows and surfaces appear translucent
                     </TextBlock>
                 </StackPanel>
@@ -200,7 +193,7 @@
         </Border>
 
         <!-- log -->
-        <TextBlock FontWeight="SemiBold" Margin="0 32 0 0">Diagnostics</TextBlock>
+        <TextBlock Classes="BodyStrongTextBlockStyle" Margin="0 32 0 0">Diagnostics</TextBlock>
         <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
                 CornerRadius="4" Padding="16"  Margin="0 8 0 0"
                 BorderBrush="{Binding TintColor}" BorderThickness="1">
@@ -209,9 +202,8 @@
                            VerticalAlignment="Center" HorizontalAlignment="Left"
                            Text="{Binding DiagnosticsSymbol}"/>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock>Diagnostics will save to</TextBlock>
-                    <TextBlock FontSize="12" Foreground="{Binding DimTextColor}"
-                               HorizontalAlignment="Left"
+                    <TextBlock Classes="BodyTextBlockStyle">Logs will save to</TextBlock>
+                    <TextBlock Classes="CaptionTextBlockStyle" Foreground="{Binding DimTextColor}"
                                MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
                                Text="{Binding LogPath}"/>
                 </StackPanel>
@@ -224,9 +216,33 @@
                 </Button>
             </Grid>
         </Border>
+
+        <!-- test -->
+        <TextBlock Classes="BodyStrongTextBlockStyle" Margin="0 32 0 0" IsVisible="{Binding IsDebug}">Test block</TextBlock>
+        <Border Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
+                CornerRadius="4" Padding="16"  Margin="0 8 0 0"
+                BorderBrush="{Binding TintColor}" BorderThickness="1"
+                IsVisible="{Binding IsDebug}">
+            <Grid ColumnDefinitions="*,*,*" RowDefinitions="*,*">
+                <Button Grid.Row="0" Grid.Column="0" Width="50" Background="{Binding SystemAccentColor1, Converter={StaticResource BrushConverter}}">ac1</Button>
+                <Button Grid.Row="0" Grid.Column="1" Width="50" Background="{Binding SystemAccentColor2, Converter={StaticResource BrushConverter}}">ac2</Button>
+                <Button Grid.Row="0" Grid.Column="2" Width="50" Background="{Binding SystemAccentColor3, Converter={StaticResource BrushConverter}}">ac3</Button>
+                <Button Grid.Row="1" Grid.Column="0" Width="50" Background="{Binding AccentColor, Converter={StaticResource BrushConverter}}">ac</Button>
+                <Button Grid.Row="1" Grid.Column="1" Width="50"
+                        Background="{Binding AccentColor, Converter={StaticResource BrushConverter}}"
+                        Foreground="{Binding ButtonAccentForegroundColor, Converter={StaticResource BrushConverter}}"
+                >
+                    bac
+                </Button>
+                <StackPanel Grid.Row="1" Grid.Column="2">
+                    <TextBlock Classes="BodyTextBlockStyle">Body</TextBlock>
+                    <TextBlock Classes="CaptionTextBlockStyle">Caption</TextBlock>
+                </StackPanel>
+            </Grid>
+        </Border>
         
         <!-- about -->
-        <TextBlock FontWeight="SemiBold" Margin="0 31 0 0">About this app</TextBlock>
+        <TextBlock Classes="BodyStrongTextBlockStyle" Margin="0 31 0 0">About this app</TextBlock>
         <TextBlock Margin="0 12 0 0" Text="{Binding DumperVersion, StringFormat=PS3 Disc Dumper v{0}}"/>
         <TextBlock Margin="0 8 0 0" Text="{Binding CurrentYear, StringFormat=© {0} 13xforever}"/>
         <StackPanel Orientation="Horizontal" Margin="0 12 0 0">
