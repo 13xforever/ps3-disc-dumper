@@ -16,13 +16,6 @@ public static class ThemeConsts
     public const string LightThemeDimGray = "#646464";
     public const string DarkThemeDimGray = "#a9aba9";
 
-    // idk man, can't find dark const anywhere
-    public const string LightThemeLayer2Background = "#ccffffff";
-    public const string DarkThemeLayer2Background = "#b32e2e2e";
-
-    public const string LightThemeLayer2Grounded = "ccf4f4f4";
-    public const string DarkThemeLayer2Grounded = "#b3272727";
-
     public static readonly IPalette Debug = new DebugPalette();
     public static readonly IPalette Dark = new FluentPaletteDark();
     public static readonly IPalette Light = new FluentPaletteLight();

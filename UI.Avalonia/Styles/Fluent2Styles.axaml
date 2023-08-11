@@ -49,6 +49,9 @@
         <Setter Property="LineHeight" Value="92"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
+    <Style Selector="TextBlock.SecondaryTextBlockStyle">
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}"/>
+    </Style>
     
     <!-- toggleswitch -->
     <Style Selector="ToggleSwitch:unchecked /template/ Ellipse#SwitchKnobOff">
@@ -96,7 +99,11 @@
         <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorSecondaryBrush}"/>
     </Style>
+    <Style Selector="Button:pressed">
+        <Setter Property="RenderTransform" Value=""/>
+    </Style>
     <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorTertiaryBrush}"/>
         <Setter Property="Background" Value="{DynamicResource ControlFillColorTertiaryBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}"/>
     </Style>
@@ -115,10 +122,12 @@
     </Style>
     <!-- todo: Path fill color = accent light 1? -->
     <!-- custom buttons -->
+    <!-- transparent -->
     <Style Selector="Button.Transparent">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
     </Style>
+    <!-- link -->
     <Style Selector="Button.Link">
         <Setter Property="Foreground" Value="{DynamicResource LinkButtonForeground}"/>
         <Setter Property="Background" Value="Transparent"/>
@@ -126,10 +135,20 @@
         <Setter Property="Padding" Value="0"/>
         <Setter Property="Cursor" Value="Hand"/>
     </Style>
-    <Style Selector="Button.Link:pressed">
-        <Setter Property="RenderTransform" Value=""/>
-    </Style>
     <Style Selector="Button.Link:pressed /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Foreground" Value="{DynamicResource LinkButtonForegroundTertiary}"/>
+    </Style>
+    <!-- accent -->
+    <Style Selector="Button.Accent">
+        <Setter Property="Foreground" Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource AccentFillColorDefaultBrush}"/>
+    </Style>
+    <Style Selector="Button.Accent:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource AccentFillColorSecondaryBrush}"/>
+    </Style>
+    <Style Selector="Button.Accent:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource TextOnAccentFillColorSecondaryBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource AccentTextFillColorTertiaryBrush}"/>
     </Style>
 </Styles>

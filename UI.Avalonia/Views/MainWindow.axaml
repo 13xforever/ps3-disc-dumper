@@ -32,7 +32,7 @@
     </Design.DataContext>
  
     <Panel>
-	    <Border IsHitTestVisible="False" Background="{Binding CurrentPage.TintColor}">
+	    <Border IsHitTestVisible="False" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
 		    <Border.IsVisible>
 			    <MultiBinding Converter="{x:Static BoolConverters.Or}">
 				    <Binding  Path="!CurrentPage.EnableTransparency"/>
@@ -63,7 +63,7 @@
 	    </ExperimentalAcrylicBorder>
 	    
 	    <!-- top left -->
-	    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4 6 -6 0">
+	    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5 7 -6 0">
 		    <!-- back button -->
 		    <Button Width="40" Height="36"
 		            Classes="Transparent"
@@ -73,11 +73,10 @@
 		            Command="{Binding ToggleSettingsPageCommand}"
 		    >
 			    <TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="12"
-			               Text="{Binding CurrentPage.BackSymbol}"
-			               Foreground="{Binding CurrentPage.DimTextColor}"/>
+			               Text="{Binding CurrentPage.BackSymbol}"/>
 		    </Button>
 		    <!-- window title -->
-			<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="11 11 0 0"
+			<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6 10 0 0"
 		               FontSize="12"
 		               IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=IsExtendedIntoWindowDecorations}"
 		               Text="{Binding CurrentPage.PageTitle}"/>
@@ -126,7 +125,7 @@
 		    >
 			    <TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="18"
 			               Text="{Binding CurrentPage.SettingsSymbol}"
-			               Foreground="{Binding CurrentPage.DimTextColor}"/>
+			               Classes="SecondaryTextBlockStyle"/>
 			    <Button.IsVisible>
 				    <MultiBinding Converter="{x:Static BoolConverters.And}">
 					    <Binding Path="CurrentPage.CanEditSettings"/>

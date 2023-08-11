@@ -41,7 +41,6 @@
         
         <!-- middle -->
         <Expander IsExpanded="{Binding DiscInfoExpanded}" Margin="0 24" Width="500" CornerRadius="4"
-                  Background="{Binding Layer2BackgroundColor, Converter={StaticResource BrushConverter}}"
                   IsVisible="{Binding ProductCode, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
 	        <Expander.Header >
 		        <!-- 436 for container, 414 for title without checkmark -->
@@ -61,9 +60,9 @@
 			        <TextBlock Classes="BodyTextBlockStyle">Disc Key</TextBlock>
 		        </StackPanel>
 		        <StackPanel Grid.Column="1" Margin="0 2 0 0">
-			        <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding ProductCode}"/>
-			        <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding DiscSizeInfo}"/>
-			        <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}"
+			        <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding ProductCode}"/>
+			        <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding DiscSizeInfo}"/>
+			        <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20"
 			                   ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
 			                   Text="{Binding DiscKeyName}"/>
 		        </StackPanel>
@@ -73,16 +72,14 @@
         <!-- bottom -->
         <Button HorizontalAlignment="Center" Width="200" Height="48" Margin="0" IsDefault="True"
                 HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                Background="{Binding AccentColor, Converter={StaticResource BrushConverter}}"
-                Foreground="{Binding ButtonAccentForegroundColor, Converter={StaticResource BrushConverter}}"
+                Classes="Accent"
                 IsVisible="{Binding !FoundDisc}"
                 Command="{Binding ScanDiscsCommand}">
 	        <TextBlock Classes="SubtitleTextBlockStyle">Rescan disc devices</TextBlock>
         </Button>
         <Button HorizontalAlignment="Center" Width="200" Height="48" Margin="0" IsDefault="True"
                 HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                Background="{Binding AccentColor, Converter={StaticResource BrushConverter}}"
-                Foreground="{Binding ButtonAccentForegroundColor, Converter={StaticResource BrushConverter}}"
+                Classes="Accent"
                 Command="{Binding DumpDiscCommand}">
 	        <Button.IsVisible>
 		        <MultiBinding Converter="{x:Static BoolConverters.And}">
@@ -101,8 +98,7 @@
 		                     Minimum="0" Maximum="{Binding ProgressMax}" Value="{Binding Progress}"/>
 		        
 		        <TextBlock Margin="0 8"
-		                   Classes="CaptionTextBlockStyle" TextAlignment="Center"
-		                   Foreground="{Binding DimTextColor}"
+		                   Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" TextAlignment="Center"
 		                   IsVisible="{Binding DumpingInProgress}"
 		                   Text="{Binding ProgressInfo}"/>
 	        </StackPanel>

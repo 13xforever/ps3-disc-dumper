@@ -24,7 +24,7 @@
                            Text="{Binding FolderSymbol}"/>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock Classes="BodyTextBlockStyle">Disc dumps will save to</TextBlock>
-                    <TextBlock Classes="CaptionTextBlockStyle" Foreground="{Binding DimTextColor}"
+                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle"
                                MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
                                Text="{Binding OutputDirPreview}"/>
                 </StackPanel>
@@ -45,7 +45,7 @@
                            Text="{Binding FolderSymbol}"/>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock Classes="BodyTextBlockStyle">Disc key copies will save to</TextBlock>
-                    <TextBlock Classes="CaptionTextBlockStyle" Foreground="{Binding DimTextColor}"
+                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle"
                                MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
                                Text="{Binding IrdDirPreview}"/>
                 </StackPanel>
@@ -68,7 +68,7 @@
                            Text="{Binding RenameSymbol}"/>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock Classes="BodyTextBlockStyle">Dump name template</TextBlock>
-                    <TextBlock Classes="CaptionTextBlockStyle" Foreground="{Binding DimTextColor}"
+                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle"
                                ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis">
                         Disc metadata will be used to substitute the values
                     </TextBlock>
@@ -85,7 +85,7 @@
             <Grid ColumnDefinitions="36,*,240">
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock Classes="BodyTextBlockStyle">Live Preview</TextBlock>
-                    <TextBlock Classes="CaptionTextBlockStyle" Foreground="{Binding DimTextColor}"
+                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle"
                                ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
                                Text="{Binding TemplatePreview}"/>
                 </StackPanel>
@@ -104,11 +104,11 @@
                     <TextBlock Classes="BodyTextBlockStyle">%region%</TextBlock>
                 </StackPanel>
                 <StackPanel Grid.Column="2" Margin="0 2 0 0">
-                    <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding TestProductCode}"/>
-                    <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding TestProductCodeLetters}"/>
-                    <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding TestProductCodeNumbers}"/>
-                    <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding TestTitle}"/>
-                    <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20" Foreground="{Binding DimTextColor}" Text="{Binding TestRegion}"/>
+                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding TestProductCode}"/>
+                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding TestProductCodeLetters}"/>
+                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding TestProductCodeNumbers}"/>
+                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding TestTitle}"/>
+                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding TestRegion}"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -123,7 +123,7 @@
                            Text="{Binding PinSymbol}"/>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock Classes="BodyTextBlockStyle">Stay on top</TextBlock>
-                    <TextBlock Classes="CaptionTextBlockStyle" Foreground="{Binding DimTextColor}">
+                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle">
                         Window will stay always visible on top of normal windows
                     </TextBlock>
                 </StackPanel>
@@ -165,7 +165,7 @@
                            Text="{Binding TransparencySymbol}"/>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock Classes="BodyTextBlockStyle">Transparency effects</TextBlock>
-                    <TextBlock Classes="CaptionTextBlockStyle" Foreground="{Binding DimTextColor}">
+                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle">
                         Windows and surfaces appear translucent
                     </TextBlock>
                 </StackPanel>
@@ -187,7 +187,7 @@
                            Text="{Binding DiagnosticsSymbol}"/>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock Classes="BodyTextBlockStyle">Logs will save to</TextBlock>
-                    <TextBlock Classes="CaptionTextBlockStyle" Foreground="{Binding DimTextColor}"
+                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle"
                                MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
                                Text="{Binding LogPath}"/>
                 </StackPanel>
@@ -218,7 +218,7 @@
                 </Button>
                 <StackPanel Grid.Row="1" Grid.Column="2">
                     <TextBlock Classes="BodyTextBlockStyle">Body</TextBlock>
-                    <TextBlock Classes="CaptionTextBlockStyle">Caption</TextBlock>
+                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle">Caption</TextBlock>
                 </StackPanel>
             </Grid>
         </Border>

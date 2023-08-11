@@ -118,8 +118,6 @@ public partial class App : Application
             vm.TintColor = ThemeConsts.LightThemeTintColor;
             vm.TintOpacity = ThemeConsts.LightThemeTintOpacity;
             vm.DimTextColor = ThemeConsts.LightThemeDimGray;
-            vm.Layer2BackgroundColor = ThemeConsts.LightThemeLayer2Background;
-            vm.Layer2GroundedColor = ThemeConsts.LightThemeLayer2Grounded;
             vm.ColorPalette = ThemeConsts.Light;
         }
         else if (w.ActualThemeVariant == ThemeVariant.Dark)
@@ -127,8 +125,6 @@ public partial class App : Application
             vm.TintColor = ThemeConsts.DarkThemeTintColor;
             vm.TintOpacity = ThemeConsts.DarkThemeTintOpacity;
             vm.DimTextColor = ThemeConsts.DarkThemeDimGray;
-            vm.Layer2BackgroundColor = ThemeConsts.DarkThemeLayer2Background;
-            vm.Layer2GroundedColor = ThemeConsts.DarkThemeLayer2Grounded;
             vm.ColorPalette = ThemeConsts.Dark;
         }
     }
