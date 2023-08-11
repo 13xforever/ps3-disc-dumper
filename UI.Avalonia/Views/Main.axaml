@@ -62,7 +62,7 @@
 			                   Text="{Binding Success, Converter={StaticResource ValidationSymbolConverter}}"/>
 		        </StackPanel>
 	        </Expander.Header>
-	        <Grid ColumnDefinitions="100,*">
+	        <Grid ColumnDefinitions="120,*">
 		        <StackPanel Grid.Column="0">
 			        <TextBlock Classes="BodyTextBlockStyle">Product Code</TextBlock>
 			        <TextBlock Classes="BodyTextBlockStyle">Dump Size</TextBlock>
@@ -79,14 +79,14 @@
         </Expander>
         
         <!-- bottom -->
-        <Button HorizontalAlignment="Center" Width="200" Height="48" Margin="0" IsDefault="True"
+        <Button HorizontalAlignment="Center" MinWidth="200" Height="48" Margin="0" IsDefault="True"
                 HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                 Classes="Accent"
                 IsVisible="{Binding !FoundDisc}"
                 Command="{Binding ScanDiscsCommand}">
 	        <TextBlock Classes="SubtitleTextBlockStyle">Rescan disc devices</TextBlock>
         </Button>
-        <Button HorizontalAlignment="Center" Width="200" Height="48" Margin="0" IsDefault="True"
+        <Button HorizontalAlignment="Center" MinWidth="200" Height="48" Margin="0" IsDefault="True"
                 HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                 Classes.Accent="{Binding !LastOperationWarning}"
                 Classes.Caution="{Binding LastOperationWarning}"
