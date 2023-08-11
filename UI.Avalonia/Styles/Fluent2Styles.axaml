@@ -151,4 +151,9 @@
         <Setter Property="Foreground" Value="{DynamicResource TextOnAccentFillColorSecondaryBrush}"/>
         <Setter Property="Background" Value="{DynamicResource AccentTextFillColorTertiaryBrush}"/>
     </Style>
+    <!-- inverted accent -->
+    <Style Selector="Button.AccentInverted">
+        <Setter Property="Foreground" Value="{DynamicResource AccentFillColorDefaultBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}"/>
+    </Style>
 </Styles>

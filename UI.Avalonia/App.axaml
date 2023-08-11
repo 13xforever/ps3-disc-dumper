@@ -15,7 +15,6 @@
          <lc:ColorConverter x:Key="ColorConverter"/>
          <lc:BrushConverter x:Key="BrushConverter"/>
          <lc:ValidationColorConverter x:Key="ValidationColorConverter"/>
-         <lc:UpdateColorConverter x:Key="UpdateColorConverter"/>
          <lc:ValidationSymbolConverter x:Key="ValidationSymbolConverter"/>
          <lc:PageTransitionConverter x:Key="PageTransitionConverter"/>
          <lc:OnOffConverter x:Key="OnOffConverter"/>

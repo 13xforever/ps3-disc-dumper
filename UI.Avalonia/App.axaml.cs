@@ -117,14 +117,12 @@ public partial class App : Application
         {
             vm.TintColor = ThemeConsts.LightThemeTintColor;
             vm.TintOpacity = ThemeConsts.LightThemeTintOpacity;
-            vm.DimTextColor = ThemeConsts.LightThemeDimGray;
             vm.ColorPalette = ThemeConsts.Light;
         }
         else if (w.ActualThemeVariant == ThemeVariant.Dark)
         {
             vm.TintColor = ThemeConsts.DarkThemeTintColor;
             vm.TintOpacity = ThemeConsts.DarkThemeTintOpacity;
-            vm.DimTextColor = ThemeConsts.DarkThemeDimGray;
             vm.ColorPalette = ThemeConsts.Dark;
         }
     }
@@ -141,6 +139,6 @@ public partial class App : Application
         if (SettingsProvider.Settings.PreferSystemAccent)
             vm.AccentColor = e.AccentColor1.ToString();
         else
-            vm.AccentColor = ThemeConsts.AccentColor;
+            vm.AccentColor = ThemeConsts.BrandColor;
     }
 }

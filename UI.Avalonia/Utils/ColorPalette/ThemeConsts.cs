@@ -13,12 +13,9 @@ public static class ThemeConsts
     public const double DarkThemeMaterialOpacity = 0.8;
     public const double DarkThemeLuminosityOpacity = 0;
 
-    public const string LightThemeDimGray = "#646464";
-    public const string DarkThemeDimGray = "#a9aba9";
-
     public static readonly IPalette Debug = new DebugPalette();
     public static readonly IPalette Dark = new FluentPaletteDark();
     public static readonly IPalette Light = new FluentPaletteLight();
 
-    public const string AccentColor = "#0094ff";
+    public const string BrandColor = "#0094ff";
 }

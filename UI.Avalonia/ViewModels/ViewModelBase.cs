@@ -24,10 +24,10 @@ public partial class ViewModelBase: ObservableObject
     [ObservableProperty] private static double luminosityOpacity = 1.0;
     [ObservableProperty] private static string accentColor = "#000000";
     [ObservableProperty] private static string buttonAccentForegroundColor = "#ffffff";
-    [ObservableProperty] private static string systemAccentColor = ThemeConsts.AccentColor;
-    [ObservableProperty] private static string systemAccentColor1 = ThemeConsts.AccentColor;
-    [ObservableProperty] private static string systemAccentColor2 = ThemeConsts.AccentColor;
-    [ObservableProperty] private static string systemAccentColor3 = ThemeConsts.AccentColor;
+    [ObservableProperty] private static string systemAccentColor = ThemeConsts.BrandColor;
+    [ObservableProperty] private static string systemAccentColor1 = ThemeConsts.BrandColor;
+    [ObservableProperty] private static string systemAccentColor2 = ThemeConsts.BrandColor;
+    [ObservableProperty] private static string systemAccentColor3 = ThemeConsts.BrandColor;
     [ObservableProperty] private static bool hasSystemAccentColor = Application.Current?.PlatformSettings is not null;
     [ObservableProperty] private static bool micaEnabled = true;
     [ObservableProperty] private static bool acrylicEnabled = false;
@@ -152,7 +152,7 @@ public partial class ViewModelBase: ObservableObject
     partial void OnPreferSystemAccentChanged(bool value)
     {
         SettingsProvider.Settings = SettingsProvider.Settings with { PreferSystemAccent = value };
-        AccentColor = value ? SystemAccentColor : ThemeConsts.AccentColor;
+        AccentColor = value ? SystemAccentColor : ThemeConsts.BrandColor;
     }
 
     partial void OnStayOnTopChanged(bool value)
