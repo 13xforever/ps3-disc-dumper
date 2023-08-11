@@ -24,6 +24,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private string stepSubtitle = "";
     [ObservableProperty] private bool lastOperationSuccess = true;
     [ObservableProperty] private bool lastOperationWarning = false;
+    [ObservableProperty] private bool lastOperationNotification = false;
     [ObservableProperty] private string startButtonCaption = "Start";
 
     [ObservableProperty] private bool foundDisc;
@@ -60,6 +61,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         StepSubtitle = "";
         LastOperationSuccess = true;
         LastOperationWarning = false;
+        LastOperationNotification = false;
         StartButtonCaption = "Start";
         FoundDisc = false;
         DumperIsReady = false;
@@ -159,6 +161,12 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             StartButtonCaption = "Overwrite";
             LastOperationWarning = true;
         }
+        else if (Directory.Exists(Path.Combine(dumper.InputDevicePath, "BDMV")))
+        {
+            StepTitle = "Ready to dump a hybrid disc";
+            StepSubtitle = "All files will be copied, but only PS3 game files will be decrypted";
+            LastOperationNotification = true;
+        }
         else
         {
             StepTitle = "Ready to dump";
@@ -181,6 +189,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         ProgressInfo = "Analyzing the file structure";
         LastOperationSuccess = true;
         LastOperationWarning = false;
+        LastOperationNotification = false;
         DumpingInProgress = true;
         CanEditSettings = false;
         EnableTaskbarProgress();

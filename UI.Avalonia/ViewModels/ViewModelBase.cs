@@ -55,6 +55,7 @@ public partial class ViewModelBase: ObservableObject
     public string PinSymbol => UseSegoeIcons ? "\ue718" : "\uf08d";
     public string ValidationErrorSymbol => UseSegoeIcons ? "\ue783" : "\uf06a";
     public string ValidationWarningSymbol => UseSegoeIcons ? "\ue7ba" : "\uf071";
+    public string ValidationInformationSymbol => UseSegoeIcons ? "\ue946" : "\uf05a";
     public string DiagnosticsSymbol => UseSegoeIcons ? "\ue9d9" : "\uf478";
     public string ColorSymbol => UseSegoeIcons ? "\ue790" : "\uf53f";
 

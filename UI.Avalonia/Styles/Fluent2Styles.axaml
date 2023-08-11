@@ -201,7 +201,7 @@
         <Setter Property="Foreground" Value="{DynamicResource ComboBoxForegroundPressed}"/>
     </Style>
     <Style Selector="ComboBox /template/ PathIcon#DropDownGlyph" >
-        <Setter Property="RenderTransform" Value="scale(0.67)"/>
+        <Setter Property="RenderTransform" Value="scale(0.69)"/>
     </Style>
     <Style Selector="ComboBox:pressed /template/ PathIcon#DropDownGlyph">
         <Setter Property="Margin" Value="0 4 10 0"/>

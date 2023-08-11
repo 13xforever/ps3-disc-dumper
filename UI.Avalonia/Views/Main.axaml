@@ -29,6 +29,11 @@
 	                   Foreground="{DynamicResource SystemFillColorCautionBrush}"
 	                   Text="{Binding ValidationWarningSymbol}"
 	                   IsVisible="{Binding LastOperationWarning}"/>
+	        <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="16"
+	                   VerticalAlignment="Center" Margin="0 0 8 0"
+	                   Foreground="{DynamicResource SystemFillColorAttentionBrush}"
+	                   Text="{Binding ValidationInformationSymbol}"
+	                   IsVisible="{Binding LastOperationNotification}"/>
 	        <TextBlock Classes="BodyTextBlockStyle" Text="{Binding StepSubtitle}">
 		        <TextBlock.IsVisible>
 			        <MultiBinding Converter="{x:Static BoolConverters.Or}">
