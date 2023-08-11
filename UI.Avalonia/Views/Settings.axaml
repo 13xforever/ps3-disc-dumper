@@ -38,7 +38,7 @@
                     <Button Classes="Transparent" Width="36" Height="36" Margin="8 0 0 0"
                             VerticalAlignment="Center" HorizontalAlignment="Right"
                             Command="{Binding  SelectFolderCommand}" CommandParameter="output">
-                        <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="20" Margin="-4 0 0 0"
+                        <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                                    VerticalAlignment="Center" HorizontalAlignment="Center"
                                    Text="{Binding MoreSymbol}"/>
                     </Button>
@@ -67,7 +67,7 @@
                     <Button Grid.Column="2" Classes="Transparent" Width="36" Height="36" Margin="8 0 0 0"
                             VerticalAlignment="Center" HorizontalAlignment="Right"
                             Command="{Binding  SelectFolderCommand}" CommandParameter="ird">
-                        <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="20" Margin="-4 0 0 0"
+                        <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                                    VerticalAlignment="Center" HorizontalAlignment="Center"
                                    Text="{Binding MoreSymbol}"/>
                     </Button>
@@ -77,57 +77,66 @@
         
         <!-- pattern -->
         <TextBlock Classes="BodyStrongTextBlockStyle" Margin="0 32 0 0">Naming</TextBlock>
-        <Border Classes="Card" Margin="0 8 0 0" CornerRadius="4 4 0 0">
-            <Grid ColumnDefinitions="36,*,120">
-                <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
-                           VerticalAlignment="Center" HorizontalAlignment="Left"
-                           Text="{Binding RenameSymbol}"/>
-                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Classes="BodyTextBlockStyle">Dump name template</TextBlock>
-                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle"
-                               ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis">
-                        Disc metadata will be used to substitute the values
-                    </TextBlock>
+        <Expander Margin="0 8 0 0" Padding="0" CornerRadius="4" IsExpanded="True" Width="566"
+                  Background="Transparent">
+            <Expander.Header>
+                <Border Classes="Card" Margin="0" BorderThickness="0" CornerRadius="0" Background="Transparent">
+                    <Grid ColumnDefinitions="36,*,120">
+                        <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
+                                   VerticalAlignment="Center" HorizontalAlignment="Left"
+                                   Text="{Binding RenameSymbol}"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Classes="BodyTextBlockStyle">Dump name template</TextBlock>
+                            <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle"
+                                       ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis">
+                                Disc metadata will be used to substitute the values
+                            </TextBlock>
+                        </StackPanel>
+                        <Button Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
+                                Padding="16 4" MinWidth="90" Height="32"
+                                Command="{Binding ResetTemplateCommand}">
+                            Reset
+                        </Button>
+                    </Grid>
+                </Border>
+            </Expander.Header>
+            <Expander.Content>
+                <StackPanel>
+                    <Border Classes="Card" CornerRadius="0" BorderThickness="0 0 0 1">
+                        <Grid ColumnDefinitions="36,*,240">
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Classes="BodyTextBlockStyle">Live Preview</TextBlock>
+                                <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle"
+                                           ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
+                                           Text="{Binding TemplatePreview}"/>
+                            </StackPanel>
+                            <TextBox Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
+                                     Margin="8 0 0 0"
+                                     Text="{Binding DumpNameTemplate}"/>
+                        </Grid>
+                    </Border>
+                    <Border Classes="Card" CornerRadius="0" BorderThickness="0">
+                        <Grid ColumnDefinitions="36,200,*">
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Classes="BodyTextBlockStyle">%product_code%</TextBlock>
+                                <TextBlock Classes="BodyTextBlockStyle">%product_code_letters%</TextBlock>
+                                <TextBlock Classes="BodyTextBlockStyle">%product_code_numbers%</TextBlock>
+                                <TextBlock Classes="BodyTextBlockStyle">%title%</TextBlock>
+                                <TextBlock Classes="BodyTextBlockStyle">%region%</TextBlock>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="0 2 0 0">
+                                <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding TestProductCode}"/>
+                                <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding TestProductCodeLetters}"/>
+                                <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding TestProductCodeNumbers}"/>
+                                <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding TestTitle}"/>
+                                <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding TestRegion}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
                 </StackPanel>
-                <Button Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
-                        VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
-                        Padding="16 4" MinWidth="90" Height="32"
-                        Command="{Binding ResetTemplateCommand}">
-                    Reset
-                </Button>
-            </Grid>
-        </Border>
-        <Border Classes="Card" CornerRadius="0" BorderThickness="1 0 1 1">
-            <Grid ColumnDefinitions="36,*,240">
-                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Classes="BodyTextBlockStyle">Live Preview</TextBlock>
-                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle"
-                               ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
-                               Text="{Binding TemplatePreview}"/>
-                </StackPanel>
-                <TextBox Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
-                         Margin="8 0 0 0"
-                         Text="{Binding DumpNameTemplate}"/>
-            </Grid>
-        </Border>
-        <Border Classes="Card" CornerRadius="0 0 4 4" BorderThickness="1 0 1 1">
-            <Grid ColumnDefinitions="36,200,*">
-                <StackPanel Grid.Column="1">
-                    <TextBlock Classes="BodyTextBlockStyle">%product_code%</TextBlock>
-                    <TextBlock Classes="BodyTextBlockStyle">%product_code_letters%</TextBlock>
-                    <TextBlock Classes="BodyTextBlockStyle">%product_code_numbers%</TextBlock>
-                    <TextBlock Classes="BodyTextBlockStyle">%title%</TextBlock>
-                    <TextBlock Classes="BodyTextBlockStyle">%region%</TextBlock>
-                </StackPanel>
-                <StackPanel Grid.Column="2" Margin="0 2 0 0">
-                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding TestProductCode}"/>
-                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding TestProductCodeLetters}"/>
-                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding TestProductCodeNumbers}"/>
-                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding TestTitle}"/>
-                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding TestRegion}"/>
-                </StackPanel>
-            </Grid>
-        </Border>
+            </Expander.Content>
+        </Expander>
 
         <!-- personalization -->
         <TextBlock Classes="BodyStrongTextBlockStyle" Margin="0 32 0 0">Personalization</TextBlock>
