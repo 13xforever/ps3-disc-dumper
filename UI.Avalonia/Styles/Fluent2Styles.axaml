@@ -156,4 +156,10 @@
         <Setter Property="Foreground" Value="{DynamicResource AccentFillColorDefaultBrush}"/>
         <Setter Property="Background" Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}"/>
     </Style>
+    
+    <!-- expander -->
+    <Style Selector="Expander">
+        <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}"/>
+    </Style>
 </Styles>

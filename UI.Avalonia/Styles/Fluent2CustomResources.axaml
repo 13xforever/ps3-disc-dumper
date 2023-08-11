@@ -1,6 +1,24 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <SolidColorBrush x:Key="CaptionCloseButtonBackgroundHover" Color="#c42b1c"/>
     <SolidColorBrush x:Key="CaptionCloseButtonBackgroundPressed" Color="#b3271c"/>
+            
+    <!-- expander -->
+    <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="{DynamicResource CardBackgroundFillColorDefault}"/>
+    <SolidColorBrush x:Key="ExpanderHeaderBorderBrush" Color="{DynamicResource CardStrokeColorDefault}"/>
+    <SolidColorBrush x:Key="ExpanderHeaderForeground" Color="{DynamicResource TextFillColorPrimary}"/>
+    <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPointerOver" Color="{DynamicResource ControlStrokeColorDefault}"/>
+    <SolidColorBrush x:Key="ExpanderHeaderForegroundPointerOver" Color="{DynamicResource TextFillColorPrimary}"/>
+    <!-- tertiary -->
+    <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="{DynamicResource CardBackgroundFillColorSecondary}"/>
+    <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPressed" Color="{DynamicResource ControlStrokeColorDefault}"/>
+    <SolidColorBrush x:Key="ExpanderHeaderForegroundPressed" Color="{DynamicResource TextFillColorSecondary}"/>
+    <!-- expander chevron -->
+    <SolidColorBrush x:Key="ExpanderChevronBackground" Color="Transparent"/>
+    <SolidColorBrush x:Key="ExpanderChevronBorderBrush" Color="Transparent"/>
+    <SolidColorBrush x:Key="ExpanderChevronBackgroundPointerOver" Color="Transparent"/>
+    <SolidColorBrush x:Key="ExpanderChevronBorderBrushPointerOver" Color="Transparent"/>
+    <SolidColorBrush x:Key="ExpanderChevronBackgroundPressed" Color="Transparent"/>
+    <SolidColorBrush x:Key="ExpanderChevronBorderBrushPressed" Color="Transparent"/>
     
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
@@ -10,6 +28,7 @@
             <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="{DynamicResource SystemAccentColorDark1}"/>
             <SolidColorBrush x:Key="LinkButtonForeground" Color="{DynamicResource SystemAccentColorDark2}"/>
             <SolidColorBrush x:Key="LinkButtonForegroundTertiary" Color="{DynamicResource SystemAccentColorDark1}"/>
+            <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="{DynamicResource ControlStrokeColorForStrongFillWhenOnImage}"/>
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
             <SolidColorBrush x:Key="DimGreyText" Color="#a9aba9"/>
@@ -18,6 +37,7 @@
             <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="{DynamicResource SystemAccentColorLight2}"/>
             <SolidColorBrush x:Key="LinkButtonForeground" Color="{DynamicResource SystemAccentColorLight3}"/>
             <SolidColorBrush x:Key="LinkButtonForegroundTertiary" Color="{DynamicResource SystemAccentColorLight2}"/>
+            <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="{DynamicResource ControlFillColorSecondary}"/>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>
