@@ -20,6 +20,21 @@
     <SolidColorBrush x:Key="ExpanderChevronBackgroundPressed" Color="Transparent"/>
     <SolidColorBrush x:Key="ExpanderChevronBorderBrushPressed" Color="Transparent"/>
     
+    <!-- combobox -->
+    <SolidColorBrush x:Key="ComboBoxBackground" Color="{DynamicResource ControlFillColorDefault}"/>
+    <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="{DynamicResource ControlStrokeColorDefault}"/>
+    <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="{DynamicResource ControlFillColorSecondary}"/>
+    <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver" Color="{DynamicResource ControlStrokeColorSecondary}"/>
+    <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="{DynamicResource ControlFillColorTertiary}"/>
+    <SolidColorBrush x:Key="ComboBoxBorderBrushPressed" Color="{DynamicResource ControlStrokeColorDefault}"/>
+    <SolidColorBrush x:Key="ComboBoxForegroundPressed" Color="{DynamicResource TextFillColorTertiary}"/>
+    <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="{DynamicResource SolidBackgroundFillColorQuarternary}"/>
+    <SolidColorBrush x:Key="ComboBoxDropDownBorderBrush" Color="{DynamicResource ControlStrokeColorDefault}"/>
+    <Thickness x:Key="ComboBoxDropdownBorderPadding">5,0</Thickness>
+    <SolidColorBrush x:Key="ComboBoxItemBackgroundPointerOver" Color="{DynamicResource ControlAltFillColorTertiary}"/>
+    <SolidColorBrush x:Key="ComboBoxItemForegroundSelected" Color="{DynamicResource TextOnAccentFillColorPrimary}"/>
+    <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPointerOver" Color="{DynamicResource TextOnAccentFillColorPrimary}"/>
+    
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="DimGreyText" Color="#646464"/>
@@ -29,6 +44,8 @@
             <SolidColorBrush x:Key="LinkButtonForeground" Color="{DynamicResource SystemAccentColorDark2}"/>
             <SolidColorBrush x:Key="LinkButtonForegroundTertiary" Color="{DynamicResource SystemAccentColorDark1}"/>
             <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="{DynamicResource ControlStrokeColorForStrongFillWhenOnImage}"/>
+            <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="{DynamicResource SystemAccentColorDark1}"/>
+            <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="{DynamicResource SystemAccentColor}"/>
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
             <SolidColorBrush x:Key="DimGreyText" Color="#a9aba9"/>
@@ -38,6 +55,8 @@
             <SolidColorBrush x:Key="LinkButtonForeground" Color="{DynamicResource SystemAccentColorLight3}"/>
             <SolidColorBrush x:Key="LinkButtonForegroundTertiary" Color="{DynamicResource SystemAccentColorLight2}"/>
             <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="{DynamicResource ControlFillColorSecondary}"/>
+            <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="{DynamicResource SystemAccentColorLight2}"/>
+            <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="{DynamicResource SystemAccentColorLight1}"/>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

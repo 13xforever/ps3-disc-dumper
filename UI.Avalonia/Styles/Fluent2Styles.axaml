@@ -96,7 +96,7 @@
         <Setter Property="CornerRadius" Value="4"/>
     </Style>
     <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource ControlFillColorSecondaryBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorSecondaryBrush}"/>
     </Style>
     <Style Selector="Button:pressed">
@@ -127,6 +127,9 @@
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
     </Style>
+    <Style Selector="Button.Transparent:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}"/>
+    </Style>
     <!-- link -->
     <Style Selector="Button.Link">
         <Setter Property="Foreground" Value="{DynamicResource LinkButtonForeground}"/>
@@ -134,6 +137,9 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="0"/>
         <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.Link:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}"/>
     </Style>
     <Style Selector="Button.Link:pressed /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Foreground" Value="{DynamicResource LinkButtonForegroundTertiary}"/>
@@ -162,4 +168,23 @@
         <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}"/>
     </Style>
+    
+    <!-- combobox -->
+    <Style Selector="ComboBox">
+        <Setter Property="CornerRadius" Value="4"/>
+    </Style>
+    <Style Selector="ComboBox:pressed">
+        <Setter Property="Foreground" Value="{DynamicResource ComboBoxForegroundPressed}"/>
+    </Style>
+    <Style Selector="ComboBox /template/ PathIcon#DropDownGlyph" >
+        <Setter Property="RenderTransform" Value="scale(0.67)"/>
+    </Style>
+    <Style Selector="ComboBox:pressed /template/ PathIcon#DropDownGlyph">
+        <Setter Property="Margin" Value="0 4 10 0"/>
+    </Style>
+    <Style Selector="ComboBoxItem">
+        <Setter Property="CornerRadius" Value="3"/>
+        <Setter Property="Margin" Value="0 2"/>
+    </Style>
+
 </Styles>
