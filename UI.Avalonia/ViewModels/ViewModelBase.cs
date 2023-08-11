@@ -23,11 +23,7 @@ public partial class ViewModelBase: ObservableObject
     [ObservableProperty] private static double materialOpacity = 0.69;
     [ObservableProperty] private static double luminosityOpacity = 1.0;
     [ObservableProperty] private static string accentColor = "#000000";
-    [ObservableProperty] private static string buttonAccentForegroundColor = "#ffffff";
     [ObservableProperty] private static string systemAccentColor = ThemeConsts.BrandColor;
-    [ObservableProperty] private static string systemAccentColor1 = ThemeConsts.BrandColor;
-    [ObservableProperty] private static string systemAccentColor2 = ThemeConsts.BrandColor;
-    [ObservableProperty] private static string systemAccentColor3 = ThemeConsts.BrandColor;
     [ObservableProperty] private static bool hasSystemAccentColor = Application.Current?.PlatformSettings is not null;
     [ObservableProperty] private static bool micaEnabled = true;
     [ObservableProperty] private static bool acrylicEnabled = false;
@@ -106,10 +102,6 @@ public partial class ViewModelBase: ObservableObject
             }} app)
             return;
 
-        if (t == ThemeVariant.Light)
-            ButtonAccentForegroundColor = PreferSystemAccent ? "#000000" : "#ffffff";
-        else if (t == ThemeVariant.Dark)
-            ButtonAccentForegroundColor = PreferSystemAccent ? "#ffffff" : "#000000";
         AccentColorInfo accentInfo;
         if (!PreferSystemAccent || !OperatingSystem.IsWindowsVersionAtLeast(10))
         {
@@ -133,20 +125,6 @@ public partial class ViewModelBase: ObservableObject
         app.Resources["SystemAccentColorLight1"] = accentInfo.Light1;
         app.Resources["SystemAccentColorLight2"] = accentInfo.Light2;
         app.Resources["SystemAccentColorLight3"] = accentInfo.Light3;
-        if (t == ThemeVariant.Light)
-        {
-            ButtonAccentForegroundColor = "#ffffff";
-            SystemAccentColor1 = accentInfo.Light1.ToString();
-            SystemAccentColor2 = accentInfo.Light2.ToString();
-            SystemAccentColor3 = accentInfo.Light3.ToString();
-        }
-        else if (t == ThemeVariant.Dark)
-        {
-            ButtonAccentForegroundColor = "#000000";
-            SystemAccentColor1 = accentInfo.Dark1.ToString();
-            SystemAccentColor2 = accentInfo.Dark2.ToString();
-            SystemAccentColor3 = accentInfo.Dark3.ToString();
-        }
     }
 
     partial void OnPreferSystemAccentChanged(bool value)
