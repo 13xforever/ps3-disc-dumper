@@ -80,7 +80,7 @@
         <Expander Margin="0 8 0 0" Padding="0" CornerRadius="4" IsExpanded="True" Width="566"
                   Background="Transparent">
             <Expander.Header>
-                <Border Classes="Card" Margin="0" BorderThickness="0" CornerRadius="0" Background="Transparent">
+                <Border Classes="Card" Margin="0" Padding="0 0 " BorderThickness="0" CornerRadius="0" Background="Transparent">
                     <Grid ColumnDefinitions="36,*,120">
                         <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                                    VerticalAlignment="Center" HorizontalAlignment="Left"

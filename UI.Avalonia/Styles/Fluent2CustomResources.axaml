@@ -35,6 +35,13 @@
     <SolidColorBrush x:Key="ComboBoxItemForegroundSelected" Color="{DynamicResource TextOnAccentFillColorPrimary}"/>
     <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPointerOver" Color="{DynamicResource TextOnAccentFillColorPrimary}"/>
     
+    <!-- textbox -->
+    <SolidColorBrush x:Key="TextControlBackground" Color="{DynamicResource ControlFillColorDefault}"/>
+    <SolidColorBrush x:Key="TextControlBorderBrush" Color="{DynamicResource ControlStrokeColorDefault}"/>
+    <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="{DynamicResource ControlFillColorSecondary}"/>
+    <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="{DynamicResource ControlStrokeColorDefault}"/>
+    <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{DynamicResource ControlFillColorInputActive}"/>
+    
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="DimGreyText" Color="#646464"/>
@@ -46,6 +53,7 @@
             <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="{DynamicResource ControlStrokeColorForStrongFillWhenOnImage}"/>
             <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="{DynamicResource SystemAccentColorDark1}"/>
             <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="{DynamicResource SystemAccentColor}"/>
+            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="{DynamicResource SystemAccentColorDark1}"/>
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
             <SolidColorBrush x:Key="DimGreyText" Color="#a9aba9"/>
@@ -57,6 +65,7 @@
             <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="{DynamicResource ControlFillColorSecondary}"/>
             <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="{DynamicResource SystemAccentColorLight2}"/>
             <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="{DynamicResource SystemAccentColorLight1}"/>
+            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="{DynamicResource SystemAccentColorLight2}"/>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>
