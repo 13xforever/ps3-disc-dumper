@@ -46,9 +46,11 @@ public partial class ViewModelBase: ObservableObject
 
     private bool UseSegoeIcons => SymbolFontFamily.Name is "Segoe Fluent Icons";
     public string SettingsSymbol => UseSegoeIcons ? "\ue713" : "\uf013";
-    public string UpdateSymbol => UseSegoeIcons ? "\ue946" : "\uf05a"; //"\uf06a" // exclamation mark in circle
+    //public string UpdateSymbol => UseSegoeIcons ? "\ue946" : "\uf05a"; //"\uf06a" // exclamation mark in circle
+    public string UpdateSymbol => UseSegoeIcons ? "\ue895" : "\uf021";
     public string BackSymbol => UseSegoeIcons ? "\ue72b" : "\uf060";
     public string FolderSymbol => UseSegoeIcons ? "\ue8b7" : "\uf07b";
+    public string MoreSymbol => UseSegoeIcons ? "\ue712" : "\uf141";
     public string RenameSymbol => UseSegoeIcons ? "\ue8ac" : "\uf573";
     public string HelpSymbol => UseSegoeIcons ? "\ue8ac" : "\uf573";
     public string HomeSymbol => UseSegoeIcons ? "\ue80f" : "\uf015";

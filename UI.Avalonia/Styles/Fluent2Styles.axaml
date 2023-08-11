@@ -8,8 +8,8 @@
     <Styles.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceInclude Source="WinUICommon.axaml"/>
-                <ResourceInclude Source="Fluent2Resources.axaml"/>
+                <ResourceInclude Source="WinUICommonResources.axaml"/>
+                <ResourceInclude Source="Fluent2CustomResources.axaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Styles.Resources>
@@ -87,13 +87,13 @@
     </Style>
     
     <!-- buttons -->
-    <Style Selector="Button /template/ ContentPresenter#PART_ContentPresenter">
+    <Style Selector="Button">
         <Setter Property="Background" Value="{DynamicResource ControlFillColorDefaultBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}"/>
         <Setter Property="CornerRadius" Value="4"/>
     </Style>
     <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource ControlFillColorSecondaryBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorSecondaryBrush}"/>
     </Style>
     <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">

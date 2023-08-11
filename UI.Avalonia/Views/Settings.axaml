@@ -28,10 +28,12 @@
                                MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
                                Text="{Binding OutputDirPreview}"/>
                 </StackPanel>
-                <Button Grid.Column="2" Classes="Transparent"
-                        VerticalAlignment="Center" HorizontalAlignment="Right"
+                <Button Grid.Column="2" Classes="Transparent" Width="36" Height="36"
+                        VerticalAlignment="Center" HorizontalAlignment="Right" HorizontalContentAlignment="Center"
                         Command="{Binding  SelectFolderCommand}" CommandParameter="output">
-                    …
+                    <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="20" Margin="-4 0 0 0"
+                               VerticalAlignment="Center" HorizontalAlignment="Center"
+                               Text="{Binding MoreSymbol}"/>
                 </Button>
             </Grid>
         </Border>
@@ -50,7 +52,9 @@
                 <Button Grid.Column="2" Classes="Transparent"
                         VerticalAlignment="Center" HorizontalAlignment="Right"
                         Command="{Binding  SelectFolderCommand}" CommandParameter="ird">
-                    …
+                    <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="20" Margin="-4 0 0 0"
+                               VerticalAlignment="Center" HorizontalAlignment="Center"
+                               Text="{Binding MoreSymbol}"/>
                 </Button>
             </Grid>
         </Border>
