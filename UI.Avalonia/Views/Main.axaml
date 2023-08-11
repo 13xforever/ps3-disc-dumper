@@ -41,8 +41,10 @@
         
         <!-- middle -->
         <Expander IsExpanded="{Binding DiscInfoExpanded}" Margin="0 24" Width="500" CornerRadius="4"
-                  IsVisible="{Binding ProductCode, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-	        <Expander.Header >
+                  IsVisible="{Binding ProductCode, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                  Classes.Success="{Binding Success}"
+                  Classes.Critical="{Binding Success, Converter={x:Static BoolConverters.Not}}">
+	        <Expander.Header>
 		        <!-- 436 for container, 414 for title without checkmark -->
 		        <StackPanel Orientation="Horizontal">
 			        <!-- PrefixCharacterEllipsis or CharacterEllipsis -->
@@ -81,7 +83,8 @@
         </Button>
         <Button HorizontalAlignment="Center" Width="200" Height="48" Margin="0" IsDefault="True"
                 HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                Classes="Accent"
+                Classes.Accent="{Binding !LastOperationWarning}"
+                Classes.Caution="{Binding LastOperationWarning}"
                 Command="{Binding DumpDiscCommand}">
 	        <Button.IsVisible>
 		        <MultiBinding Converter="{x:Static BoolConverters.And}">

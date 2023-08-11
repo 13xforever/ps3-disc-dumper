@@ -175,11 +175,22 @@
         <Setter Property="Foreground" Value="{DynamicResource AccentFillColorDefaultBrush}"/>
         <Setter Property="Background" Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}"/>
     </Style>
+    <!-- status -->
+    <Style Selector="Button.Caution">
+        <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCautionBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource SystemFillColorCautionBackgroundBrush}"/>
+    </Style>
     
     <!-- expander -->
     <Style Selector="Expander">
         <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}"/>
+    </Style>
+    <Style Selector="Expander.Success ToggleButton">
+        <Setter Property="Background" Value="{DynamicResource SystemFillColorSuccessBackgroundBrush}"/>
+    </Style>
+    <Style Selector="Expander.Critical ToggleButton">
+        <Setter Property="Background" Value="{DynamicResource SystemFillColorCriticalBackgroundBrush}"/>
     </Style>
     
     <!-- combobox -->
