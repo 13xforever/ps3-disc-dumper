@@ -230,18 +230,14 @@
         <StackPanel Orientation="Horizontal" Margin="0 12 0 0">
             <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="16"
                        VerticalAlignment="Center" Margin="0 0 12 0" Text="{Binding HomeSymbol}"/>
-            <Button Padding="0"
-                    Background="Transparent" Foreground="{Binding AccentColor}" Cursor="Hand"
-                    Command="{Binding OpenUrlCommand}" CommandParameter="{Binding ProjectUrl}">
+            <Button Classes="Link" Command="{Binding OpenUrlCommand}" CommandParameter="{Binding ProjectUrl}">
                 Project page
             </Button>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Margin="0 8 0 0">
             <TextBlock FontSize="16" FontFamily="{Binding SymbolFontFamily}"
                        VerticalAlignment="Center" Margin="0 0 12 0" Text="{Binding FeedbackSymbol}"/>
-            <Button Padding="0"
-                    Background="Transparent" Foreground="{Binding AccentColor}" Cursor="Hand"
-                    Command="{Binding OpenUrlCommand}" CommandParameter="{Binding SubmitIssueUrl}">
+            <Button Classes="Link" Command="{Binding OpenUrlCommand}" CommandParameter="{Binding SubmitIssueUrl}">
                 Give feedback
             </Button>
         </StackPanel>

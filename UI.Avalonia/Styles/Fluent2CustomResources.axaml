@@ -7,11 +7,15 @@
             <SolidColorBrush x:Key="ToggleSwitchKnobFillOff" Color="#5d5d5d"/>
             <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="White"/>
             <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="{DynamicResource SystemAccentColorDark1}"/>
+            <SolidColorBrush x:Key="LinkButtonForeground" Color="{DynamicResource SystemAccentColorDark2}"/>
+            <SolidColorBrush x:Key="LinkButtonForegroundTertiary" Color="{DynamicResource SystemAccentColorDark1}"/>
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
             <SolidColorBrush x:Key="ToggleSwitchKnobFillOff" Color="#cecece"/>
             <SolidColorBrush x:Key="ToggleSwitchKnobFillOn" Color="Black"/>
             <SolidColorBrush x:Key="ToggleSwitchFillOn" Color="{DynamicResource SystemAccentColorLight2}"/>
+            <SolidColorBrush x:Key="LinkButtonForeground" Color="{DynamicResource SystemAccentColorLight3}"/>
+            <SolidColorBrush x:Key="LinkButtonForegroundTertiary" Color="{DynamicResource SystemAccentColorLight2}"/>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

@@ -114,10 +114,22 @@
         <Setter Property="Background" Value="{DynamicResource CaptionCloseButtonBackgroundPressed}"/>
     </Style>
     <!-- todo: Path fill color = accent light 1? -->
-
     <!-- custom buttons -->
     <Style Selector="Button.Transparent">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="Button.Link">
+        <Setter Property="Foreground" Value="{DynamicResource LinkButtonForeground}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.Link:pressed">
+        <Setter Property="RenderTransform" Value=""/>
+    </Style>
+    <Style Selector="Button.Link:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource LinkButtonForegroundTertiary}"/>
     </Style>
 </Styles>
