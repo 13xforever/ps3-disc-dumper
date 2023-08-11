@@ -18,7 +18,7 @@
         <!-- output dir -->
         <TextBlock Classes="BodyStrongTextBlockStyle">Locations</TextBlock>
         <Border Classes="Card" Margin="0 8 0 0">
-            <Grid ColumnDefinitions="36,*,36">
+            <Grid ColumnDefinitions="36,*,150">
                 <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                            VerticalAlignment="Center" HorizontalAlignment="Left"
                            Text="{Binding FolderSymbol}"/>
@@ -28,18 +28,26 @@
                                MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
                                Text="{Binding OutputDirPreview}"/>
                 </StackPanel>
-                <Button Grid.Column="2" Classes="Transparent" Width="36" Height="36"
-                        VerticalAlignment="Center" HorizontalAlignment="Right" HorizontalContentAlignment="Center"
-                        Command="{Binding  SelectFolderCommand}" CommandParameter="output">
-                    <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="20" Margin="-4 0 0 0"
-                               VerticalAlignment="Center" HorizontalAlignment="Center"
-                               Text="{Binding MoreSymbol}"/>
-                </Button>
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button VerticalAlignment="Center" HorizontalAlignment="Right"
+                            VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
+                            Padding="16 4" MinWidth="90" Height="32"
+                            Command="{Binding OpenFolderCommand}" CommandParameter="{Binding OutputDir}">
+                        Open folder
+                    </Button>                    
+                    <Button Classes="Transparent" Width="36" Height="36" Margin="8 0 0 0"
+                            VerticalAlignment="Center" HorizontalAlignment="Right"
+                            Command="{Binding  SelectFolderCommand}" CommandParameter="output">
+                        <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="20" Margin="-4 0 0 0"
+                                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Text="{Binding MoreSymbol}"/>
+                    </Button>
+                </StackPanel>
             </Grid>
         </Border>
         <!-- ird dir -->
         <Border Classes="Card" Margin="0 3 0 0">
-            <Grid ColumnDefinitions="36,*,36">
+            <Grid ColumnDefinitions="36,*,150">
                 <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                            VerticalAlignment="Center" HorizontalAlignment="Left"
                            Text="{Binding FolderSymbol}"/>
@@ -49,13 +57,21 @@
                                MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
                                Text="{Binding IrdDirPreview}"/>
                 </StackPanel>
-                <Button Grid.Column="2" Classes="Transparent"
-                        VerticalAlignment="Center" HorizontalAlignment="Right"
-                        Command="{Binding  SelectFolderCommand}" CommandParameter="ird">
-                    <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="20" Margin="-4 0 0 0"
-                               VerticalAlignment="Center" HorizontalAlignment="Center"
-                               Text="{Binding MoreSymbol}"/>
-                </Button>
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button VerticalAlignment="Center" HorizontalAlignment="Right"
+                            VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
+                            Padding="16 4" MinWidth="90" Height="32"
+                            Command="{Binding OpenFolderCommand}" CommandParameter="{Binding IrdDir}">
+                        Open folder
+                    </Button>                    
+                    <Button Grid.Column="2" Classes="Transparent" Width="36" Height="36" Margin="8 0 0 0"
+                            VerticalAlignment="Center" HorizontalAlignment="Right"
+                            Command="{Binding  SelectFolderCommand}" CommandParameter="ird">
+                        <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="20" Margin="-4 0 0 0"
+                                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Text="{Binding MoreSymbol}"/>
+                    </Button>
+                </StackPanel>
             </Grid>
         </Border>
         
@@ -189,40 +205,18 @@
                     <TextBlock Classes="BodyTextBlockStyle">Logs will save to</TextBlock>
                     <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle"
                                MaxWidth="459" ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
-                               Text="{Binding LogPath}"/>
+                               Text="{Binding LogPathPreview}"/>
                 </StackPanel>
                 <Button Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
                         VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
                         Padding="16 4" MinWidth="90" Height="32"
                         IsVisible="{Binding LogAvailable}"
-                        Command="{Binding OpenLogsCommand}">
+                        Command="{Binding OpenFolderCommand}" CommandParameter="{Binding LogPath}">
                     Open folder
                 </Button>
             </Grid>
         </Border>
 
-        <!-- test -->
-        <TextBlock Classes="BodyStrongTextBlockStyle" Margin="0 32 0 0" IsVisible="{Binding IsDebug}">Test block</TextBlock>
-        <Border Classes="Card" Margin="0 8 0 0"
-                IsVisible="{Binding IsDebug}">
-            <Grid ColumnDefinitions="*,*,*" RowDefinitions="*,*">
-                <Button Grid.Row="0" Grid.Column="0" Width="50" Background="{Binding SystemAccentColor1, Converter={StaticResource BrushConverter}}">ac1</Button>
-                <Button Grid.Row="0" Grid.Column="1" Width="50" Background="{Binding SystemAccentColor2, Converter={StaticResource BrushConverter}}">ac2</Button>
-                <Button Grid.Row="0" Grid.Column="2" Width="50" Background="{Binding SystemAccentColor3, Converter={StaticResource BrushConverter}}">ac3</Button>
-                <Button Grid.Row="1" Grid.Column="0" Width="50" Background="{Binding AccentColor, Converter={StaticResource BrushConverter}}">ac</Button>
-                <Button Grid.Row="1" Grid.Column="1" Width="50"
-                        Background="{Binding AccentColor, Converter={StaticResource BrushConverter}}"
-                        Foreground="{Binding ButtonAccentForegroundColor, Converter={StaticResource BrushConverter}}"
-                >
-                    bac
-                </Button>
-                <StackPanel Grid.Row="1" Grid.Column="2">
-                    <TextBlock Classes="BodyTextBlockStyle">Body</TextBlock>
-                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle">Caption</TextBlock>
-                </StackPanel>
-            </Grid>
-        </Border>
-        
         <!-- about -->
         <TextBlock Classes="BodyStrongTextBlockStyle" Margin="0 31 0 0">About this app</TextBlock>
         <TextBlock Margin="0 12 0 0" Text="{Binding DumperVersion, StringFormat=PS3 Disc Dumper v{0}}"/>

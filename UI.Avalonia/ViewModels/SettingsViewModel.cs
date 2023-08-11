@@ -52,7 +52,8 @@ public partial class SettingsViewModel: ViewModelBase
     public string TestRegion => testItems[Patterns.Region]!;
 
     public bool LogAvailable => File.Exists(Log.LogPath); 
-    public string LogPath => FormatPathPreview(Log.LogPath);
+    public string LogPath => Log.LogPath;
+    public string LogPathPreview => FormatPathPreview(Log.LogPath);
     public string DumperVersion => Dumper.Version;
     public string CurrentYear => DateTime.Now.Year.ToString();
     public static string ProjectUrl => "https://github.com/13xforever/ps3-disc-dumper";
@@ -146,9 +147,12 @@ public partial class SettingsViewModel: ViewModelBase
     }
 
     [RelayCommand]
-    private void OpenLogs()
+    private void OpenFolder(string value)
     {
-        var folder = $"\"{Path.GetDirectoryName(Log.LogPath)}\"";
+        var folder = value;
+        if (File.Exists(folder))
+            folder = Path.GetDirectoryName(value);
+        folder = $"\"{folder}\"";
         ProcessStartInfo psi = OperatingSystem.IsWindows()
             ? new() { Verb = "open", FileName = folder, UseShellExecute = true, }
             : new () { FileName = "open", Arguments = folder, };

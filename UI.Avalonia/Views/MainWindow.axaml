@@ -71,7 +71,7 @@
 		            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
 		            IsVisible="{Binding InSettings}"
 		            Command="{Binding ToggleSettingsPageCommand}"
-		    >
+		            ToolTip.Tip="Back">
 			    <TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="12"
 			               Text="{Binding CurrentPage.BackSymbol}"/>
 		    </Button>
@@ -88,7 +88,7 @@
 		            Classes="Transparent" CornerRadius="0"
 		            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
 		            IsVisible="{Binding UpdateInfo, Converter={x:Static ObjectConverters.IsNotNull}}"
-		    >
+		            ToolTip.Tip="Update">
 				<TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="18"
 		                   Text="{Binding CurrentPage.UpdateSymbol}">
 					<TextBlock.Foreground>
@@ -122,7 +122,7 @@
 		            Classes="Transparent" CornerRadius="0"
 		            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
 		            Command="{Binding ToggleSettingsPageCommand}"
-		    >
+		            ToolTip.Tip="Settings">
 			    <TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="18"
 			               Text="{Binding CurrentPage.SettingsSymbol}"
 			               Classes="SecondaryTextBlockStyle"/>
