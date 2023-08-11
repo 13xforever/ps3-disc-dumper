@@ -49,8 +49,21 @@
         <Setter Property="LineHeight" Value="92"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
+    <!-- textblock -->
     <Style Selector="TextBlock.SecondaryTextBlockStyle">
         <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.Success">
+        <Setter Property="Foreground" Value="{DynamicResource SystemFillColorSuccessBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.Attention">
+        <Setter Property="Foreground" Value="{DynamicResource SystemFillColorAttentionBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.Caution">
+        <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCautionBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.Critical">
+        <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCriticalBrush}"/>
     </Style>
     
     <!-- toggleswitch -->
@@ -186,5 +199,4 @@
         <Setter Property="CornerRadius" Value="3"/>
         <Setter Property="Margin" Value="0 2"/>
     </Style>
-
 </Styles>

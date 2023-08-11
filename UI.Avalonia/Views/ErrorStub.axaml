@@ -72,7 +72,7 @@
                 <StackPanel Orientation="Horizontal" MaxWidth="568">
                     <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="36"
                                Margin="0 0 16 0" Padding="0 4 0 0"
-                               Foreground="{Binding ColorPalette.StatusDangerForeground1, Converter={StaticResource BrushConverter}}"
+                               Foreground="{DynamicResource SystemFillColorCriticalBrush}"
                                Text="{Binding ValidationErrorSymbol}"/>
                     <TextBlock FontSize="28" TextWrapping="Wrap" ClipToBounds="True" MaxWidth="500">
                         Please do not run software as Administrator unless application was designed to properly handle it, and it is explicitly required.

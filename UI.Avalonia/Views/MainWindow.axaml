@@ -92,6 +92,7 @@
 		            IsVisible="{Binding UpdateInfo, Converter={x:Static ObjectConverters.IsNotNull}}"
 		            ToolTip.Tip="Update">
 				<TextBlock FontFamily="{Binding CurrentPage.SymbolFontFamily}" FontSize="18"
+				           Classes.Attention="{Binding !UpdateIsPrerelease}"
 				           Classes.SecondaryTextBlockStyle="{Binding UpdateIsPrerelease}"
 		                   Text="{Binding CurrentPage.UpdateSymbol}">
 				</TextBlock>

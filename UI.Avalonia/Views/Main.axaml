@@ -21,12 +21,12 @@
         <StackPanel Margin="0 8 0 0" Orientation="Horizontal" HorizontalAlignment="Center">
 	        <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="16"
 	                   VerticalAlignment="Center" Margin="0 0 8 0"
-	                   Foreground="{Binding ColorPalette.StatusDangerForeground1, Converter={StaticResource BrushConverter}}"
+	                   Foreground="{DynamicResource SystemFillColorCriticalBrush}"
 	                   Text="{Binding ValidationErrorSymbol}"
 	                   IsVisible="{Binding !LastOperationSuccess}"/>
 	        <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="16"
 	                   VerticalAlignment="Center" Margin="0 0 8 0"
-	                   Foreground="{Binding ColorPalette.StatusWarningForeground1, Converter={StaticResource BrushConverter}}"
+	                   Foreground="{DynamicResource SystemFillColorCautionBrush}"
 	                   Text="{Binding ValidationWarningSymbol}"
 	                   IsVisible="{Binding LastOperationWarning}"/>
 	        <TextBlock Classes="BodyTextBlockStyle" Text="{Binding StepSubtitle}">
@@ -49,7 +49,9 @@
 			        <TextBlock Classes="BodyTextBlockStyle" Text="{Binding GameTitle}" MaxWidth="414" ClipToBounds="True" TextTrimming="CharacterEllipsis"/>
 			        <TextBlock FontFamily="{Binding SymbolFontFamily}"
 			                   Margin="8 0 0 0" VerticalAlignment="Center"
-			                   Foreground="{Binding Success, Converter={StaticResource ValidationColorConverter}}"
+			                   IsVisible="{Binding Success, Converter={x:Static ObjectConverters.IsNotNull}}"
+			                   Classes.Success="{Binding Success}"
+			                   Classes.Critical="{Binding !Success}"
 			                   Text="{Binding Success, Converter={StaticResource ValidationSymbolConverter}}"/>
 		        </StackPanel>
 	        </Expander.Header>
