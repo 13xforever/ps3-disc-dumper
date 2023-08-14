@@ -64,8 +64,21 @@
 	    
 	    <!-- top left -->
 	    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5 7 -6 0">
+		    <!-- icon -->
+		    <!--
+		    <Image Source="avares://ps3-disc-dumper/Assets/icon.ico"
+		           Width="16" Height="16" Margin="12 10 8 10" RenderOptions.BitmapInterpolationMode="HighQuality"
+		           VerticalAlignment="Top" HorizontalAlignment="Left">
+			    <Image.IsVisible>
+				    <MultiBinding Converter="{x:Static BoolConverters.And}">
+					    <Binding Path="!InSettings"/>
+					    <Binding Path="IsExtendedIntoWindowDecorations" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=Window}"/>
+				    </MultiBinding>
+			    </Image.IsVisible>
+		    </Image>
+		    -->
 		    <!-- back button -->
-		    <Button Width="40" Height="36"
+		    <Button Width="40" Height="36" Margin="0 0 -8 0"
 		            Classes="Transparent"
 		            VerticalAlignment="Top" HorizontalAlignment="Left"
 		            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
@@ -76,7 +89,7 @@
 			               Text="{Binding CurrentPage.BackSymbol}"/>
 		    </Button>
 		    <!-- window title -->
-			<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="6 10 0 0"
+			<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="14 10 0 0"
 		               FontSize="12"
 		               IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=IsExtendedIntoWindowDecorations}"
 		               Text="{Binding CurrentPage.PageTitle}"/>
