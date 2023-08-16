@@ -35,12 +35,12 @@ Windows 11
   <img alt="Screenshot running on Windows 11" src="./screenshots/windows11-dark.png">
 </picture>
 
-Ubuntu 22.04
+Fedora 38
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./screenshots/ubuntu-dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="./screenshots/ubuntu-light.png">
-  <img alt="Screenshot running on Ubuntu 22.04" src="./screenshots/ubuntu-dark.png">
+  <source media="(prefers-color-scheme: dark)" srcset="./screenshots/fedora-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="./screenshots/fedora-light.png">
+  <img alt="Screenshot running on Fedora 38" src="./screenshots/fedora-dark.png">
 </picture>
 
 Building
