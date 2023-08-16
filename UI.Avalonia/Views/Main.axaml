@@ -84,7 +84,7 @@
                 Classes="Accent"
                 IsVisible="{Binding !FoundDisc}"
                 Command="{Binding ScanDiscsCommand}">
-	        <TextBlock Classes="SubtitleTextBlockStyle">Rescan disc devices</TextBlock>
+	        <TextBlock Classes="BodyTextBlockStyle">Rescan disc devices</TextBlock>
         </Button>
         <Button HorizontalAlignment="Center" MinWidth="200" Height="48" Margin="0" IsDefault="True"
                 HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
@@ -97,7 +97,7 @@
 			        <Binding Path="!DumpingInProgress"></Binding>
 		        </MultiBinding>
 	        </Button.IsVisible>
-	        <TextBlock Classes="SubtitleTextBlockStyle" Text="{Binding StartButtonCaption}"/>
+	        <TextBlock Classes="BodyTextBlockStyle" Text="{Binding StartButtonCaption}"/>
         </Button>
         
         <!-- progress -->
