@@ -61,29 +61,40 @@
             </ExperimentalAcrylicBorder>
 
             <!-- title -->
-            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="11 11 0 0"
+            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="19 17 0 0"
                        FontSize="12"
                        IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=IsExtendedIntoWindowDecorations}"
                        Text="{Binding PageTitle}"/>
             
             <!-- message -->
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
-                        Margin="16 64 16 16">
-                <StackPanel Orientation="Horizontal" MaxWidth="568">
-                    <TextBlock FontFamily="{Binding SymbolFontFamily}" FontSize="36"
-                               Margin="0 0 16 0" Padding="0 4 0 0"
-                               Foreground="{DynamicResource SystemFillColorCriticalBrush}"
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="16 48 16 16">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" MaxWidth="536" Margin="8 0">
+                    <TextBlock FontFamily="{Binding SymbolFontFamily}"
+                               Classes="Critical" FontSize="40" Padding="0 2 0 0"
                                Text="{Binding ValidationErrorSymbol}"/>
-                    <TextBlock FontSize="28" TextWrapping="Wrap" ClipToBounds="True" MaxWidth="500">
-                        Please do not run software as Administrator unless application was designed to properly handle it, and it is explicitly required.
+                    <TextBlock Classes="TitleTextBlockStyle" Margin="16 0 52 0" TextAlignment="Left">
+                        Unsupported security context
+                    </TextBlock>
+                </StackPanel>
+                <StackPanel Margin="68 12 68 0">
+                    <TextBlock Classes="BodyTextBlockStyle" TextWrapping="Wrap" IsVisible="{Binding UacIsEnabled}">
+                        Please do not run software as an Administrator unless the application is designed to properly handle it, and it is explicitly required.
+                    </TextBlock>
+                    <TextBlock Classes="BodyTextBlockStyle" TextWrapping="Wrap" IsVisible="{Binding !UacIsEnabled}">
+                        You are running software with Administrator privileges. Please do not disable standard security mechanisms built into operating systems, including User Account Control. <Button Classes="Link"
+                            Command="{Binding OpenUrlCommand}" CommandParameter="{Binding UacInfoLink}">
+                            Learn more
+                        </Button>
                     </TextBlock>
                 </StackPanel>
                 
-                <Button Margin="0 44 0 0" Padding="32 8" FontSize="24"
+                <Button Margin="0 24 0 0" Padding="32 8"
+                        MinWidth="200" Height="48"
+                        IsDefault="True" Classes="Accent"
                         HorizontalAlignment="Center"
                         HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                         Click="Exit">
-                    Exit
+	                <TextBlock Classes="BodyTextBlockStyle">Exit</TextBlock>
                 </Button>
             </StackPanel>
 
