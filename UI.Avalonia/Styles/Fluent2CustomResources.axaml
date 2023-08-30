@@ -36,11 +36,47 @@
     <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPointerOver" Color="{DynamicResource TextOnAccentFillColorPrimary}"/>
     
     <!-- textbox -->
+    
+    <!--
     <SolidColorBrush x:Key="TextControlBackground" Color="{DynamicResource ControlFillColorDefault}"/>
-    <SolidColorBrush x:Key="TextControlBorderBrush" Color="{DynamicResource ControlStrokeColorDefault}"/>
     <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="{DynamicResource ControlFillColorSecondary}"/>
-    <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="{DynamicResource ControlStrokeColorDefault}"/>
     <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{DynamicResource ControlFillColorInputActive}"/>
+
+    <SolidColorBrush x:Key="TextControlBorderBrush" Color="{DynamicResource ControlStrokeColorDefault}"/>
+    <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="{DynamicResource ControlStrokeColorDefault}"/>
+    -->
+    <LinearGradientBrush x:Key="TextControlBorderBrush" TransformOrigin="0%,50%" StartPoint="0,0" EndPoint="0,2">
+        <LinearGradientBrush.Transform>
+            <ScaleTransform ScaleY="-1"/>
+        </LinearGradientBrush.Transform>
+        <LinearGradientBrush.GradientStops>
+            <GradientStop Offset="0.5" Color="{StaticResource ControlStrongStrokeColorDefault}"/>
+            <GradientStop Offset="1.0" Color="{StaticResource ControlStrokeColorDefault}"/>
+        </LinearGradientBrush.GradientStops>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="TextControlBorderBrushPointerOver" TransformOrigin="0%,50%" StartPoint="0,0" EndPoint="0,2">
+        <LinearGradientBrush.Transform>
+            <ScaleTransform ScaleY="-1"/>
+        </LinearGradientBrush.Transform>
+        <LinearGradientBrush.GradientStops>
+            <GradientStop Offset="0.5" Color="{StaticResource ControlStrongStrokeColorDefault}"/>
+            <GradientStop Offset="1.0" Color="{StaticResource ControlStrokeColorDefault}"/>
+        </LinearGradientBrush.GradientStops>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="TextControlBackground" Color="{DynamicResource ControlFillColorDefault}" />
+    <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="{DynamicResource ControlFillColorSecondary}" />
+    <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{DynamicResource ControlFillColorInputActive}" />
+    <SolidColorBrush x:Key="TextControlBackgroundDisabled" Color="{DynamicResource ControlFillColorDisabled}" />
+    <SolidColorBrush x:Key="TextControlBorderBrushDisabled" Color="{DynamicResource ControlStrokeColorDefault}" />
+    <SolidColorBrush x:Key="TextControlForeground" Color="{DynamicResource TextFillColorPrimary}" />
+    <SolidColorBrush x:Key="TextControlForegroundPointerOver" Color="{DynamicResource TextFillColorPrimary}" />
+    <SolidColorBrush x:Key="TextControlForegroundFocused" Color="{DynamicResource TextFillColorPrimary}" />
+    <!--<SolidColorBrush x:Key="TextControlForegroundDisabled" Color="{DynamicResource TemporaryTextFillColorDis}" />-->
+    <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="{DynamicResource TextFillColorSecondary}" />
+    <SolidColorBrush x:Key="TextControlPlaceholderForegroundPointerOver" Color="{DynamicResource TextFillColorSecondary}" />
+    <SolidColorBrush x:Key="TextControlPlaceholderForegroundFocused" Color="{DynamicResource TextFillColorTertiary}" />
+    <SolidColorBrush x:Key="TextControlPlaceholderForegroundDisabled" Color="{DynamicResource TextFillColorDisabled}" />
+    <!--<SolidColorBrush x:Key="TextControlSelectionHighlightColor" Color="{DynamicResource AccentFillColorSelectedTextBackground}" />-->
     
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
@@ -53,8 +89,18 @@
             <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="{DynamicResource ControlStrokeColorForStrongFillWhenOnImage}"/>
             <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="{DynamicResource SystemAccentColorDark1}"/>
             <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="{DynamicResource SystemAccentColor}"/>
-            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="{DynamicResource SystemAccentColorDark1}"/>
+            <!--<SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="{DynamicResource SystemAccentColorDark1}"/>-->
+            <LinearGradientBrush x:Key="TextControlBorderBrushFocused" TransformOrigin="0%,50%" StartPoint="0,0" EndPoint="0,2">
+                <LinearGradientBrush.Transform>
+                    <ScaleTransform ScaleY="-1"/>
+                </LinearGradientBrush.Transform>
+                <LinearGradientBrush.GradientStops>
+                    <GradientStop Offset="1.0" Color="{DynamicResource SystemAccentColorDark1}"/>
+                    <GradientStop Offset="1.0" Color="{StaticResource ControlStrokeColorDefault}"/>
+                </LinearGradientBrush.GradientStops>
+            </LinearGradientBrush>
         </ResourceDictionary>
+
         <ResourceDictionary x:Key="Dark">
             <SolidColorBrush x:Key="DimGreyText" Color="#a9aba9"/>
             <SolidColorBrush x:Key="ToggleSwitchKnobFillOff" Color="#cecece"/>
@@ -65,7 +111,17 @@
             <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="{DynamicResource ControlFillColorSecondary}"/>
             <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="{DynamicResource SystemAccentColorLight2}"/>
             <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="{DynamicResource SystemAccentColorLight1}"/>
-            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="{DynamicResource SystemAccentColorLight2}"/>
+            <!--<SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="{DynamicResource SystemAccentColorLight2}"/>-->
+
+            <LinearGradientBrush x:Key="TextControlBorderBrushFocused" TransformOrigin="0%,50%" StartPoint="0,0" EndPoint="0,2">
+                <LinearGradientBrush.Transform>
+                    <ScaleTransform ScaleY="-1"/>
+                </LinearGradientBrush.Transform>
+                <LinearGradientBrush.GradientStops>
+                    <GradientStop Offset="1.0" Color="{DynamicResource SystemAccentColorLight2}"/>
+                    <GradientStop Offset="1.0" Color="{StaticResource ControlStrokeColorDefault}"/>
+                </LinearGradientBrush.GradientStops>
+            </LinearGradientBrush>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>
