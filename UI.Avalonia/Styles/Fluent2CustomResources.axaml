@@ -50,8 +50,8 @@
             <ScaleTransform ScaleY="-1"/>
         </LinearGradientBrush.Transform>
         <LinearGradientBrush.GradientStops>
-            <GradientStop Offset="0.5" Color="{StaticResource ControlStrongStrokeColorDefault}"/>
-            <GradientStop Offset="1.0" Color="{StaticResource ControlStrokeColorDefault}"/>
+            <GradientStop Offset="0.5" Color="{DynamicResource ControlStrongStrokeColorDefault}"/>
+            <GradientStop Offset="1.0" Color="{DynamicResource ControlStrokeColorDefault}"/>
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
     <LinearGradientBrush x:Key="TextControlBorderBrushPointerOver" TransformOrigin="0%,50%" StartPoint="0,0" EndPoint="0,2">
@@ -59,8 +59,8 @@
             <ScaleTransform ScaleY="-1"/>
         </LinearGradientBrush.Transform>
         <LinearGradientBrush.GradientStops>
-            <GradientStop Offset="0.5" Color="{StaticResource ControlStrongStrokeColorDefault}"/>
-            <GradientStop Offset="1.0" Color="{StaticResource ControlStrokeColorDefault}"/>
+            <GradientStop Offset="0.5" Color="{DynamicResource ControlStrongStrokeColorDefault}"/>
+            <GradientStop Offset="1.0" Color="{DynamicResource ControlStrokeColorDefault}"/>
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
     <SolidColorBrush x:Key="TextControlBackground" Color="{DynamicResource ControlFillColorDefault}" />
@@ -96,7 +96,7 @@
                 </LinearGradientBrush.Transform>
                 <LinearGradientBrush.GradientStops>
                     <GradientStop Offset="1.0" Color="{DynamicResource SystemAccentColorDark1}"/>
-                    <GradientStop Offset="1.0" Color="{StaticResource ControlStrokeColorDefault}"/>
+                    <GradientStop Offset="1.0" Color="{DynamicResource ControlStrokeColorDefault}"/>
                 </LinearGradientBrush.GradientStops>
             </LinearGradientBrush>
         </ResourceDictionary>
@@ -119,7 +119,7 @@
                 </LinearGradientBrush.Transform>
                 <LinearGradientBrush.GradientStops>
                     <GradientStop Offset="1.0" Color="{DynamicResource SystemAccentColorLight2}"/>
-                    <GradientStop Offset="1.0" Color="{StaticResource ControlStrokeColorDefault}"/>
+                    <GradientStop Offset="1.0" Color="{DynamicResource ControlStrokeColorDefault}"/>
                 </LinearGradientBrush.GradientStops>
             </LinearGradientBrush>
         </ResourceDictionary>
