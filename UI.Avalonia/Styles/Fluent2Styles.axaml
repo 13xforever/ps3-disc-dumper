@@ -210,4 +210,29 @@
         <Setter Property="CornerRadius" Value="3"/>
         <Setter Property="Margin" Value="0 2"/>
     </Style>
+    
+    <!-- progress bar -->
+    <Style Selector="ProgressBar">
+        <Setter Property="Background" Value="{DynamicResource ProgressBarBackground}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ProgressBarForeground}"/>
+        <Setter Property="BorderThickness" Value="{DynamicResource ProgressBarBorderThemeThickness}"/>
+        <Setter Property="MinHeight" Value="{DynamicResource ProgressBarMinHeight}"/>
+        <Setter Property="CornerRadius" Value="{DynamicResource ProgressBarCornerRadius}"></Setter>
+    </Style>
+    <Style Selector="ProgressBar:horizontal /template/ Border#ProgressBarRoot">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="ProgressBar:horizontal /template/ Border#PART_Indicator">
+        <Setter Property="MinHeight" Value="{DynamicResource ProgressBarMinHeight}"/>
+        <Setter Property="Height" Value="{DynamicResource ProgressBarMinHeight}"/>
+        <Setter Property="CornerRadius" Value="{DynamicResource ProgressBarCornerRadius}"/>
+    </Style>
+    <Style Selector="ProgressBar:horizontal /template/ Panel#DeterminateRoot">
+        <Setter Property="Background" Value="{DynamicResource ProgressBarBackground}"/>
+        <Setter Property="MinHeight" Value="{DynamicResource ProgressBarTrackHeight}"/>
+        <Setter Property="Height" Value="{DynamicResource ProgressBarTrackHeight}"/>
+    </Style>
+    <Style Selector="ProgressBar:horizontal /template/ Panel#DeterminateRoot Border">
+        <Setter Property="CornerRadius" Value="{DynamicResource ProgressBarTrackCornerRadius}"/>
+    </Style>
 </Styles>

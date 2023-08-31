@@ -45,7 +45,7 @@
         </StackPanel>
         
         <!-- middle -->
-        <Expander IsExpanded="{Binding DiscInfoExpanded}" Margin="0 24" Width="500" CornerRadius="4"
+        <Expander IsExpanded="{Binding DiscInfoExpanded}" Margin="0 12" Width="500" CornerRadius="4"
                   IsVisible="{Binding ProductCode, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
                   Classes.Success="{Binding Success}"
                   Classes.Critical="{Binding Success, Converter={x:Static BoolConverters.Not}}">
@@ -103,10 +103,8 @@
         <!-- progress -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
                     IsVisible="{Binding DumpingInProgress}">
-	        <StackPanel Margin="0 6 12 0" Name="ProgressBar">
-		        <ProgressBar ShowProgressText="True" Foreground="{Binding AccentColor}"
-		                     Minimum="0" Maximum="{Binding ProgressMax}" Value="{Binding Progress}"/>
-		        
+	        <StackPanel Margin="0 12 12 0" Name="ProgressBar">
+		        <ProgressBar Minimum="0" Maximum="{Binding ProgressMax}" Value="{Binding Progress}"/>
 		        <TextBlock Margin="0 8"
 		                   Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" TextAlignment="Center"
 		                   IsVisible="{Binding DumpingInProgress}"

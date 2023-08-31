@@ -36,15 +36,6 @@
     <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPointerOver" Color="{DynamicResource TextOnAccentFillColorPrimary}"/>
     
     <!-- textbox -->
-    
-    <!--
-    <SolidColorBrush x:Key="TextControlBackground" Color="{DynamicResource ControlFillColorDefault}"/>
-    <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="{DynamicResource ControlFillColorSecondary}"/>
-    <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="{DynamicResource ControlFillColorInputActive}"/>
-
-    <SolidColorBrush x:Key="TextControlBorderBrush" Color="{DynamicResource ControlStrokeColorDefault}"/>
-    <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="{DynamicResource ControlStrokeColorDefault}"/>
-    -->
     <LinearGradientBrush x:Key="TextControlBorderBrush" TransformOrigin="0%,50%" StartPoint="0,0" EndPoint="0,2">
         <LinearGradientBrush.Transform>
             <ScaleTransform ScaleY="-1"/>
@@ -78,6 +69,21 @@
     <SolidColorBrush x:Key="TextControlPlaceholderForegroundDisabled" Color="{DynamicResource TextFillColorDisabled}" />
     <!--<SolidColorBrush x:Key="TextControlSelectionHighlightColor" Color="{DynamicResource AccentFillColorSelectedTextBackground}" />-->
     
+    <!-- progress bar -->
+    <Thickness x:Key="ProgressBarBorderThemeThickness">0</Thickness>
+    <SolidColorBrush x:Key="ProgressBarBackground" Color="{DynamicResource ControlStrongStrokeColorDefault}" />
+    <SolidColorBrush x:Key="ProgressBarBorderBrush" Color="{DynamicResource ControlStrokeColorDefault}" />
+    <SolidColorBrush x:Key="ProgressBarPausedForegroundColor" Color="{DynamicResource SystemFillColorCaution}" />
+    <SolidColorBrush x:Key="ProgressBarErrorForegroundColor" Color="{DynamicResource SystemFillColorCritical}" />
+    <x:Double x:Key="ProgressBarMinHeight">3</x:Double>
+    <x:Double x:Key="ProgressBarTrackHeight">1</x:Double>
+    <!--
+    <CornerRadius x:Key="ProgressBarCornerRadius">1.5</CornerRadius>
+    <CornerRadius x:Key="ProgressBarTrackCornerRadius">0.5</CornerRadius>  
+    -->
+    <CornerRadius x:Key="ProgressBarCornerRadius">3</CornerRadius>
+    <CornerRadius x:Key="ProgressBarTrackCornerRadius">1</CornerRadius>  
+    
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="DimGreyText" Color="#646464"/>
@@ -89,7 +95,6 @@
             <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="{DynamicResource ControlStrokeColorForStrongFillWhenOnImage}"/>
             <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="{DynamicResource SystemAccentColorDark1}"/>
             <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="{DynamicResource SystemAccentColor}"/>
-            <!--<SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="{DynamicResource SystemAccentColorDark1}"/>-->
             <LinearGradientBrush x:Key="TextControlBorderBrushFocused" TransformOrigin="0%,50%" StartPoint="0,0" EndPoint="0,2">
                 <LinearGradientBrush.Transform>
                     <ScaleTransform ScaleY="-1"/>
@@ -99,6 +104,7 @@
                     <GradientStop Offset="1.0" Color="{DynamicResource ControlStrokeColorDefault}"/>
                 </LinearGradientBrush.GradientStops>
             </LinearGradientBrush>
+            <SolidColorBrush x:Key="ProgressBarForeground" Color="{DynamicResource SystemAccentColorDark1}" />
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="Dark">
@@ -111,8 +117,6 @@
             <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="{DynamicResource ControlFillColorSecondary}"/>
             <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="{DynamicResource SystemAccentColorLight2}"/>
             <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="{DynamicResource SystemAccentColorLight1}"/>
-            <!--<SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="{DynamicResource SystemAccentColorLight2}"/>-->
-
             <LinearGradientBrush x:Key="TextControlBorderBrushFocused" TransformOrigin="0%,50%" StartPoint="0,0" EndPoint="0,2">
                 <LinearGradientBrush.Transform>
                     <ScaleTransform ScaleY="-1"/>
@@ -122,6 +126,7 @@
                     <GradientStop Offset="1.0" Color="{DynamicResource ControlStrokeColorDefault}"/>
                 </LinearGradientBrush.GradientStops>
             </LinearGradientBrush>
+            <SolidColorBrush x:Key="ProgressBarForeground" Color="{DynamicResource SystemAccentColorLight2}" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

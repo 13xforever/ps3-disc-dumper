@@ -112,7 +112,7 @@
                                            Text="{Binding TemplatePreview}"/>
                             </StackPanel>
                             <TextBox Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
-                                     Margin="8 0 0 0"
+                                     Margin="8 0 0 0" MaxLines="1"
                                      Text="{Binding DumpNameTemplate}"/>
                         </Grid>
                     </Border>
