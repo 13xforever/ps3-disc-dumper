@@ -27,7 +27,7 @@ namespace Ps3DiscDumper;
 
 public class Dumper: IDisposable
 {
-    public const string Version = "4.0.3";
+    public const string Version = "4.0.4";
 
     static Dumper() => Log.Info("PS3 Disc Dumper v" + Version);
 
@@ -310,7 +310,7 @@ public class Dumper: IDisposable
             {
                 Log.Trace($"Getting keys from {keyProvider.GetType().Name}...");
                 var newKeys = await keyProvider.EnumerateAsync(discKeyCachePath, ProductCode, Cts.Token).ConfigureAwait(false);
-                Log.Trace($"Got {newKeys.Count} keys");
+                Log.Trace($"Got {newKeys.Count} keys from {keyProvider.GetType().Name}");
                 lock (AllKnownDiscKeys)
                 {
                     foreach (var keyInfo in newKeys)
@@ -450,7 +450,19 @@ public class Dumper: IDisposable
         string discKey = null;
         try
         {
-            discKey = untestedKeys.AsParallel().FirstOrDefault(k => !Cts.IsCancellationRequested && IsValidDiscKey(k));
+            var validKeys = untestedKeys.AsParallel().Where(k => !Cts.IsCancellationRequested && IsValidDiscKey(k)).Distinct().ToList();
+            if (validKeys.Count > 1)
+            {
+                Log.Warn($"Expected only one valid decryption key, but found {validKeys.Count}:");
+                foreach (var k in validKeys)
+                {
+                    Log.Debug($"\t{k}:");
+                    var kiList = AllKnownDiscKeys[k];
+                    foreach (var ki in kiList)
+                        Log.Debug($"\t\t{ki.KeyType}: {Path.GetFileName(ki.FullPath)}");
+                }
+            }
+            discKey = validKeys.FirstOrDefault();
         }
         catch (Exception e)
         {
@@ -458,6 +470,11 @@ public class Dumper: IDisposable
         }
         if (discKey == null)
             throw new KeyNotFoundException("No valid disc decryption key was found");
+
+        Log.Info($"Selected disc key: {discKey}, known key sources:");
+        var keyInfoList = AllKnownDiscKeys[discKey];
+        foreach (var ki in keyInfoList)
+            Log.Debug($"\t{ki.KeyType}: {Path.GetFileName(ki.FullPath)}");
 
         if (Cts.IsCancellationRequested)
             return;
