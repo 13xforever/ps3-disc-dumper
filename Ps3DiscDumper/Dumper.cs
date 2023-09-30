@@ -208,8 +208,12 @@ public class Dumper: IDisposable
             Title = string.Join(" ", titleParts);
         ProductCode = sfo.Items.FirstOrDefault(i => i.Key == "TITLE_ID")?.StringValue?.Trim(' ', '\0');
         DiscVersion = sfo.Items.FirstOrDefault(i => i.Key == "VERSION")?.StringValue?.Trim();
+        var appVer = sfo.Items.FirstOrDefault(i => i.Key == "APP_VER")?.StringValue.Trim();
 
         Log.Info($"Game title: {Title}");
+        Log.Info($"Game product code: {ProductCode}");
+        Log.Info($"Game version: {DiscVersion}");
+        Log.Info($"App version: {appVer}");
     }
 
     public void DetectDisc(string inDir = "", Func<Dumper, string> outputDirFormatter = null)
