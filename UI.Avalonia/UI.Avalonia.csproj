@@ -14,16 +14,16 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' != 'Linux' ">
-        <TargetFrameworks>net7.0-windows;net7.0</TargetFrameworks>
+        <TargetFrameworks>net8.0-windows;net8.0</TargetFrameworks>
     </PropertyGroup>
     
     <PropertyGroup Condition=" '$(Configuration)' == 'Linux' ">
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
         <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
     </PropertyGroup>
     
-    <PropertyGroup Condition=" '$(TargetFramework)' == 'net7.0-windows' ">
+    <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0-windows' ">
         <DefineConstants>WINDOWS</DefineConstants>
     </PropertyGroup>
 
@@ -47,10 +47,10 @@
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.5" />
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.5" />
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
-        <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+        <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     </ItemGroup>
-    <ItemGroup Condition="'$(TargetFramework)'=='net7.0-windows'">
+    <ItemGroup Condition="'$(TargetFramework)'=='net8.0-windows'">
         <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.22621.2" />
         <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
     </ItemGroup>

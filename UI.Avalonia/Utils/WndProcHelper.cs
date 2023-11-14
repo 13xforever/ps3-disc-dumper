@@ -26,9 +26,9 @@ public static unsafe class WndProcHelper
             //var platformHandle = windowImpl.GetType().GetProperty("Handle", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(windowImpl);
             var windowHandle = (IntPtr)windowImpl.GetType().GetProperty("Hwnd", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(windowImpl)!;
             var hwnd = (HWND)windowHandle;
-            wrappedWndProc = (delegate* unmanaged<HWND, uint, WPARAM, LPARAM, LRESULT>)Windows.GetWindowLongPtr(hwnd, GWLP.GWLP_WNDPROC);
+            wrappedWndProc = (delegate* unmanaged<HWND, uint, WPARAM, LPARAM, LRESULT>)TerraFX.Interop.Windows.Windows.GetWindowLongPtr(hwnd, GWLP.GWLP_WNDPROC);
             delegate* unmanaged<HWND, uint, WPARAM, LPARAM, LRESULT> wrapperWinProc = &WndProcHook;
-            Windows.SetWindowLongPtr(hwnd, GWLP.GWLP_WNDPROC, (nint)wrapperWinProc);
+            TerraFX.Interop.Windows.Windows.SetWindowLongPtr(hwnd, GWLP.GWLP_WNDPROC, (nint)wrapperWinProc);
             return true;
         }
         catch (Exception e)
