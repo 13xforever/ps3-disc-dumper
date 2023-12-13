@@ -74,7 +74,7 @@ public partial class ViewModelBase: ObservableObject
     {
         ProcessStartInfo psi = OperatingSystem.IsWindows()
             ? new() { FileName = url, UseShellExecute = true, }
-            : new() { FileName = "open", Arguments = url, };
+            : new() { FileName = "xdg-open", Arguments = url, };
         psi.CreateNoWindow = true;
         try
         {

@@ -155,7 +155,7 @@ public partial class SettingsViewModel: ViewModelBase
         folder = $"\"{folder}\"";
         ProcessStartInfo psi = OperatingSystem.IsWindows()
             ? new() { Verb = "open", FileName = folder, UseShellExecute = true, }
-            : new () { FileName = "open", Arguments = folder, };
+            : new () { FileName = "xdg-open", Arguments = folder, };
         try
         {
             Process.Start(psi);
