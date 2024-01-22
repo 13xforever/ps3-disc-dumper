@@ -51,7 +51,7 @@
         <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     </ItemGroup>
     <ItemGroup Condition="'$(TargetFramework)'=='net8.0-windows'">
-        <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.22621.5" />
+        <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.22621.6" />
         <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
     </ItemGroup>
 
