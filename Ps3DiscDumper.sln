@@ -3,19 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28407.52
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UI.Console", "UI.Console\UI.Console.csproj", "{F58970E2-7861-4635-BBAA-2E081D1B68F0}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IrdLibraryClient", "IrdLibraryClient\IrdLibraryClient.csproj", "{EC25C188-51BB-4665-B79B-2AE17CABB01E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ps3DiscDumper", "Ps3DiscDumper\Ps3DiscDumper.csproj", "{C8C058F0-01DA-41B9-BBAA-6787C5C755F1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UI.WinForms.Msil", "UI.WinForms.Msil\UI.WinForms.Msil.csproj", "{874BD35B-DFDF-40BE-BB6F-EC36059E40EB}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deploy", "Deploy", "{BA0C9255-6CC7-4173-B09A-53FB8D69C289}"
 	ProjectSection(SolutionItems) = preProject
-		azure-pipelines.yml = azure-pipelines.yml
 		publish.ps1 = publish.ps1
 		README.md = README.md
 	EndProjectSection
@@ -29,12 +24,6 @@ Global
 		Linux|Any CPU = Linux|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F58970E2-7861-4635-BBAA-2E081D1B68F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F58970E2-7861-4635-BBAA-2E081D1B68F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F58970E2-7861-4635-BBAA-2E081D1B68F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F58970E2-7861-4635-BBAA-2E081D1B68F0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F58970E2-7861-4635-BBAA-2E081D1B68F0}.Linux|Any CPU.ActiveCfg = Debug|Any CPU
-		{F58970E2-7861-4635-BBAA-2E081D1B68F0}.Linux|Any CPU.Build.0 = Debug|Any CPU
 		{EC25C188-51BB-4665-B79B-2AE17CABB01E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EC25C188-51BB-4665-B79B-2AE17CABB01E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC25C188-51BB-4665-B79B-2AE17CABB01E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -53,11 +42,6 @@ Global
 		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.Linux|Any CPU.ActiveCfg = Debug|Any CPU
 		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.Linux|Any CPU.Build.0 = Debug|Any CPU
-		{874BD35B-DFDF-40BE-BB6F-EC36059E40EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{874BD35B-DFDF-40BE-BB6F-EC36059E40EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{874BD35B-DFDF-40BE-BB6F-EC36059E40EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{874BD35B-DFDF-40BE-BB6F-EC36059E40EB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{874BD35B-DFDF-40BE-BB6F-EC36059E40EB}.Linux|Any CPU.ActiveCfg = Debug|Any CPU
 		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.Release|Any CPU.ActiveCfg = Release|Any CPU
