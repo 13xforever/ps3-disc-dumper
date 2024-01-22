@@ -36,8 +36,8 @@ public static class DiscInfoConverter
             csList.Add(irdFileInfo.Md5Checksum.ToHexString());
 #if DEBUG
             Log.Debug($"{irdFileInfo.Offset,8} (0x{irdFileInfo.Offset:x8}): {irdFileInfo.Md5Checksum.ToHexString()}");
-        }
 #endif        
+        }
         return new()
         {
             ProductCode = ird.ProductCode,
