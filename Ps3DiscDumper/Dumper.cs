@@ -36,7 +36,7 @@ public class Dumper: IDisposable
         RegexOptions.Multiline | RegexOptions.ExplicitCapture);
     private static readonly HashSet<char> InvalidChars = new(Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()));
     private static readonly char[] MultilineSplit = {'\r', '\n'};
-    private long currentSector;
+    private long currentSector, fileSector;
     private static readonly IDiscKeyProvider[] DiscKeyProviders = {new IrdProvider(), new RedumpProvider(),};
     private static readonly Dictionary<string, HashSet<DiscKeyInfo>> AllKnownDiscKeys = new();
     private readonly HashSet<string> TestedDiscKeys = new();
@@ -86,7 +86,10 @@ public class Dumper: IDisposable
     public int TotalFileCount { get; private set; }
     public int CurrentFileNumber { get; private set; }
     public long TotalSectors { get; private set; }
+    public long TotalFileSectors { get; private set; }
+    public long ProcessedSectors { get; private set; }
     public long TotalFileSize { get; private set; }
+    public long TotalDiscSize { get; private set; }
     public long SectorSize { get; private set; }
     private List<string> DiscFilenames { get; set; }
     public List<(string filename, string error)> BrokenFiles { get; } = new();
@@ -108,6 +111,17 @@ public class Dumper: IDisposable
             if (tmp == null)
                 return currentSector;
             return currentSector = tmp.Value;
+        }
+    }
+
+    public long CurrentFileSector
+    {
+        get
+        {
+            var tmp = Decrypter?.FileSector;
+            if (tmp == null)
+                return fileSector;
+            return fileSector = tmp.Value;
         }
     }
 
@@ -240,6 +254,7 @@ public class Dumper: IDisposable
 
                     InputDevicePath = drive.Name;
                     Drive = drive.Name[0];
+                    TotalDiscSize = drive.TotalSize;
                     break;
                 }
             }
@@ -289,7 +304,7 @@ public class Dumper: IDisposable
         foreach (var f in files)
         {
             try { totalFilesize += new FileInfo(f).Length; } catch { }
-            DiscFilenames.Add(f.Substring(rootLength));
+            DiscFilenames.Add(f[rootLength..]);
         }
         TotalFileSize = totalFilesize;
         TotalFileCount = DiscFilenames.Count;
@@ -419,9 +434,11 @@ public class Dumper: IDisposable
                     var recordInfo = new FileRecordInfo(fileInfo.CreationTimeUtc, fileInfo.LastWriteTimeUtc);
                     var parent = fileInfo.Parent;
                     var parentInfo = new DirRecord(parent.FullName.TrimStart('\\'), new(parent.CreationTimeUtc, parent.LastWriteTimeUtc));
-                    detectionRecord = new(path, clusterRange.Min(r => r.Offset), discReader.GetFileLength(path), recordInfo, parentInfo);
+                    var startSector = clusterRange.Min(r => r.Offset);
+                    var lengthInSectors = clusterRange.Sum(r => r.Count);
+                    detectionRecord = new(path, startSector, lengthInSectors, discReader.GetFileLength(path), recordInfo, parentInfo);
                     expectedBytes = Detectors[path];
-                    if (detectionRecord.Length == 0)
+                    if (detectionRecord.SizeInBytes == 0)
                         continue;
                         
                     Log.Debug($"Using {path} for disc key detection");
@@ -513,7 +530,8 @@ public class Dumper: IDisposable
             if (drive != null)
             {
                 var spaceAvailable = drive.AvailableFreeSpace;
-                TotalFileSize = filesystemStructure.Sum(f => f.Length);
+                TotalFileSize = filesystemStructure.Sum(f => f.SizeInBytes);
+                TotalFileSectors = filesystemStructure.Sum(f => f.LengthInSectors);
                 var diff = TotalFileSize + 100 * 1024 - spaceAvailable;
                 if (diff > 0)
                     Log.Warn($"Target drive might require {diff.AsStorageUnit()} of additional free space");
@@ -523,7 +541,7 @@ public class Dumper: IDisposable
         foreach (var dir in emptyDirStructure)
             Log.Trace($"Empty dir: {dir}");
         foreach (var file in filesystemStructure)
-            Log.Trace($"0x{file.StartSector:x8}: {file.TargetFileName} ({file.Length}, {file.FileInfo.CreationTimeUtc:u})");
+            Log.Trace($"0x{file.StartSector:x8}: {file.TargetFileName} ({file.SizeInBytes}, {file.FileInfo.CreationTimeUtc:u})");
         var outputPathBase = Path.Combine(output, OutputDir);
         Log.Debug($"Output path: {outputPathBase}");
         if (!Directory.Exists(outputPathBase))
@@ -531,6 +549,7 @@ public class Dumper: IDisposable
 
         TotalFileCount = filesystemStructure.Count;
         TotalSectors = discReader.TotalClusters;
+        ProcessedSectors = 0;
         Log.Debug("Using decryption key: " + allMatchingKeys.First().DecryptedKeyId);
         var decryptionKey = allMatchingKeys.First().DecryptedKey;
         var sectorSize = (int)discReader.ClusterSize;
@@ -568,7 +587,7 @@ public class Dumper: IDisposable
                 if (Cts.IsCancellationRequested)
                     return;
 
-                Log.Info($"Reading {file.TargetFileName} ({file.Length.AsStorageUnit()})");
+                Log.Info($"Reading {file.TargetFileName} ({file.SizeInBytes.AsStorageUnit()})");
                 CurrentFileNumber++;
                 var convertedFilename = Path.DirectorySeparatorChar == '\\' ? file.TargetFileName : file.TargetFileName.Replace('\\', Path.DirectorySeparatorChar);
                 var inputFilename = Path.Combine(InputDevicePath, convertedFilename);
@@ -633,7 +652,6 @@ public class Dumper: IDisposable
                             }
                             Log.Warn(msg + ", retrying");
                         }
-
                         lastHash = resultMd5;
                     }
                     catch (Exception e)
@@ -660,6 +678,7 @@ public class Dumper: IDisposable
                 BrokenFiles.Add((file.TargetFileName, "Unexpected error: " + ex.Message));
                 ValidationStatus = false;
             }
+            ProcessedSectors += file.LengthInSectors;
         }
 
         Log.Info("Fixing directory modification time stamps...");
@@ -796,11 +815,11 @@ public class Dumper: IDisposable
         }
     }
 
-    private static bool IsMatch(Dictionary<string, string> hashes, List<Dictionary<string, string>> expectedHashes)
+    private static bool IsMatch(Dictionary<string, string> hashes, List<Dictionary<string, List<string>>> expectedHashes)
     {
         foreach (var eh in expectedHashes)
         foreach (var h in hashes)
-            if (eh.TryGetValue(h.Key, out var expectedHash) && expectedHash == h.Value)
+            if (eh.TryGetValue(h.Key, out var expectedHash) && expectedHash.Any(e => e == h.Value))
                 return true;
         return false;
     }

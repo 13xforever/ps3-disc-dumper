@@ -37,6 +37,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private string productCode = "";
     [ObservableProperty] private string gameTitle = "";
     [ObservableProperty] private string discSizeInfo = "";
+    [ObservableProperty] private string discSizeDiffInfoLink = "";
     [ObservableProperty] private string discKeyName = "";
     [ObservableProperty] private int progress;
     [ObservableProperty] private int progressMax = 10_000;
@@ -73,6 +74,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         ProductCode = "";
         GameTitle = "";
         DiscSizeInfo = "";
+        DiscSizeDiffInfoLink = "";
         DiscKeyName = "";
         Progress = 0;
         ProgressInfo = "";
@@ -132,6 +134,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         ProductCode = dumper.ProductCode;
         GameTitle = dumper.Title;
         DiscSizeInfo = $"{dumper.TotalFileSize.AsStorageUnit()} ({dumper.TotalFileCount} files)";
+        if (Math.Abs(dumper.TotalDiscSize - dumper.TotalFileSize) > 100 * 1024 * 1024)
+            DiscSizeDiffInfoLink = SettingsViewModel.WikiUrlBase + "Dump-size-is-significantly-different-from-disc-size";
 
         StepTitle = "Looking for a disc key";
         StepSubtitle = "Checking IRD and Redump data sets…";
@@ -204,6 +208,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         LastOperationSuccess = true;
         LastOperationWarning = false;
         LastOperationNotification = false;
+        LearnMoreLink = "";
         DumpingInProgress = true;
         CanEditSettings = false;
         EnableTaskbarProgress();
@@ -220,7 +225,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                     {
                         if (dumper.TotalSectors > 0 && !dumper.Cts.IsCancellationRequested)
                         {
-                            Progress = (int)(dumper.CurrentSector * 10000L / dumper.TotalSectors);
+                            //Progress = (int)(dumper.CurrentSector * 10000L / dumper.TotalSectors);
+                            //ProgressInfo = $"Sector data {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
+                            Progress = (int)((dumper.ProcessedSectors + dumper.CurrentFileSector) * 10000L / dumper.TotalSectors);
                             ProgressInfo = $"Sector data {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
                         }
                         Task.Delay(200, combinedToken.Token).GetAwaiter().GetResult();
@@ -232,7 +239,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             });
             monitor.Start();
             await dumper.DumpAsync(settings.OutputDir).WaitAsync(dumper.Cts.Token);
-            threadCts.Cancel();
+            await threadCts.CancelAsync().ConfigureAwait(false);
             monitor.Join(100);
         }
         catch (OperationCanceledException e)

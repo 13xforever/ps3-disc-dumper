@@ -75,7 +75,14 @@
 		        </StackPanel>
 		        <StackPanel Grid.Column="1" Margin="0 2 0 0">
 			        <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding ProductCode}"/>
-			        <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding DiscSizeInfo}"/>
+			        <StackPanel Orientation="Horizontal">
+				        <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding DiscSizeInfo}"/>
+				        <Button Classes="Link" Margin="8 0 0 0"
+				                Command="{Binding OpenUrlCommand}" CommandParameter="{Binding DiscSizeDiffInfoLink}"
+				                IsVisible="{Binding DiscSizeDiffInfoLink, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+					        <TextBlock Classes="CaptionTextBlockStyle" LineHeight="20">Learn more</TextBlock>
+				        </Button>
+			        </StackPanel>
 			        <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20"
 			                   ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
 			                   Text="{Binding DiscKeyName}"/>

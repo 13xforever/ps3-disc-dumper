@@ -6,5 +6,5 @@ public class FileInfo
 {
     public long Offset;
     public long Size;
-    public Dictionary<string, string> Hashes;
+    public Dictionary<string, List<string>> Hashes;
 }

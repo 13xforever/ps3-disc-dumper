@@ -99,6 +99,7 @@ public class Decrypter : Stream, IDisposable
         tmpSector = new byte[sectorSize];
         this.unprotectedSectorRanges = unprotectedSectorRanges;
         SectorPosition = startSector;
+        FileSector = 0;
     }
 
     public override int Read(byte[] buffer, int offset, int count)
@@ -119,7 +120,10 @@ public class Decrypter : Stream, IDisposable
             resultCount += len;
             Position += len;
             if (Position % sectorSize == 0)
+            {
                 SectorPosition++;
+                FileSector++;
+            }
         }
         if (Position == inputStream.Length)
             return resultCount;
@@ -159,6 +163,7 @@ public class Decrypter : Stream, IDisposable
                 resultCount += readCount;
                 Position += readCount;
                 SectorPosition++;
+                FileSector++;
             }
             else // partial sector read
             {
@@ -210,6 +215,7 @@ public class Decrypter : Stream, IDisposable
     public override long Length => inputStream.Length;
     public override long Position { get; set; }
     public long SectorPosition { get; private set; }
+    public long FileSector { get; private set; }
     public bool WasEncrypted { get; private set; }
     public bool WasUnprotected { get; private set; }
     public bool LastBlockCorrupted { get; private set; }

@@ -57,12 +57,13 @@ public static class IsoHeaderParser
             if (clusterRange.Length != 1)
                 Log.Warn($"{targetFilename} is split in {clusterRange.Length} ranges");
             var startSector = clusterRange.Min(r => r.Offset);
+            var lengthInSectors = clusterRange.Sum(r => r.Count);
             var length = reader.GetFileLength(filename);
             var fileInfo = reader.GetFileSystemInfo(filename);
             var recordInfo = new FileRecordInfo(fileInfo.CreationTimeUtc, fileInfo.LastWriteTimeUtc);
             var parent = fileInfo.Parent;
             var parentInfo = new DirRecord(parent.FullName.TrimStart('\\').Replace('\\', Path.DirectorySeparatorChar), new(parent.CreationTimeUtc, parent.LastWriteTimeUtc));
-            fileList.Add(new(targetFilename, startSector, length, recordInfo, parentInfo));
+            fileList.Add(new(targetFilename, startSector, lengthInSectors, length, recordInfo, parentInfo));
         }
         fileList = fileList.OrderBy(r => r.StartSector).ToList();
             
@@ -93,7 +94,7 @@ public static class IsoHeaderParser
     }
 }
 
-public record FileRecord(string TargetFileName, long StartSector, long Length, FileRecordInfo FileInfo, DirRecord Parent);
+public record FileRecord(string TargetFileName, long StartSector, long LengthInSectors, long SizeInBytes, FileRecordInfo FileInfo, DirRecord Parent);
 
 public record FileRecordInfo(DateTime CreationTimeUtc, DateTime LastWriteTimeUtc);
 
