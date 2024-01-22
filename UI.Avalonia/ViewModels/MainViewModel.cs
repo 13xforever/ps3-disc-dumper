@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Threading;
@@ -145,15 +146,18 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             FoundDisc = false;
             StepTitle = "Disc check error";
             LastOperationSuccess = false;
-            if (e.Message is "Direct disk access to the drive was denied")
+            (StepSubtitle, LearnMoreLink) = e switch
             {
-                StepSubtitle = e.Message + ".";
-                LearnMoreLink = SettingsViewModel.WikiUrlBase + "Direct-disk-access-to-the-drive-was-denied";
-            }
-            else
-            {
-                StepSubtitle = e.Message;
-            }
+                AccessViolationException {Message: "Direct disk access to the drive was denied"} => (
+                    e.Message + ".",
+                    SettingsViewModel.WikiUrlBase + "Direct-disk-access-to-the-drive-was-denied"
+                ),
+                KeyNotFoundException {Message: "No valid disc decryption key was found"} => (
+                    e.Message + ".",
+                    SettingsViewModel.WikiUrlBase + "No-valid-disc-decryption-key-was-found"
+                ),
+                _ => (e.Message, ""),
+            };
             return;
         }
         
