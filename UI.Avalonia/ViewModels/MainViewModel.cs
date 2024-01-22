@@ -146,18 +146,15 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             FoundDisc = false;
             StepTitle = "Disc check error";
             LastOperationSuccess = false;
-            (StepSubtitle, LearnMoreLink) = e switch
+            StepSubtitle = e.Message;
+            LearnMoreLink = e switch
             {
-                AccessViolationException {Message: "Direct disk access to the drive was denied"} => (
-                    e.Message + ".",
-                    SettingsViewModel.WikiUrlBase + "Direct-disk-access-to-the-drive-was-denied"
-                ),
-                KeyNotFoundException {Message: "No valid disc decryption key was found"} => (
-                    e.Message + ".",
-                    SettingsViewModel.WikiUrlBase + "No-valid-disc-decryption-key-was-found"
-                ),
-                _ => (e.Message, ""),
-            };
+                AccessViolationException {Message: "Direct disk access to the drive was denied"}
+                    => "Direct-disk-access-to-the-drive-was-denied",
+                KeyNotFoundException {Message: "No valid disc decryption key was found"}
+                    => "No-valid-disc-decryption-key-was-found",
+                _ => "",
+            } is {Length: >0} lnk ? SettingsViewModel.WikiUrlBase + lnk : "";
             return;
         }
         
