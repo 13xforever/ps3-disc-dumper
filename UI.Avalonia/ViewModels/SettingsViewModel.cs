@@ -59,6 +59,7 @@ public partial class SettingsViewModel: ViewModelBase
     public static string ProjectUrl => "https://github.com/13xforever/ps3-disc-dumper";
     public static string SubmitIssueUrl => $"{ProjectUrl}/issues/new/choose";
     public static string WikiUrlBase => $"{ProjectUrl}/wiki/";
+    public static string HybridDiscWikiLink => $"{WikiUrlBase}Hybrid-discs";
 
     private static string FormatPathPreview(string path)
     {

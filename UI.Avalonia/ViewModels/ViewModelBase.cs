@@ -30,6 +30,7 @@ public partial class ViewModelBase: ObservableObject
     [ObservableProperty] private static bool enableTransparency = SettingsProvider.Settings.EnableTransparency;
     [ObservableProperty] private static bool preferSystemAccent = SettingsProvider.Settings.PreferSystemAccent;
     [ObservableProperty] private static bool stayOnTop = SettingsProvider.Settings.StayOnTop;
+    [ObservableProperty] private static bool copyBdmv = SettingsProvider.Settings.CopyBdmv;
     
     [ObservableProperty] private static string dimTextColor = "#00ff00"; //ThemeConsts.LightThemeDimGray;
     [ObservableProperty] private static IPalette colorPalette = ThemeConsts.Debug;
@@ -52,6 +53,7 @@ public partial class ViewModelBase: ObservableObject
     public string HomeSymbol => UseSegoeIcons ? "\ue80f" : "\uf015";
     public string FeedbackSymbol => UseSegoeIcons ? "\ue939" : "\uf086";
     public string TransparencySymbol => UseSegoeIcons ? "\uef20" : "\uf853"; //e8b3
+    public string ItemSelectionSymbol => UseSegoeIcons ? "\ue762" : "\uf0ae";
     public string PinSymbol => UseSegoeIcons ? "\ue718" : "\uf08d";
     public string ValidationErrorSymbol => UseSegoeIcons ? "\ue783" : "\uf06a";
     public string ValidationWarningSymbol => UseSegoeIcons ? "\ue7ba" : "\uf071";
@@ -136,6 +138,9 @@ public partial class ViewModelBase: ObservableObject
 
     partial void OnStayOnTopChanged(bool value)
         => SettingsProvider.Settings = SettingsProvider.Settings with { StayOnTop = value };
+
+    partial void OnCopyBdmvChanged(bool value)
+        => SettingsProvider.Settings = SettingsProvider.Settings with { CopyBdmv = value }; 
 
     private static Color ChangeColorLuminosity(Color color, double luminosityFactor)
     {

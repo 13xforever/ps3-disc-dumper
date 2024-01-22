@@ -182,7 +182,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         {
             StepTitle = "Ready to dump a hybrid disc";
             StepSubtitle = "All files will be copied, but only PS3 game files will be decrypted";
-            LearnMoreLink = SettingsViewModel.WikiUrlBase + "Hybrid-discs";
+            LearnMoreLink = SettingsViewModel.HybridDiscWikiLink;
             LastOperationNotification = true;
         }
         else

@@ -138,6 +138,32 @@
             </Expander.Content>
         </Expander>
 
+        <!-- Processing -->
+        <TextBlock Classes="BodyStrongTextBlockStyle" Margin="0 32 0 0">Processing</TextBlock>
+        <!-- Skip video -->
+        <Border Classes="Card" Margin="0 8 0 0">
+            <Grid ColumnDefinitions="36,*,120">
+                <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
+                           VerticalAlignment="Center" HorizontalAlignment="Left"
+                           Text="{Binding ItemSelectionSymbol}"/>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Classes="BodyTextBlockStyle">Copy blu-ray video data</TextBlock>
+                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle">
+                        Video data will not be decrypted.
+                        <Button Classes="Link" Command="{Binding OpenUrlCommand}" CommandParameter="{Binding HybridDiscWikiLink}">
+                            Learn more
+                        </Button>
+                    </TextBlock>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0 0 -12 0"
+                            VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <TextBlock VerticalAlignment="Center" Margin="0 0 12 0"
+                               Text="{Binding CopyBdmv, Converter={StaticResource OnOffConverter}}"/>
+                    <ToggleSwitch OnContent="" OffContent="" IsChecked="{Binding CopyBdmv}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
         <!-- personalization -->
         <TextBlock Classes="BodyStrongTextBlockStyle" Margin="0 32 0 0">Personalization</TextBlock>
         <!-- stay on top -->

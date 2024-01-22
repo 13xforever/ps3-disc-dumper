@@ -21,6 +21,7 @@ public struct Settings
     public bool EnableTransparency { get; set; } = true;
     public bool PreferSystemAccent { get; set; } = !OperatingSystem.IsWindows();
     public bool StayOnTop { get; set; } = false;
+    public bool CopyBdmv { get; set; } = false;
 
     private static StringComparison Comparison => OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
     private static StringComparer Comparer => OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
@@ -35,7 +36,8 @@ public struct Settings
            && ShowDetails == other.ShowDetails
            && EnableTransparency == other.EnableTransparency
            && PreferSystemAccent == other.PreferSystemAccent
-           && StayOnTop == other.StayOnTop;
+           && StayOnTop == other.StayOnTop
+           && CopyBdmv == other.CopyBdmv;
 
     public override int GetHashCode()
     {
@@ -47,6 +49,7 @@ public struct Settings
         hashCode.Add(EnableTransparency);
         hashCode.Add(PreferSystemAccent);
         hashCode.Add(StayOnTop);
+        hashCode.Add(CopyBdmv);
         return hashCode.ToHashCode();
     }
 }
