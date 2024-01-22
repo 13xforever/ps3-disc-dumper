@@ -153,6 +153,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                     => "Direct-disk-access-to-the-drive-was-denied",
                 KeyNotFoundException {Message: "No valid disc decryption key was found"}
                     => "No-valid-disc-decryption-key-was-found",
+                IOException when e.Message.Contains("cyclic redundancy check")
+                    => "Data-Error-(cyclic-redundancy-check)",
                 _ => "",
             } is {Length: >0} lnk ? SettingsViewModel.WikiUrlBase + lnk : "";
             return;
