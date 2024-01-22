@@ -19,7 +19,7 @@ public struct Settings
     public string DumpNameTemplate { get; set; } = DefaultPattern;
     public bool ShowDetails { get; set; } = true;
     public bool EnableTransparency { get; set; } = true;
-    public bool PreferSystemAccent { get; set; } = false;
+    public bool PreferSystemAccent { get; set; } = !OperatingSystem.IsWindows();
     public bool StayOnTop { get; set; } = false;
 
     private static StringComparison Comparison => OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
