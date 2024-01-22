@@ -181,7 +181,10 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         else if (Directory.Exists(Path.Combine(dumper.InputDevicePath, "BDMV")))
         {
             StepTitle = "Ready to dump a hybrid disc";
-            StepSubtitle = "All files will be copied, but only PS3 game files will be decrypted";
+            if (CopyBdmv)
+                StepSubtitle = "All files will be copied, but only PS3 game files will be decrypted";
+            else
+                StepSubtitle = "Only PS3 game files will be copied";
             LearnMoreLink = SettingsViewModel.HybridDiscWikiLink;
             LastOperationNotification = true;
         }

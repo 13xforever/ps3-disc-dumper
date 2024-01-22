@@ -298,6 +298,13 @@ public class Dumper: IDisposable
 
         // todo: maybe use discutils instead to read TOC as one block
         var files = IOEx.GetFilepaths(InputDevicePath, "*", SearchOption.AllDirectories);
+        if (!SettingsProvider.Settings.CopyBdmv)
+        {
+            var prefixList = Settings.BdmvFolders
+                .Select(f => Path.Combine(InputDevicePath, f) + Path.DirectorySeparatorChar)
+                .ToArray();
+            files = files.Where(f => !prefixList.Any(f.StartsWith));
+        }
         DiscFilenames = new();
         var totalFilesize = 0L;
         var rootLength = InputDevicePath.Length;
@@ -518,7 +525,21 @@ public class Dumper: IDisposable
                 dumpPath = parent;
         }
         if (filesystemStructure is null)
+        {
             (filesystemStructure, emptyDirStructure) = GetFilesystemStructure();
+            var prefixList = Settings.BdmvFolders.Select(f => f + Path.DirectorySeparatorChar).ToArray();
+            if (!SettingsProvider.Settings.CopyBdmv)
+            {
+                filesystemStructure = filesystemStructure
+                    .Where(r => !Settings.BdmvFolders.Any(f => r.TargetFileName == f) &&
+                                !prefixList.Any(p => r.TargetFileName.StartsWith(p)))
+                    .ToList();
+                emptyDirStructure = emptyDirStructure
+                    .Where(r => !Settings.BdmvFolders.Any(f => r.TargetDirName == f) &&
+                                !prefixList.Any(p => r.TargetDirName.StartsWith(p)))
+                    .ToList();
+            }
+        }
         var validators = GetValidationInfo();
         if (!string.IsNullOrEmpty(dumpPath))
         {

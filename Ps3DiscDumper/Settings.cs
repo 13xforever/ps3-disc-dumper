@@ -11,8 +11,8 @@ public struct Settings
 {
     public Settings() { }
 
-    [JsonIgnore]
-    public const string DefaultPattern = $"%{Patterns.Title}% [%{Patterns.ProductCode}%]";
+    [JsonIgnore] public const string DefaultPattern = $"%{Patterns.Title}% [%{Patterns.ProductCode}%]";
+    [JsonIgnore] public static readonly string[] BdmvFolders = ["BDMV", "AACS", "CERTIFICATE"]; 
 
     public string OutputDir { get; set; } = ".";
     public string IrdDir { get; set; } = Path.Combine(Environment.GetFolderPath(SpecialFolder.ApplicationData) ,"ps3-iso-dumper", "ird");
