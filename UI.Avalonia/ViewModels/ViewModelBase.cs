@@ -31,6 +31,7 @@ public partial class ViewModelBase: ObservableObject
     [ObservableProperty] private static bool preferSystemAccent = SettingsProvider.Settings.PreferSystemAccent;
     [ObservableProperty] private static bool stayOnTop = SettingsProvider.Settings.StayOnTop;
     [ObservableProperty] private static bool copyBdmv = SettingsProvider.Settings.CopyBdmv;
+    [ObservableProperty] private static bool copyPs3Update = SettingsProvider.Settings.CopyPs3Update;
     
     [ObservableProperty] private static string dimTextColor = "#00ff00"; //ThemeConsts.LightThemeDimGray;
     [ObservableProperty] private static IPalette colorPalette = ThemeConsts.Debug;
@@ -141,6 +142,9 @@ public partial class ViewModelBase: ObservableObject
 
     partial void OnCopyBdmvChanged(bool value)
         => SettingsProvider.Settings = SettingsProvider.Settings with { CopyBdmv = value }; 
+
+    partial void OnCopyPs3UpdateChanged(bool value)
+        => SettingsProvider.Settings = SettingsProvider.Settings with { CopyPs3Update = value }; 
 
     private static Color ChangeColorLuminosity(Color color, double luminosityFactor)
     {
