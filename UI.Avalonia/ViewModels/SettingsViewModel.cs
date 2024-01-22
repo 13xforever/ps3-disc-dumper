@@ -58,6 +58,7 @@ public partial class SettingsViewModel: ViewModelBase
     public string CurrentYear => DateTime.Now.Year.ToString();
     public static string ProjectUrl => "https://github.com/13xforever/ps3-disc-dumper";
     public static string SubmitIssueUrl => $"{ProjectUrl}/issues/new/choose";
+    public static string WikiUrlBase => $"{ProjectUrl}/wiki/";
 
     private static string FormatPathPreview(string path)
     {

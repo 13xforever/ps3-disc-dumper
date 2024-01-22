@@ -25,6 +25,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private bool lastOperationSuccess = true;
     [ObservableProperty] private bool lastOperationWarning = false;
     [ObservableProperty] private bool lastOperationNotification = false;
+    [ObservableProperty] private string learnMoreLink = "";
     [ObservableProperty] private string startButtonCaption = "Start";
 
     [ObservableProperty] private bool foundDisc;
@@ -62,6 +63,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         LastOperationSuccess = true;
         LastOperationWarning = false;
         LastOperationNotification = false;
+        LearnMoreLink = "";
         StartButtonCaption = "Start";
         FoundDisc = false;
         DumperIsReady = false;
@@ -139,11 +141,19 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         catch (Exception e)
         {
             Log.Error(e, "Failed to find a matching key");
-            dumper.Cts.Cancel();
+            await dumper.Cts.CancelAsync().ConfigureAwait(false);
             FoundDisc = false;
             StepTitle = "Disc check error";
-            StepSubtitle = e.Message;
             LastOperationSuccess = false;
+            if (e.Message is "Direct disk access to the drive was denied")
+            {
+                StepSubtitle = e.Message + ".";
+                LearnMoreLink = SettingsViewModel.WikiUrlBase + "Direct-disk-access-to-the-drive-was-denied";
+            }
+            else
+            {
+                StepSubtitle = e.Message;
+            }
             return;
         }
         

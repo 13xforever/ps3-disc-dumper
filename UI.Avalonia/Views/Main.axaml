@@ -42,6 +42,11 @@
 			        </MultiBinding>
 		        </TextBlock.IsVisible>
 	        </TextBlock>
+	        <Button Classes="Link" Margin="8 0 0 0"
+	                Command="{Binding OpenUrlCommand}" CommandParameter="{Binding LearnMoreLink}"
+	                IsVisible="{Binding LearnMoreLink, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+		        Learn more
+	        </Button>
         </StackPanel>
         
         <!-- middle -->
