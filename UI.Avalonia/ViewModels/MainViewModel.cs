@@ -230,7 +230,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                         {
                             //Progress = (int)(dumper.CurrentSector * 10000L / dumper.TotalSectors);
                             //ProgressInfo = $"Sector data {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
-                            Progress = (int)((dumper.ProcessedSectors + dumper.CurrentFileSector) * 10000L / dumper.TotalSectors);
+                            Progress = (int)((dumper.ProcessedSectors + dumper.CurrentFileSector) * 10000L / dumper.TotalFileSectors);
                             ProgressInfo = $"Sector data {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
                         }
                         Task.Delay(200, combinedToken.Token).GetAwaiter().GetResult();
