@@ -161,7 +161,7 @@
             </Grid>
         </Border>
         <!-- Copy video -->
-        <Border Classes="Card" Margin="0 8 0 0">
+        <Border Classes="Card" Margin="0 3 0 0">
             <Grid ColumnDefinitions="36,*,120">
                 <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
                            VerticalAlignment="Center" HorizontalAlignment="Left"
