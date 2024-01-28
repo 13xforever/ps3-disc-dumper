@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text;
-
-namespace IrdLibraryClient;
+﻿namespace IrdLibraryClient;
 
 public static class NamingStyles
 {

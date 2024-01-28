@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
+﻿using System.Collections.Specialized;
 using System.Net;
-using System.Net.Http;
-using System.Text;
 
 namespace IrdLibraryClient;
 

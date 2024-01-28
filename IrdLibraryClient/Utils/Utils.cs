@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace IrdLibraryClient.Utils;
+﻿namespace IrdLibraryClient.Utils;
 
 public static class Utils
 {

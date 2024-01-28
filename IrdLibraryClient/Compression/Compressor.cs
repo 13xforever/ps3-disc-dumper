@@ -1,7 +1,4 @@
-﻿using System.IO;
-using System.Threading.Tasks;
-
-namespace IrdLibraryClient.Compression;
+﻿namespace IrdLibraryClient.Compression;
 
 public abstract class Compressor : ICompressor
 {

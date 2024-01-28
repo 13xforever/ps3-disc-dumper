@@ -1,7 +1,4 @@
-﻿using System;
-using System.Net.Http;
-
-namespace IrdLibraryClient.Utils;
+﻿namespace IrdLibraryClient.Utils;
 
 public static class ConsoleLogger
 {
