@@ -2,7 +2,7 @@ PS3 Disc Dumper
 ===============
 This is a small utility to make decrypted copies of the PS3 game discs, suitable for use in emulators.
 
-It does require a [compatible blu-ray drive](https://rpcs3.net/quickstart) and existence of a matching [disc key](http://www.psdevwiki.com/ps3/Bluray_disc#IRD_file) to work.
+It does require a [compatible blu-ray drive](https://rpcs3.net/quickstart#dumping_drives) and existence of a matching [disc key](http://www.psdevwiki.com/ps3/Bluray_disc#IRD_file) to work.
 
 Requirements
 ============
@@ -35,7 +35,7 @@ Windows 11
   <img alt="Screenshot running on Windows 11" src="./screenshots/windows11-dark.png">
 </picture>
 
-Fedora 38
+Fedora 39
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./screenshots/fedora-dark.png">
