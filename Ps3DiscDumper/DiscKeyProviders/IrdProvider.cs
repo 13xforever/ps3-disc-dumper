@@ -30,7 +30,7 @@ public class IrdProvider : IDiscKeyProvider
                     {
                         var ird = IrdParser.Parse(await File.ReadAllBytesAsync(irdFile, cancellationToken).ConfigureAwait(false));
                         result.Add(new(ird.Data1, null, irdFile, KeyType.Ird, ird.Crc32.ToString("x8")));
-                        knownFilenames.Add(Path.GetFileName(irdFile));
+                        knownFilenames.Add(Path.GetRelativePath(discKeyCachePath, irdFile).Replace('\\', '/'));
                     }
                     catch (InvalidDataException)
                     {
@@ -71,7 +71,7 @@ public class IrdProvider : IDiscKeyProvider
             }
         }
         if (irdList.Count == 0)
-            Log.Debug("No matching IRD file was found at any source");
+            Log.Debug("No new matching IRD file was found at any source");
         else
         {
             Log.Info($"Found {irdList.Count} new IRD match{(irdList.Count == 1 ? "" : "es")}");
