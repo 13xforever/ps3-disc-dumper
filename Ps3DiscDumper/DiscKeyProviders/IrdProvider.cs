@@ -11,7 +11,7 @@ namespace Ps3DiscDumper.DiscKeyProviders;
 
 public class IrdProvider : IDiscKeyProvider
 {
-    private static readonly IrdClient[] Clients = { new IrdClientFreeFr(), new IrdClientAldos() };
+    private static readonly IIrdClient[] Clients = [new IrdClientFreeFr(), new IrdClientAldos(), new IrdClientFlexby420()];
 
     public async Task<HashSet<DiscKeyInfo>> EnumerateAsync(string discKeyCachePath, string productCode, CancellationToken cancellationToken)
     {
@@ -21,7 +21,7 @@ public class IrdProvider : IDiscKeyProvider
         Log.Trace("Searching local cache for a match...");
         if (Directory.Exists(discKeyCachePath))
         {
-            var matchingIrdFiles = Directory.GetFiles(discKeyCachePath, "*.ird", SearchOption.TopDirectoryOnly);
+            var matchingIrdFiles = Directory.GetFiles(discKeyCachePath, "*.ird", new EnumerationOptions{RecurseSubdirectories = true, MaxRecursionDepth = 2, IgnoreInaccessible = true,});
             foreach (var irdFile in matchingIrdFiles)
             {
                 try
@@ -52,7 +52,7 @@ public class IrdProvider : IDiscKeyProvider
         var searchTasks = new Task<List<(string productCode, string irdFilename)>>[Clients.Length];
         for (var i = 0; i < Clients.Length; i++)
             searchTasks[i] = Clients[i].GetFullListAsync(cancellationToken);
-        var irdList = new List<(IrdClient client, string irdFilename)>();
+        var irdList = new List<(IIrdClient client, string irdFilename)>();
         for (var i = 0; i < Clients.Length; i++)
         {
             var client = Clients[i];

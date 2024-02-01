@@ -27,19 +27,19 @@ namespace Ps3DiscDumper;
 
 public class Dumper: IDisposable
 {
-    public const string Version = "4.1.0";
+    public const string Version = "4.1.1";
 
     static Dumper() => Log.Info("PS3 Disc Dumper v" + Version);
 
     private static readonly Regex VersionParts = new(@"(?<ver>\d+(\.\d+){0,2})[ \-]*(?<pre>.*)", RegexOptions.Singleline | RegexOptions.ExplicitCapture);
     private static readonly Regex ScsiInfoParts = new(@"Host: .+$\s*Vendor: (?<vendor>.+?)\s* Model: (?<model>.+?)\s* Rev: (?<revision>.+)$\s*Type: \s*(?<type>.+?)\s* ANSI  ?SCSI revision: (?<scsi_rev>.+?)\s*$",
         RegexOptions.Multiline | RegexOptions.ExplicitCapture);
-    private static readonly HashSet<char> InvalidChars = new(Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()));
-    private static readonly char[] MultilineSplit = {'\r', '\n'};
+    private static readonly HashSet<char> InvalidChars = [..Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars())];
+    private static readonly char[] MultilineSplit = ['\r', '\n'];
     private long currentSector, fileSector;
-    private static readonly IDiscKeyProvider[] DiscKeyProviders = {new IrdProvider(), new RedumpProvider(),};
+    private static readonly IDiscKeyProvider[] DiscKeyProviders = [new IrdProvider(), new RedumpProvider()];
     private static readonly Dictionary<string, HashSet<DiscKeyInfo>> AllKnownDiscKeys = new();
-    private readonly HashSet<string> TestedDiscKeys = new();
+    private readonly HashSet<string> TestedDiscKeys = [];
     private byte[] discSfbData;
     private static readonly Dictionary<string, ImmutableArray<byte>> Detectors = new()
     {
@@ -50,7 +50,7 @@ public class Dumper: IDisposable
     private ImmutableArray<byte> detectionBytesExpected;
     private byte[] sectorIV;
     private Stream driveStream;
-    private static readonly byte[] Iso9660PrimaryVolumeDescriptorHeader = {0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0x00};
+    private static readonly byte[] Iso9660PrimaryVolumeDescriptorHeader = [0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0x00];
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = new SnakeCasePolicy(),
@@ -92,8 +92,8 @@ public class Dumper: IDisposable
     public long TotalDiscSize { get; private set; }
     public long SectorSize { get; private set; }
     private List<string> DiscFilenames { get; set; }
-    public List<(string filename, string error)> BrokenFiles { get; } = new();
-    public HashSet<DiscKeyInfo> ValidatingDiscKeys { get; } = new();
+    public List<(string filename, string error)> BrokenFiles { get; } = [];
+    public HashSet<DiscKeyInfo> ValidatingDiscKeys { get; } = [];
     public CancellationTokenSource Cts { get; private set; }
     public bool? ValidationStatus { get; private set; }
     public bool IsIvInitialized => sectorIV?.Length == 16;
@@ -305,7 +305,7 @@ public class Dumper: IDisposable
                 .ToArray();
             files = files.Where(f => !prefixList.Any(f.StartsWith));
         }
-        DiscFilenames = new();
+        DiscFilenames = [];
         var totalFilesize = 0L;
         var rootLength = InputDevicePath.Length;
         foreach (var f in files)
@@ -340,7 +340,7 @@ public class Dumper: IDisposable
                         try
                         {
                             if (!AllKnownDiscKeys.TryGetValue(keyInfo.DecryptedKeyId, out var duplicates))
-                                AllKnownDiscKeys[keyInfo.DecryptedKeyId] = duplicates = new();
+                                AllKnownDiscKeys[keyInfo.DecryptedKeyId] = duplicates = [];
                             duplicates.Add(keyInfo);
                         }
                         catch (Exception e)
@@ -363,7 +363,7 @@ public class Dumper: IDisposable
         if (untestedKeys.Count == 0)
             throw new KeyNotFoundException("No valid disc decryption key was found");
 
-        List<string> physicalDrives = new List<string>();
+        List<string> physicalDrives = [];
         Log.Trace("Trying to enumerate physical drives...");
         try
         {

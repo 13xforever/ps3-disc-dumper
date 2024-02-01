@@ -18,7 +18,7 @@ public class ParamSfoEntry
     public string Key { get; set; }
     public byte[] BinaryValue { get; set; }
 
-    private static readonly char[] Whitespace = { '\r', '\n', '\0', '\t', ' ' };
+    private static readonly char[] Whitespace = ['\r', '\n', '\0', '\t', ' '];
 
     public string StringValue
     {

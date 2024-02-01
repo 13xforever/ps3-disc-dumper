@@ -4,22 +4,20 @@ using IrdLibraryClient.IrdFormat;
 
 namespace IrdLibraryClient;
 
-public abstract class IrdClient
+public abstract class IrdClient: IIrdClient
 {
     public abstract Uri BaseUri { get; }
     protected abstract Regex IrdFilename { get; }
-    protected IrdClient() => client = HttpClientFactory.Create(new CompressionMessageHandler());
+    private readonly HttpClient client = HttpClientFactory.Create(new CompressionMessageHandler());
 
-    private readonly HttpClient client;
-
-    private string GetDownloadLink(string irdFilename)
+    protected virtual string GetDownloadLink(string irdFilename)
     {
         var builder = new UriBuilder(BaseUri) { Query = "" };
         builder.Path = Path.Combine(builder.Path, irdFilename);
         return builder.ToString();
     }
 
-    public async Task<List<(string productCode, string irdFilename)>> GetFullListAsync(CancellationToken cancellationToken)
+    public virtual async Task<List<(string productCode, string irdFilename)>> GetFullListAsync(CancellationToken cancellationToken)
     {
         try
         {
@@ -78,8 +76,9 @@ public abstract class IrdClient
                 result = IrdParser.Parse(resultBytes);
                 try
                 {
-                    if (!Directory.Exists(localCachePath))
-                        Directory.CreateDirectory(localCachePath);
+                    var savePath = Path.GetDirectoryName(localCacheFilename)!;
+                    if (!Directory.Exists(savePath))
+                        Directory.CreateDirectory(savePath);
                     await File.WriteAllBytesAsync(localCacheFilename, resultBytes, cancellationToken);
                 }
                 catch (Exception ex)
