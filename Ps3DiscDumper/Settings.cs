@@ -21,7 +21,7 @@ public struct Settings
     public string DumpNameTemplate { get; set; } = DefaultPattern;
     public bool ShowDetails { get; set; } = true;
     public bool EnableTransparency { get; set; } = true;
-    public bool PreferSystemAccent { get; set; } = !OperatingSystem.IsWindows();
+    public bool PreferSystemAccent { get; set; } = OperatingSystem.IsWindows();
     public bool StayOnTop { get; set; } = false;
     public bool CopyBdmv { get; set; } = false;
     public bool CopyPs3Update { get; set; } = false;
