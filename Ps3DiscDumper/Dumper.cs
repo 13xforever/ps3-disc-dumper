@@ -94,14 +94,9 @@ public class Dumper: IDisposable
     private List<string> DiscFilenames { get; set; }
     public List<(string filename, string error)> BrokenFiles { get; } = [];
     public HashSet<DiscKeyInfo> ValidatingDiscKeys { get; } = [];
-    public CancellationTokenSource Cts { get; private set; }
+    public CancellationTokenSource Cts { get; private set; } = new();
     public bool? ValidationStatus { get; private set; }
     public bool IsIvInitialized => sectorIV?.Length == 16;
-
-    public Dumper(CancellationTokenSource cancellationTokenSource)
-    {
-        Cts = cancellationTokenSource;
-    }
 
     public long CurrentSector
     {

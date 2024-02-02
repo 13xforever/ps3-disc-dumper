@@ -105,7 +105,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         StepTitle = "Scanning disc drives";
         StepSubtitle = "Checking the inserted disc…";
         dumper?.Dispose();
-        dumper = new(new());
+        dumper = new();
         try
         {
             dumper.DetectDisc("",
