@@ -169,8 +169,8 @@
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock Classes="BodyTextBlockStyle">Copy blu-ray video data</TextBlock>
                     <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle">
-                        Video data will not be decrypted.
-                        <Button Classes="Link" Command="{Binding OpenUrlCommand}" CommandParameter="{Binding HybridDiscWikiLink}">
+                        Video data will not be decrypted
+                        <Button Classes="Link" Margin="6 0 0 0" Command="{Binding OpenUrlCommand}" CommandParameter="{Binding HybridDiscWikiLink}">
                             Learn more
                         </Button>
                     </TextBlock>
