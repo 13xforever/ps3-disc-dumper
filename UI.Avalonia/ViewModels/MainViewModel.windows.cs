@@ -10,9 +10,16 @@ public partial class MainViewModel
     {
         if (!OperatingSystem.IsWindowsVersionAtLeast(6, 1))
             return;
-        
-        TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
-        TaskbarManager.Instance.SetProgressValue(0, ProgressMax);
+
+        try
+        {
+            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+            TaskbarManager.Instance.SetProgressValue(0, ProgressMax);
+        }
+        catch (InvalidOperationException)
+        {
+            //ignore in design mode
+        }
     }
 
     partial void EnableTaskbarProgress()

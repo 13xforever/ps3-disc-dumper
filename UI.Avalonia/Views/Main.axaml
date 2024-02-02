@@ -10,7 +10,19 @@
 	<Design.DataContext>
 		<!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-		<vm:MainViewModel/>
+		<vm:MainViewModel
+			FoundDisc="False"
+			StepTitle="Disc check error"
+			StepSubtitle="Direct disk access to the drive was denied"
+			LastOperationSuccess="False"
+			LearnMoreLink="https://github.com/13xforever/ps3-disc-dumper/wiki/Direct-disk-access-to-the-drive-was-denied"
+			
+			ProductCode="BLUS00001"
+			GameTitle="Super Long and Obnoxious Game Title That Makes Capcom's Super Ultra Deluxe Edition Look Tame"
+			DiscSizeInfo="6.9 GB (420 files)"
+			DiscSizeDiffInfoLink="https://github.com/13xforever/ps3-disc-dumper/wiki/Dump-size-is-significantly-different-from-disc-size"
+			DiscKeyName="BLUS00001.ird"
+			/>
 	</Design.DataContext>
 
     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="16">
