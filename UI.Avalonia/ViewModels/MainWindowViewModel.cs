@@ -4,6 +4,7 @@ using System.Linq;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using IrdLibraryClient;
 using Ps3DiscDumper;
 using Ps3DiscDumper.POCOs;
 
@@ -53,6 +54,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             {
                 Dispatcher.UIThread.Post(() =>
                 {
+                    Log.Debug("Settings were changed, trying to re-scan the disc if present…");
                     mainPage.ResetViewModelCommand.Execute(null);
                     mainPage.ScanDiscsCommand.Execute(null);
                 }, DispatcherPriority.Background);

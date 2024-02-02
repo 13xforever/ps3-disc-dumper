@@ -46,6 +46,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private bool? validated;
 
     internal Dumper? dumper;
+    private readonly SemaphoreSlim scanLock = new(1, 1);
 
     partial void OnDiscInfoExpandedChanged(bool value)
     {
@@ -99,6 +100,13 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     
     private async Task ScanDiscsAsync()
     {
+        // ReSharper disable once MethodHasAsyncOverload
+        if (!scanLock.Wait(0))
+        {
+            Log.Debug("Another disc scan is already in progress, ignoring call");
+            return;
+        }
+        
         ResetViewModel();
         
         FoundDisc = true;

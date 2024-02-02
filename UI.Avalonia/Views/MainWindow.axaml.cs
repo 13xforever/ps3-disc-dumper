@@ -8,6 +8,7 @@ using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using IrdLibraryClient;
 using UI.Avalonia.Utils;
 using UI.Avalonia.Utils.ColorPalette;
 using UI.Avalonia.ViewModels;
@@ -61,6 +62,7 @@ public partial class MainWindow : Window
         
         Dispatcher.UIThread.Post(() =>
         {
+            Log.Debug("Main window is loaded, trying to scan the disc…");
             mvm.ResetViewModelCommand.Execute(null);
             mvm.ScanDiscsCommand.Execute(null);
         }, DispatcherPriority.Background);

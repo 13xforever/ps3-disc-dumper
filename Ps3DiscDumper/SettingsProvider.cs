@@ -22,9 +22,22 @@ public static class SettingsProvider
             settingsFolder = Path.Combine(Environment.GetFolderPath(SpecialFolder.LocalApplicationData), "ps3-disc-dumper");
             settingsPath = Path.Combine(settingsFolder, "settings.json");
             if (File.Exists(settingsPath))
+            {
+                Log.Debug("Found existing settings file, reading…");
                 savedSettings = Read() ?? savedSettings;
+            }
             else
-                savedSettings = Import() ?? savedSettings;
+            {
+                if (OperatingSystem.IsWindows())
+                {
+                    Log.Debug("No existing settings file was found, trying to import legacy settings…");
+                    savedSettings = Import() ?? savedSettings;
+                }
+                else
+                {
+                    Log.Debug("Using default settings");
+                }
+            }
             Settings = savedSettings;
         }
         catch (Exception e)

@@ -71,7 +71,10 @@ public partial class MainWindow
                                         DumperIsReady: false
                                     }
                                 })
+                            {
+                                Log.Debug($"Found udf mount message, trying to scan disc drives… ({nameof(vm.DumpingInProgress)}: {vm.DumpingInProgress}, {nameof(vm.FoundDisc)}: {vm.FoundDisc}, {nameof(vm.DumperIsReady)}: {vm.DumperIsReady})");
                                 vm.ScanDiscsCommand.Execute(null);
+                            }
                         }, DispatcherPriority.Background);
                     }
                     else if (line.Contains("busy inodes on changed media sr"))
