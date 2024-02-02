@@ -57,7 +57,7 @@
 	        <Button Classes="Link" Margin="8 0 0 0"
 	                Command="{Binding OpenUrlCommand}" CommandParameter="{Binding LearnMoreLink}"
 	                IsVisible="{Binding LearnMoreLink, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-		        Learn more
+		        <TextBlock LineHeight="20">Learn more</TextBlock>
 	        </Button>
         </StackPanel>
         
