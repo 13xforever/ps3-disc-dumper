@@ -8,7 +8,12 @@ public abstract class IrdClient: IIrdClient
 {
     public abstract Uri BaseUri { get; }
     protected abstract Regex IrdFilename { get; }
-    private readonly HttpClient client = HttpClientFactory.Create(new CompressionMessageHandler());
+    protected readonly HttpClient Client = HttpClientFactory.Create(new CompressionMessageHandler());
+
+    protected IrdClient()
+    {
+        Client.Timeout = TimeSpan.FromSeconds(30);
+    }
 
     protected virtual string GetDownloadLink(string irdFilename)
     {
@@ -24,7 +29,7 @@ public abstract class IrdClient: IIrdClient
             var requestUri = BaseUri;
             try
             {
-                var responseData = await client.GetStringAsync(requestUri, cancellationToken).ConfigureAwait(false);
+                var responseData = await Client.GetStringAsync(requestUri, cancellationToken).ConfigureAwait(false);
                 return GetIrdInfo(responseData);
             }
             catch (Exception e)
@@ -72,7 +77,7 @@ public abstract class IrdClient: IIrdClient
             }
             try
             {
-                var resultBytes = await client.GetByteArrayAsync(GetDownloadLink(irdName), cancellationToken).ConfigureAwait(false);
+                var resultBytes = await Client.GetByteArrayAsync(GetDownloadLink(irdName), cancellationToken).ConfigureAwait(false);
                 result = IrdParser.Parse(resultBytes);
                 try
                 {

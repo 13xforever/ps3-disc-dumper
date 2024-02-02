@@ -12,7 +12,6 @@ public class IrdClientFlexby420: IrdClient
     protected override Regex IrdFilename => throw new NotImplementedException();
     private Uri BaseDownloadUri { get; } = new("https://github.com/FlexBy420/playstation_3_ird_database/raw/main/");
     private readonly JsonSerializerOptions jsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.KebabCaseLower, };
-    private readonly HttpClient client = HttpClientFactory.Create(new CompressionMessageHandler());
 
     [DebuggerDisplay("{Link}", Name="{Title}")]
     public class IrdInfo
@@ -30,7 +29,7 @@ public class IrdClientFlexby420: IrdClient
         {
             try
             {
-                var data = await client.GetFromJsonAsync<Dictionary<string, IrdInfo[]>>(BaseUri, jsonOptions, cancellationToken).ConfigureAwait(false);
+                var data = await Client.GetFromJsonAsync<Dictionary<string, IrdInfo[]>>(BaseUri, jsonOptions, cancellationToken).ConfigureAwait(false);
                 if (data is null or { Count: 0 })
                     return [];
                 
