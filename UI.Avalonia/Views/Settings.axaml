@@ -140,49 +140,61 @@
 
         <!-- Processing -->
         <TextBlock Classes="BodyStrongTextBlockStyle" Margin="0 32 0 0">Processing</TextBlock>
-        <!-- Copy ps3 firmware update -->
-        <Border Classes="Card" Margin="0 8 0 0">
-            <Grid ColumnDefinitions="36,*,120">
-                <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
-                           VerticalAlignment="Center" HorizontalAlignment="Left"
-                           Text="{Binding ItemSelectionSymbol}"/>
-                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Classes="BodyTextBlockStyle">Copy PS3 firmware update</TextBlock>
-                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle">
-                        Only useful for preservation purposes
-                    </TextBlock>
+        <Expander Margin="0 8 0 0" Padding="0" CornerRadius="4" IsExpanded="True" Width="566" Background="Transparent">
+            <Expander.Header>
+                <Border Classes="Card" Margin="0" Padding="0 16" BorderThickness="0" CornerRadius="0" Background="Transparent">
+                    <Grid ColumnDefinitions="36,*,120">
+                        <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
+                                   VerticalAlignment="Center" HorizontalAlignment="Left"
+                                   Text="{Binding ItemSelectionSymbol}"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Classes="BodyTextBlockStyle">Copy optional non-game files</TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Expander.Header>
+            <Expander.Content>
+                <StackPanel>
+                    <!-- Copy ps3 firmware update -->
+                    <Border Classes="Card" CornerRadius="0" BorderThickness="0 0 0 1">
+                        <Grid ColumnDefinitions="36,*,120">
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Classes="BodyTextBlockStyle">Firmware update file</TextBlock>
+                                <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle">
+                                    Only useful for preservation purposes
+                                </TextBlock>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0 0 -12 0"
+                                        VerticalAlignment="Center" HorizontalAlignment="Right">
+                                <TextBlock VerticalAlignment="Center" Margin="0 0 12 0"
+                                           Text="{Binding CopyPs3Update, Converter={StaticResource OnOffConverter}}"/>
+                                <ToggleSwitch OnContent="" OffContent="" IsChecked="{Binding CopyPs3Update}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <!-- Copy video -->
+                    <Border Classes="Card" CornerRadius="0" BorderThickness="0">
+                        <Grid ColumnDefinitions="36,*,120">
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Classes="BodyTextBlockStyle">Blu-ray Video files from hybrid disc</TextBlock>
+                                <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle">
+                                    Video data will remain encrypted
+                                    <Button Classes="Link" Margin="6 0 0 0" Command="{Binding OpenUrlCommand}" CommandParameter="{Binding HybridDiscWikiLink}">
+                                        Learn more
+                                    </Button>
+                                </TextBlock>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0 0 -12 0"
+                                        VerticalAlignment="Center" HorizontalAlignment="Right">
+                                <TextBlock VerticalAlignment="Center" Margin="0 0 12 0"
+                                           Text="{Binding CopyBdmv, Converter={StaticResource OnOffConverter}}"/>
+                                <ToggleSwitch OnContent="" OffContent="" IsChecked="{Binding CopyBdmv}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
                 </StackPanel>
-                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0 0 -12 0"
-                            VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <TextBlock VerticalAlignment="Center" Margin="0 0 12 0"
-                               Text="{Binding CopyPs3Update, Converter={StaticResource OnOffConverter}}"/>
-                    <ToggleSwitch OnContent="" OffContent="" IsChecked="{Binding CopyPs3Update}"/>
-                </StackPanel>
-            </Grid>
-        </Border>
-        <!-- Copy video -->
-        <Border Classes="Card" Margin="0 3 0 0">
-            <Grid ColumnDefinitions="36,*,120">
-                <TextBlock Grid.Column="0" FontFamily="{Binding SymbolFontFamily}" FontSize="20"
-                           VerticalAlignment="Center" HorizontalAlignment="Left"
-                           Text="{Binding ItemSelectionSymbol}"/>
-                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Classes="BodyTextBlockStyle">Copy blu-ray video data</TextBlock>
-                    <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle">
-                        Video data will not be decrypted
-                        <Button Classes="Link" Margin="6 0 0 0" Command="{Binding OpenUrlCommand}" CommandParameter="{Binding HybridDiscWikiLink}">
-                            Learn more
-                        </Button>
-                    </TextBlock>
-                </StackPanel>
-                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0 0 -12 0"
-                            VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <TextBlock VerticalAlignment="Center" Margin="0 0 12 0"
-                               Text="{Binding CopyBdmv, Converter={StaticResource OnOffConverter}}"/>
-                    <ToggleSwitch OnContent="" OffContent="" IsChecked="{Binding CopyBdmv}"/>
-                </StackPanel>
-            </Grid>
-        </Border>
+            </Expander.Content>
+        </Expander>
         
         <!-- personalization -->
         <TextBlock Classes="BodyStrongTextBlockStyle" Margin="0 32 0 0">Personalization</TextBlock>
