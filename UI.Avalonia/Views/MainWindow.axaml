@@ -144,8 +144,10 @@
 			</Button>
 	    </StackPanel>
 
-	    <TransitioningContentControl Content="{Binding CurrentPage}"
-	                                 PageTransition="{Binding InSettings, Converter={StaticResource PageTransitionConverter}}"/>
-	    
+	    <TransitioningContentControl Content="{Binding CurrentPage}" IsTransitionReversed="{Binding !InSettings}">
+		    <TransitioningContentControl.PageTransition>
+			    <PageSlide Duration="0:00:00.167" Orientation="Horizontal"/>
+		    </TransitioningContentControl.PageTransition>
+	    </TransitioningContentControl>
     </Panel>
 </Window>
