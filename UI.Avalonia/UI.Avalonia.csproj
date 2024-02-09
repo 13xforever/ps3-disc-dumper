@@ -9,22 +9,24 @@
         <LangVersion>latest</LangVersion>
         <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <Configurations>Debug;Release;Debug Linux</Configurations>
+        <Configurations>Debug;Release;Debug Linux;Debug MacOS</Configurations>
         <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)' != 'Linux' ">
+    <PropertyGroup Condition=" '$(Configuration)' != 'Linux' And '$(Configuration)' != 'MacOS' ">
         <TargetFrameworks>net8.0-windows;net8.0</TargetFrameworks>
     </PropertyGroup>
-    
-    <PropertyGroup Condition=" '$(Configuration)' == 'Linux' ">
-        <TargetFramework>net8.0</TargetFramework>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Linux' Or '$(Configuration)' == 'MacOS' ">
+        <TargetFrameworks>net8.0</TargetFrameworks>
         <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
         <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
     </PropertyGroup>
-    
-    <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0-windows' ">
-        <DefineConstants>WINDOWS</DefineConstants>
+
+    <PropertyGroup>
+        <DefineConstants Condition=" $([MSBuild]::IsOSPlatform('Windows')) ">WINDOWS</DefineConstants>
+        <DefineConstants Condition=" $([MSBuild]::IsOSPlatform('Linux')) ">LINUX</DefineConstants>
+        <DefineConstants Condition=" $([MSBuild]::IsOSPlatform('OSX')) ">MACOS</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)'=='Release'">

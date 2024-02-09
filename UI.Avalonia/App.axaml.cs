@@ -71,6 +71,11 @@ public partial class App : Application
 
     private static void SetSymbolFont(ViewModelBase vm)
     {
+        if (OperatingSystem.IsMacOS())
+        {
+            // TryGetGlyphTypeface always returns true but yields a fallback fonts with missing symbols.
+            return;
+        }
         var systemFonts = FontManager.Current.SystemFonts;
         if (systemFonts.TryGetGlyphTypeface("Segoe Fluent Icons", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
             vm.SymbolFontFamily = new("Segoe Fluent Icons");

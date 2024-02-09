@@ -66,7 +66,7 @@ public partial class SettingsViewModel: ViewModelBase
         if (path is "<n/a>")
             return "Couldn't create file due to permission or other issues";
 
-        if (OperatingSystem.IsLinux())
+        if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
         {
             var homePath = Environment.GetFolderPath(SpecialFolder.UserProfile);
             if (path.StartsWith(homePath))
@@ -157,6 +157,8 @@ public partial class SettingsViewModel: ViewModelBase
         folder = $"\"{folder}\"";
         ProcessStartInfo psi = OperatingSystem.IsWindows()
             ? new() { Verb = "open", FileName = folder, UseShellExecute = true, }
+            : OperatingSystem.IsMacOS()
+            ? new() { FileName = "open", Arguments = folder, }
             : new () { FileName = "xdg-open", Arguments = folder, };
         try
         {

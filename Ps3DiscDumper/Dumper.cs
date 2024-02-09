@@ -8,6 +8,7 @@ using System.Management;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -21,6 +22,7 @@ using Ps3DiscDumper.POCOs;
 using Ps3DiscDumper.Sfb;
 using Ps3DiscDumper.Sfo;
 using Ps3DiscDumper.Utils;
+using Ps3DiscDumper.Utils.MacOS;
 using FileInfo = System.IO.FileInfo;
 
 namespace Ps3DiscDumper;
@@ -193,6 +195,45 @@ public class Dumper: IDisposable
 
     }
 
+    [SupportedOSPlatform("OSX")]
+    private List<string> EnumeratePhysicalDevicesOSX()
+    {
+        var physicalDrives = new List<string>();
+
+        try
+        {
+            var matching = IOKit.IOServiceMatching(IOKit.BDMediaClass);
+            var result = IOKit.IOServiceGetMatchingServices(IOKit.MasterPortDefault, matching, out var iterator);
+            if (result != CoreFoundation.KernSuccess)
+            {
+                Log.Error($"Failed to enumerate blu-ray drives: {result}");
+                return physicalDrives;
+            }
+
+            for (var drive = IOKit.IOIteratorNext(iterator); drive != IntPtr.Zero; drive = IOKit.IOIteratorNext(iterator))
+            {
+                var cfBsdName = IOKit.IORegistryEntryCreateCFProperty(drive, IOKit.BSDNameKey, IntPtr.Zero, 0);
+                if (cfBsdName != IntPtr.Zero)
+                {
+                    var bsdName = new StringBuilder(32);
+                    if (CoreFoundation.CFStringGetCString(cfBsdName, bsdName, bsdName.Capacity, CoreFoundation.StringEncodingASCII))
+                    {
+                        // We change "disk" to "rdisk" in the BSD name to be able to open while mounted.
+                        physicalDrives.Add($"/dev/r{bsdName}");
+                    }
+                }
+
+                IOKit.IOObjectRelease(drive);
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "Unable to enumerate physical drives from drutil.");
+        }
+
+        return physicalDrives;
+    }
+
     private string CheckDiscSfb(byte[] discSfbData)
     {
         var sfb = SfbReader.Parse(discSfbData);
@@ -263,7 +304,7 @@ public class Dumper: IDisposable
                 }
             }
         }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             var mountList = inDir is { Length: > 0 }
                 ? new[] { inDir }
@@ -366,6 +407,8 @@ public class Dumper: IDisposable
                 physicalDrives = EnumeratePhysicalDrivesWindows();
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 physicalDrives = EnumeratePhysicalDrivesLinux();
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                physicalDrives = EnumeratePhysicalDevicesOSX();
             else
                 throw new NotImplementedException("Current OS is not supported");
         }

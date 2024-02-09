@@ -10,7 +10,7 @@
         
 		WindowStartupLocation="CenterScreen"
 		CanResize="False"
-        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaToDecorationsHint="{OnPlatform True, macOS=False}"
         ExtendClientAreaChromeHints="PreferSystemChrome"
         SystemDecorations="Full"
         Topmost="{Binding CurrentPage.StayOnTop}"
