@@ -27,7 +27,7 @@ namespace Ps3DiscDumper;
 
 public class Dumper: IDisposable
 {
-    public const string Version = "4.1.3";
+    public const string Version = "4.1.4";
 
     static Dumper() => Log.Info("PS3 Disc Dumper v" + Version);
 

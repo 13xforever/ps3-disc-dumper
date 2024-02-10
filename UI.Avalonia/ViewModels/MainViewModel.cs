@@ -107,100 +107,107 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             return;
         }
         
-        ResetViewModel();
-        
-        FoundDisc = true;
-        StepTitle = "Scanning disc drives";
-        StepSubtitle = "Checking the inserted disc…";
-        dumper?.Dispose();
-        dumper = new();
         try
         {
-            dumper.DetectDisc("",
-                d =>
-                {
-                    var items = new NameValueCollection
+            ResetViewModel();
+
+            FoundDisc = true;
+            StepTitle = "Scanning disc drives";
+            StepSubtitle = "Checking the inserted disc…";
+            dumper?.Dispose();
+            dumper = new();
+            try
+            {
+                dumper.DetectDisc("",
+                    d =>
                     {
-                        [Patterns.ProductCode] = d.ProductCode,
-                        [Patterns.ProductCodeLetters] = d.ProductCode?[..4],
-                        [Patterns.ProductCodeNumbers] = d.ProductCode?[4..],
-                        [Patterns.Title] = d.Title,
-                        [Patterns.Region] = Dumper.RegionMapping[d.ProductCode?[2..3] ?? ""],
-                    };
+                        var items = new NameValueCollection
+                        {
+                            [Patterns.ProductCode] = d.ProductCode,
+                            [Patterns.ProductCodeLetters] = d.ProductCode?[..4],
+                            [Patterns.ProductCodeNumbers] = d.ProductCode?[4..],
+                            [Patterns.Title] = d.Title,
+                            [Patterns.Region] = Dumper.RegionMapping[d.ProductCode?[2..3] ?? ""],
+                        };
                     settings.TestItems = items;
                     return PatternFormatter.Format(SettingsProvider.Settings.DumpNameTemplate, items);
                 });
-        } catch {}
-        if (dumper.ProductCode is not { Length: > 0 } || dumper.Cts.IsCancellationRequested)
-        {
-            ResetViewModel();
-            return;
-        }
-
-        Success = null;
-        Validated = null;
-        ProductCode = dumper.ProductCode;
-        GameTitle = dumper.Title;
-        DiscSizeInfo = $"{dumper.TotalFileSize.AsStorageUnit()} ({dumper.TotalFileCount} files)";
-        if (Math.Abs(dumper.TotalDiscSize - dumper.TotalFileSize) > 100 * 1024 * 1024)
-            DiscSizeDiffInfoLink = SettingsViewModel.WikiUrlBase + "Dump-size-is-significantly-different-from-disc-size";
-
-        StepTitle = "Looking for a disc key";
-        StepSubtitle = "Checking IRD and Redump data sets…";
-        try
-        {
-            await dumper.FindDiscKeyAsync(settings.IrdDir).WaitAsync(dumper.Cts.Token).ConfigureAwait(false);
-        }
-        catch (Exception e)
-        {
-            Log.Error(e, "Failed to find a matching key");
-            await dumper.Cts.CancelAsync().ConfigureAwait(false);
-            FoundDisc = false;
-            StepTitle = "Disc check error";
-            LastOperationSuccess = false;
-            StepSubtitle = e.Message;
-            LearnMoreLink = e switch
+            } catch {}
+            if (dumper.ProductCode is not { Length: > 0 } || dumper.Cts.IsCancellationRequested)
             {
-                AccessViolationException {Message: "Direct disk access to the drive was denied"}
-                    => "Direct-disk-access-to-the-drive-was-denied",
-                KeyNotFoundException {Message: "No valid disc decryption key was found"}
-                    => "No-valid-disc-decryption-key-was-found",
-                IOException when e.Message.Contains("cyclic redundancy check")
-                    => "Data-Error-(cyclic-redundancy-check)",
-                _ => "",
-            } is {Length: >0} lnk ? SettingsViewModel.WikiUrlBase + lnk : "";
-            return;
-        }
-        
-        StepSubtitle = "";
-        if (dumper.DiscKeyFilename is { Length: > 0 })
-            DiscKeyName = Path.GetFileName(dumper.DiscKeyFilename);
-        else
-            DiscKeyName = "No match found";
+                ResetViewModel();
+                    return;
+            }
 
-        var destination = Path.Combine(settings.OutputDir, dumper.OutputDir);
-        if (Directory.Exists(destination))
-        {
-            StepTitle = "Dump already exists";
-            StepSubtitle = "Existing dump files will be overwritten";
-            StartButtonCaption = "Overwrite";
-            LastOperationWarning = true;
-        }
-        else if (Directory.Exists(Path.Combine(dumper.InputDevicePath, "BDMV")))
-        {
-            StepTitle = "Ready to dump a hybrid disc";
-            if (CopyBdmv)
-                StepSubtitle = "All files will be copied, but only PS3 game files will be decrypted";
+            Success = null;
+            Validated = null;
+            ProductCode = dumper.ProductCode;
+            GameTitle = dumper.Title;
+            DiscSizeInfo = $"{dumper.TotalFileSize.AsStorageUnit()} ({dumper.TotalFileCount} files)";
+            if (Math.Abs(dumper.TotalDiscSize - dumper.TotalFileSize) > 100 * 1024 * 1024)
+                DiscSizeDiffInfoLink = SettingsViewModel.WikiUrlBase + "Dump-size-is-significantly-different-from-disc-size";
+
+            StepTitle = "Looking for a disc key";
+            StepSubtitle = "Checking IRD and Redump data sets…";
+            try
+            {
+                await dumper.FindDiscKeyAsync(settings.IrdDir).WaitAsync(dumper.Cts.Token).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Failed to find a matching key");
+                await dumper.Cts.CancelAsync().ConfigureAwait(false);
+                FoundDisc = false;
+                StepTitle = "Disc check error";
+                LastOperationSuccess = false;
+                StepSubtitle = e.Message;
+                LearnMoreLink = e switch
+                {
+                    AccessViolationException { Message: "Direct disk access to the drive was denied" }
+                        => "Direct-disk-access-to-the-drive-was-denied",
+                    KeyNotFoundException { Message: "No valid disc decryption key was found" }
+                        => "No-valid-disc-decryption-key-was-found",
+                    IOException when e.Message.Contains("cyclic redundancy check")
+                        => "Data-Error-(cyclic-redundancy-check)",
+                    _ => "",
+                } is {Length: >0} lnk ? SettingsViewModel.WikiUrlBase + lnk : "";
+                return;
+            }
+        
+            StepSubtitle = "";
+            if (dumper.DiscKeyFilename is { Length: > 0 })
+                DiscKeyName = Path.GetFileName(dumper.DiscKeyFilename);
             else
-                StepSubtitle = "Only PS3 game files will be copied";
-            LearnMoreLink = SettingsViewModel.HybridDiscWikiLink;
-            LastOperationNotification = true;
+                DiscKeyName = "No match found";
+
+            var destination = Path.Combine(settings.OutputDir, dumper.OutputDir);
+            if (Directory.Exists(destination))
+            {
+                StepTitle = "Dump already exists";
+                StepSubtitle = "Existing dump files will be overwritten";
+                StartButtonCaption = "Overwrite";
+                LastOperationWarning = true;
+            }
+            else if (Directory.Exists(Path.Combine(dumper.InputDevicePath, "BDMV")))
+            {
+                StepTitle = "Ready to dump a hybrid disc";
+                if (CopyBdmv)
+                    StepSubtitle = "All files will be copied, but only PS3 game files will be decrypted";
+                else
+                    StepSubtitle = "Only PS3 game files will be copied";
+                LearnMoreLink = SettingsViewModel.HybridDiscWikiLink;
+                LastOperationNotification = true;
+            }
+            else
+            {
+                StepTitle = "Ready to dump";
+            }
+            DumperIsReady = true;
         }
-        else
+        finally
         {
-            StepTitle = "Ready to dump";
+            scanLock.Release();
         }
-        DumperIsReady = true;
     }
     
     private async Task DumpDiscAsync()
