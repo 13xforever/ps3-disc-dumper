@@ -1,60 +1,61 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
 
 namespace Ps3DiscDumper.Utils.MacOS;
 
-[SupportedOSPlatform("macos")]
-public static class CoreFoundation
+[SupportedOSPlatform("osx")]
+public static partial class CoreFoundation
 {
-    private const string ApplicationServicesLibraryName = "ApplicationServices.framework/ApplicationServices";
-    private const string LibraryName = "CoreFoundation.framework/CoreFoundation";
-    private const string LibraryPath = "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation";
+    private const string AsLibraryName = "ApplicationServices.framework/ApplicationServices";
+    private const string CfLibraryName = "CoreFoundation.framework/CoreFoundation";
+    private const string CfLibraryPath = "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation";
 
-    public static readonly uint KernSuccess = 0;
-    public static readonly uint StringEncodingASCII = 0x0600;
-    public static readonly IntPtr RunLoopDefaultMode = CoreFoundation.__CFStringMakeConstantString("kCFRunLoopDefaultMode");
-
-    private static IntPtr Library;
-    public static IntPtr TypeDictionaryKeyCallBacks;
-    public static IntPtr TypeDictionaryValueCallBacks;
+    public const uint KernSuccess = 0;
+    public const uint StringEncodingAscii = 0x0600;
+    public static readonly IntPtr RunLoopDefaultMode = __CFStringMakeConstantString("kCFRunLoopDefaultMode");
+    public static readonly IntPtr TypeDictionaryKeyCallBacks;
+    public static readonly IntPtr TypeDictionaryValueCallBacks;
 
     static CoreFoundation()
     {
-        Library = dlopen(LibraryPath, 0);
-        TypeDictionaryKeyCallBacks = dlsym(Library, "kCFTypeDictionaryKeyCallBacks");
-        TypeDictionaryValueCallBacks = dlsym(Library, "kCFTypeDictionaryValueCallBacks");
+        var library = DlOpen(CfLibraryPath, 0);
+        TypeDictionaryKeyCallBacks = DlSym(library, "kCFTypeDictionaryKeyCallBacks");
+        TypeDictionaryValueCallBacks = DlSym(library, "kCFTypeDictionaryValueCallBacks");
     }
 
-    [DllImport("libdl", ExactSpelling = true)]
-    public static extern IntPtr dlopen(string filename, int flags);
+    [LibraryImport("libdl", EntryPoint = "dlopen", StringMarshalling = StringMarshalling.Utf8)]
+    private static partial IntPtr DlOpen(string filename, int flags);
 
-    [DllImport("libdl", ExactSpelling = true)]
-    public static extern IntPtr dlsym(IntPtr handle, string symbol);
+    [LibraryImport("libdl", EntryPoint = "dlsym", StringMarshalling = StringMarshalling.Utf8)]
+    private static partial IntPtr DlSym(IntPtr handle, string symbol);
 
-    [DllImport(ApplicationServicesLibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern IntPtr __CFStringMakeConstantString(string cStr);
+    [LibraryImport(AsLibraryName, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial IntPtr __CFStringMakeConstantString(string cStr);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern IntPtr CFAllocatorGetDefault();
+    [LibraryImport(CfLibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial IntPtr CFAllocatorGetDefault();
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern void CFRelease(IntPtr ptr);
+    [LibraryImport(CfLibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial void CFRelease(IntPtr ptr);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern IntPtr CFRunLoopGetCurrent();
+    [LibraryImport(CfLibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial IntPtr CFRunLoopGetCurrent();
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern void CFRunLoopRun();
+    [LibraryImport(CfLibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial void CFRunLoopRun();
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern void CFRunLoopStop(IntPtr runLoop);
+    [LibraryImport(CfLibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial void CFRunLoopStop(IntPtr runLoop);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern IntPtr CFDictionaryCreate(IntPtr allocator, IntPtr[] keys, IntPtr[] values, nint numValues, IntPtr keyCallbacks, IntPtr valueCallbacks);
+    [LibraryImport(CfLibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial IntPtr CFDictionaryCreate(IntPtr allocator, IntPtr[] keys, IntPtr[] values, nint numValues, IntPtr keyCallbacks, IntPtr valueCallbacks);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    //StringBuilder is not supported for codegen with LibraryImport
+    [DllImport(CfLibraryName, CallingConvention = CallingConvention.Cdecl)]
     [return: MarshalAs(UnmanagedType.U1)]
     public static extern bool CFStringGetCString(IntPtr theString, StringBuilder buffer, long bufferSize, uint encoding);
 }

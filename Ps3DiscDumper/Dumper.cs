@@ -122,7 +122,7 @@ public class Dumper: IDisposable
         }
     }
 
-    [SupportedOSPlatform("Windows")]
+    [SupportedOSPlatform("windows")]
     private List<string> EnumeratePhysicalDrivesWindows()
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -161,7 +161,7 @@ public class Dumper: IDisposable
         return physicalDrives;
     }
 
-    [SupportedOSPlatform("Linux")]
+    [SupportedOSPlatform("linux")]
     private List<string> EnumeratePhysicalDrivesLinux()
     {
         var cdInfo = "";
@@ -195,14 +195,13 @@ public class Dumper: IDisposable
 
     }
 
-    [SupportedOSPlatform("OSX")]
-    private List<string> EnumeratePhysicalDevicesOSX()
+    [SupportedOSPlatform("osx")]
+    private List<string> EnumeratePhysicalDevicesMacOs()
     {
         var physicalDrives = new List<string>();
-
         try
         {
-            var matching = IOKit.IOServiceMatching(IOKit.BDMediaClass);
+            var matching = IOKit.IOServiceMatching(IOKit.BdMediaClass);
             var result = IOKit.IOServiceGetMatchingServices(IOKit.MasterPortDefault, matching, out var iterator);
             if (result != CoreFoundation.KernSuccess)
             {
@@ -210,34 +209,34 @@ public class Dumper: IDisposable
                 return physicalDrives;
             }
 
+            const int nameBufferSize = 32;
+            var bsdName = new StringBuilder(nameBufferSize);
             for (var drive = IOKit.IOIteratorNext(iterator); drive != IntPtr.Zero; drive = IOKit.IOIteratorNext(iterator))
             {
-                var cfBsdName = IOKit.IORegistryEntryCreateCFProperty(drive, IOKit.BSDNameKey, IntPtr.Zero, 0);
+                var cfBsdName = IOKit.IORegistryEntryCreateCFProperty(drive, IOKit.BsdNameKey, IntPtr.Zero, 0);
                 if (cfBsdName != IntPtr.Zero)
                 {
-                    var bsdName = new StringBuilder(32);
-                    if (CoreFoundation.CFStringGetCString(cfBsdName, bsdName, bsdName.Capacity, CoreFoundation.StringEncodingASCII))
+                    bsdName.Clear().EnsureCapacity(nameBufferSize);
+                    if (CoreFoundation.CFStringGetCString(cfBsdName, bsdName, nameBufferSize, CoreFoundation.StringEncodingAscii))
                     {
                         // We change "disk" to "rdisk" in the BSD name to be able to open while mounted.
                         physicalDrives.Add($"/dev/r{bsdName}");
                     }
                 }
-
                 IOKit.IOObjectRelease(drive);
             }
         }
         catch (Exception e)
         {
-            Log.Error(e, "Unable to enumerate physical drives from drutil.");
+            Log.Error(e, "Unable to enumerate physical drives");
         }
-
         return physicalDrives;
     }
 
     private string CheckDiscSfb(byte[] discSfbData)
     {
         var sfb = SfbReader.Parse(discSfbData);
-        var flags = new HashSet<char>(sfb.KeyEntries.FirstOrDefault(e => e.Key == "HYBRID_FLAG")?.Value?.ToCharArray() ?? new char[0]);
+        var flags = new HashSet<char>(sfb.KeyEntries.FirstOrDefault(e => e.Key == "HYBRID_FLAG")?.Value?.ToCharArray() ?? Array.Empty<char>());
         Log.Debug($"Disc flags: {string.Concat(flags)}");
         if (!flags.Contains('g'))
             Log.Warn("Disc is not a game disc");
@@ -408,7 +407,7 @@ public class Dumper: IDisposable
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 physicalDrives = EnumeratePhysicalDrivesLinux();
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                physicalDrives = EnumeratePhysicalDevicesOSX();
+                physicalDrives = EnumeratePhysicalDevicesMacOs();
             else
                 throw new NotImplementedException("Current OS is not supported");
         }

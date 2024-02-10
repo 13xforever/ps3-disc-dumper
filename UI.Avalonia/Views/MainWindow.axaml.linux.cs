@@ -38,7 +38,7 @@ public partial class MainWindow
     }
 
 
-    [SupportedOSPlatform("Linux")]
+    [SupportedOSPlatform("linux")]
     private void MonitorDmesg()
     {
         try

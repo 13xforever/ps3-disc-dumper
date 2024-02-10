@@ -7,13 +7,13 @@ using Avalonia.Threading;
 using IrdLibraryClient;
 using Ps3DiscDumper.Utils.MacOS;
 using UI.Avalonia.ViewModels;
+using CF = Ps3DiscDumper.Utils.MacOS.CoreFoundation;
 
 namespace UI.Avalonia.Views;
 
 public partial class MainWindow
 {
     private Thread? diskArbiterThread;
-
     private IntPtr runLoop = IntPtr.Zero;
 
     partial void OnLoadedPlatform()
@@ -34,34 +34,37 @@ public partial class MainWindow
         diskArbiterThread?.Join();
     }
 
-    [SupportedOSPlatform("OSX")]
+    [SupportedOSPlatform("osx")]
     private void RunDiskArbiter()
     {
         try
         {
-            runLoop = CoreFoundation.CFRunLoopGetCurrent();
+            runLoop = CF.CFRunLoopGetCurrent();
 
-            var diskAppearedDelegate = new DiskArbitration.DADiskAppearedCallback(DiskAppeared);
-            var diskDisappearedDelegate = new DiskArbitration.DADiskDisappearedCallback(DiskDisappeared);
-            var diskAppearedDelegatePtr = Marshal.GetFunctionPointerForDelegate(diskAppearedDelegate);
-            var diskDisappearedDelegatePtr = Marshal.GetFunctionPointerForDelegate(diskDisappearedDelegate);
+            var diskAppearedDelegatePtr = Marshal.GetFunctionPointerForDelegate(DiskAppeared);
+            var diskDisappearedDelegatePtr = Marshal.GetFunctionPointerForDelegate(DiskDisappeared);
 
-            var cfAllocator = CoreFoundation.CFAllocatorGetDefault();
+            var cfAllocator = CF.CFAllocatorGetDefault();
             var daSession = DiskArbitration.DASessionCreate(cfAllocator);
-            var match = CoreFoundation.CFDictionaryCreate(cfAllocator,
-                [DiskArbitration.DescriptionMediaKindKey], [IOKit.BDMediaClassCFString], 1,
-                CoreFoundation.TypeDictionaryKeyCallBacks, CoreFoundation.TypeDictionaryValueCallBacks);
+            var match = CF.CFDictionaryCreate(
+                cfAllocator,
+                [DiskArbitration.DescriptionMediaKindKey],
+                [IOKit.BdMediaClassCfString],
+                1,
+                CF.TypeDictionaryKeyCallBacks,
+                CF.TypeDictionaryValueCallBacks
+            );
             DiskArbitration.DARegisterDiskAppearedCallback(daSession, match, diskAppearedDelegatePtr, IntPtr.Zero);
             DiskArbitration.DARegisterDiskDisappearedCallback(daSession, match, diskDisappearedDelegatePtr, IntPtr.Zero);
-            DiskArbitration.DASessionScheduleWithRunLoop(daSession, runLoop, CoreFoundation.RunLoopDefaultMode);
+            DiskArbitration.DASessionScheduleWithRunLoop(daSession, runLoop, CF.RunLoopDefaultMode);
 
             // Blocks the thread until stopped.
-            CoreFoundation.CFRunLoopRun();
+            CF.CFRunLoopRun();
 
             DiskArbitration.DAUnregisterCallback(daSession, diskAppearedDelegatePtr, IntPtr.Zero);
             DiskArbitration.DAUnregisterCallback(daSession, diskDisappearedDelegatePtr, IntPtr.Zero);
-            DiskArbitration.DASessionUnscheduleFromRunLoop(daSession, runLoop, CoreFoundation.RunLoopDefaultMode);
-            CoreFoundation.CFRelease(daSession);
+            DiskArbitration.DASessionUnscheduleFromRunLoop(daSession, runLoop, CF.RunLoopDefaultMode);
+            CF.CFRelease(daSession);
         }
         catch (Exception e)
         {
@@ -69,16 +72,16 @@ public partial class MainWindow
         }
     }
 
-    [SupportedOSPlatform("OSX")]
+    [SupportedOSPlatform("osx")]
     private void StopDiskArbiter()
     {
         if (runLoop != IntPtr.Zero)
         {
-            CoreFoundation.CFRunLoopStop(runLoop);
+            CF.CFRunLoopStop(runLoop);
         }
     }
 
-    [SupportedOSPlatform("OSX")]
+    [SupportedOSPlatform("osx")]
     private void DiskAppeared(IntPtr disk, IntPtr context)
     {
         try
@@ -113,7 +116,7 @@ public partial class MainWindow
         }
     }
 
-    [SupportedOSPlatform("OSX")]
+    [SupportedOSPlatform("osx")]
     private void DiskDisappeared(IntPtr disk, IntPtr context)
     {
         try

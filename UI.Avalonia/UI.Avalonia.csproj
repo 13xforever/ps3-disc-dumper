@@ -9,27 +9,30 @@
         <LangVersion>latest</LangVersion>
         <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <Configurations>Debug;Release;Debug Linux;Debug MacOS</Configurations>
+        <Configurations>Debug;Release;MacOS;Linux</Configurations>
         <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)' != 'Linux' And '$(Configuration)' != 'MacOS' ">
-        <TargetFrameworks>net8.0-windows;net8.0</TargetFrameworks>
+    <PropertyGroup Condition="'$(Configuration)' != 'Linux' And '$(Configuration)' != 'MacOS'">
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <DefineConstants>WINDOWS</DefineConstants>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)' == 'Linux' Or '$(Configuration)' == 'MacOS' ">
-        <TargetFrameworks>net8.0</TargetFrameworks>
-        <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
-        <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
+    <PropertyGroup Condition="'$(Configuration)' == 'Linux'">
+        <TargetFramework>net8.0</TargetFramework>
+        <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+        <DefineConstants>LINUX</DefineConstants>
     </PropertyGroup>
 
-    <PropertyGroup>
-        <DefineConstants Condition=" $([MSBuild]::IsOSPlatform('Windows')) ">WINDOWS</DefineConstants>
-        <DefineConstants Condition=" $([MSBuild]::IsOSPlatform('Linux')) ">LINUX</DefineConstants>
-        <DefineConstants Condition=" $([MSBuild]::IsOSPlatform('OSX')) ">MACOS</DefineConstants>
+    <PropertyGroup Condition="'$(Configuration)' == 'MacOS'">
+        <TargetFramework>net8.0-macos</TargetFramework>
+        <RuntimeIdentifier>osx-arm64</RuntimeIdentifier>
+        <DefineConstants>MACOS</DefineConstants>
+        <OutputType>Library</OutputType>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <PropertyGroup Condition="'$(Configuration)'!='Debug'">
         <PublishSingleFile>true</PublishSingleFile>
         <PublishTrimmed>false</PublishTrimmed>
         <PublishReadyToRun>false</PublishReadyToRun>
