@@ -1,5 +1,6 @@
 #if MACOS
 using System;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -23,6 +24,14 @@ public partial class MainWindow
     {
         if (!OperatingSystem.IsMacOS())
             return;
+
+        // Finder opens applications with the root as the working directory.
+        // In such cases, change it to the .app bundle directory so relative paths will work.
+        if (Directory.GetCurrentDirectory() == "/")
+        {
+            Directory.SetCurrentDirectory(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..")));
+            Log.Debug($"Set working directory to: {Directory.GetCurrentDirectory()}");
+        }
 
         diskArbiterThread = new(RunDiskArbiter);
         diskArbiterThread.Start();
