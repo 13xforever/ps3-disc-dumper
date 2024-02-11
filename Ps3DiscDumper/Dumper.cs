@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Management;
 using System.Net.Http;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
@@ -29,7 +30,11 @@ namespace Ps3DiscDumper;
 
 public class Dumper: IDisposable
 {
-    public const string Version = "4.1.4";
+    public static readonly string Version = Assembly.GetEntryAssembly()?
+                                                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+                                                .InformationalVersion
+                                                .Split('+', 2)[0]
+                                            ?? "x.y.x-unknown";
 
     static Dumper() => Log.Info("PS3 Disc Dumper v" + Version);
 
