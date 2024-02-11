@@ -1,8 +1,11 @@
 #if MACOS
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Threading;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using IrdLibraryClient;
 using Ps3DiscDumper.Utils.MacOS;
@@ -15,7 +18,6 @@ public partial class MainWindow
 {
     private Thread? diskArbiterThread;
     private IntPtr runLoop = IntPtr.Zero;
-    private delegate void DaDiskCallback(IntPtr disk, IntPtr context);
 
     partial void OnLoadedPlatform()
     {
@@ -36,15 +38,11 @@ public partial class MainWindow
     }
 
     [SupportedOSPlatform("osx")]
-    private void RunDiskArbiter()
+    private unsafe void RunDiskArbiter()
     {
         try
         {
             runLoop = CF.CFRunLoopGetCurrent();
-
-            var diskAppearedDelegatePtr = Marshal.GetFunctionPointerForDelegate((DaDiskCallback)DiskAppeared);
-            var diskDisappearedDelegatePtr = Marshal.GetFunctionPointerForDelegate((DaDiskCallback)DiskDisappeared);
-
             var cfAllocator = CF.CFAllocatorGetDefault();
             var daSession = DiskArbitration.DASessionCreate(cfAllocator);
             var match = CF.CFDictionaryCreate(
@@ -55,15 +53,15 @@ public partial class MainWindow
                 CF.TypeDictionaryKeyCallBacks,
                 CF.TypeDictionaryValueCallBacks
             );
-            DiskArbitration.DARegisterDiskAppearedCallback(daSession, match, diskAppearedDelegatePtr, IntPtr.Zero);
-            DiskArbitration.DARegisterDiskDisappearedCallback(daSession, match, diskDisappearedDelegatePtr, IntPtr.Zero);
+            DiskArbitration.DARegisterDiskAppearedCallback(daSession, match, &DiskAppeared, IntPtr.Zero);
+            DiskArbitration.DARegisterDiskDisappearedCallback(daSession, match, &DiskDisappeared, IntPtr.Zero);
             DiskArbitration.DASessionScheduleWithRunLoop(daSession, runLoop, CF.RunLoopDefaultMode);
 
             // Blocks the thread until stopped.
             CF.CFRunLoopRun();
 
-            DiskArbitration.DAUnregisterCallback(daSession, diskAppearedDelegatePtr, IntPtr.Zero);
-            DiskArbitration.DAUnregisterCallback(daSession, diskDisappearedDelegatePtr, IntPtr.Zero);
+            DiskArbitration.DAUnregisterCallback(daSession, &DiskAppeared, IntPtr.Zero);
+            DiskArbitration.DAUnregisterCallback(daSession, &DiskDisappeared, IntPtr.Zero);
             DiskArbitration.DASessionUnscheduleFromRunLoop(daSession, runLoop, CF.RunLoopDefaultMode);
             CF.CFRelease(daSession);
         }
@@ -83,7 +81,8 @@ public partial class MainWindow
     }
 
     [SupportedOSPlatform("osx")]
-    private void DiskAppeared(IntPtr disk, IntPtr context)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static void DiskAppeared(IntPtr disk, IntPtr context)
     {
         try
         {
@@ -93,16 +92,19 @@ public partial class MainWindow
             Thread.Sleep(TimeSpan.FromSeconds(1));
             Dispatcher.UIThread.Post(() =>
             {
-                if (DataContext is MainWindowViewModel
+                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime
                     {
-                        CurrentPage: MainViewModel
+                        MainWindow.DataContext: MainWindowViewModel
                         {
-                            DumpingInProgress: false
-                        } vm and not
-                        {
-                            // still scanning
-                            FoundDisc: true,
-                            DumperIsReady: false
+                            CurrentPage: MainViewModel
+                            {
+                                DumpingInProgress: false
+                            } vm and not
+                            {
+                                // still scanning
+                                FoundDisc: true,
+                                DumperIsReady: false
+                            }
                         }
                     })
                 {
@@ -118,7 +120,8 @@ public partial class MainWindow
     }
 
     [SupportedOSPlatform("osx")]
-    private void DiskDisappeared(IntPtr disk, IntPtr context)
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static void DiskDisappeared(IntPtr disk, IntPtr context)
     {
         try
         {
@@ -126,12 +129,15 @@ public partial class MainWindow
             Log.Debug($"Disk disappeared: {bsdName}");
             Dispatcher.UIThread.Post(() =>
             {
-                if (DataContext is MainWindowViewModel
+                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime
                     {
-                        CurrentPage: MainViewModel
+                        MainWindow.DataContext: MainWindowViewModel
                         {
-                            dumper: { SelectedPhysicalDevice: { Length: > 0 } spd } dumper
-                        } vm
+                            CurrentPage: MainViewModel
+                            {
+                                dumper: { SelectedPhysicalDevice: { Length: > 0 } spd } dumper
+                            } vm
+                        }
                     }
                     && spd == $"/dev/r{bsdName}")
                 {

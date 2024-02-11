@@ -16,13 +16,13 @@ public static partial class DiskArbitration
     public static partial IntPtr DASessionCreate(IntPtr allocator);
 
     [LibraryImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void DARegisterDiskAppearedCallback(IntPtr session, IntPtr match, IntPtr callback, IntPtr context);
+    public static unsafe partial void DARegisterDiskAppearedCallback(IntPtr session, IntPtr match, delegate* unmanaged[Cdecl]<IntPtr, IntPtr, void> callback, IntPtr context);
 
     [LibraryImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void DARegisterDiskDisappearedCallback(IntPtr session, IntPtr match, IntPtr callback, IntPtr context);
+    public static unsafe partial void DARegisterDiskDisappearedCallback(IntPtr session, IntPtr match, delegate* unmanaged[Cdecl]<IntPtr, IntPtr, void> callback, IntPtr context);
 
     [LibraryImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr DAUnregisterCallback(IntPtr session, IntPtr callback, IntPtr context);
+    public static unsafe partial IntPtr DAUnregisterCallback(IntPtr session, delegate* unmanaged[Cdecl]<IntPtr, IntPtr, void> callback, IntPtr context);
 
     [LibraryImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial IntPtr DASessionScheduleWithRunLoop(IntPtr session, IntPtr runLoop, IntPtr runLoopMode);
