@@ -33,7 +33,8 @@
         <CFBundleName>PS3 Disc Dumper</CFBundleName>
         <CFBundleDisplayName>PS3 Disc Dumper</CFBundleDisplayName>
         <CFBundleIdentifier>com.github.13xforever.ps3-disc-dumper</CFBundleIdentifier>
-        <CFBundleShortVersionString>4.1.4</CFBundleShortVersionString>
+        <CFBundleVersion>4.1.4</CFBundleVersion>
+        <CFBundleShortVersionString>$(CFBundleVersion)</CFBundleShortVersionString>
         <CFBundleExecutable>ps3-disc-dumper</CFBundleExecutable>
         <CFBundleIconFile>icon.icns</CFBundleIconFile>
     </PropertyGroup>
