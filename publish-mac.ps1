@@ -19,7 +19,7 @@ if (-not $IsMacOS)
 }
 
 Write-Host 'Building macOS binary...' -ForegroundColor Cyan
-dotnet publish -v:q -r osx-arm64 -f net8.0-macos --self-contained -c MacOS -o distrib/gui/mac/ UI.Avalonia/UI.Avalonia.csproj /p:PublishTrimmed=False /p:PublishSingleFile=True
+dotnet publish -v:q -r osx-arm64 -f net8.0 --self-contained -c MacOS -o distrib/gui/mac/ UI.Avalonia/UI.Avalonia.csproj /p:PublishTrimmed=False /p:PublishSingleFile=True
 if (($LASTEXITCODE -eq 0) -and ($IsMacOS -or ($PSVersionTable.Platform -eq 'Unix')))
 {
     chmod +x distrib/gui/mac/ps3-disc-dumper

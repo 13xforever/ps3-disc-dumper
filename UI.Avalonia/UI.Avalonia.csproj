@@ -26,10 +26,9 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'MacOS'">
-        <TargetFramework>net8.0-macos</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <RuntimeIdentifier>osx-arm64</RuntimeIdentifier>
         <DefineConstants>MACOS</DefineConstants>
-        <OutputType>Library</OutputType>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)'!='Debug'">

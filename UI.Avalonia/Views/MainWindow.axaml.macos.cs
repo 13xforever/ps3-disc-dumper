@@ -15,6 +15,7 @@ public partial class MainWindow
 {
     private Thread? diskArbiterThread;
     private IntPtr runLoop = IntPtr.Zero;
+    private delegate void DaDiskCallback(IntPtr disk, IntPtr context);
 
     partial void OnLoadedPlatform()
     {
@@ -41,8 +42,8 @@ public partial class MainWindow
         {
             runLoop = CF.CFRunLoopGetCurrent();
 
-            var diskAppearedDelegatePtr = Marshal.GetFunctionPointerForDelegate(DiskAppeared);
-            var diskDisappearedDelegatePtr = Marshal.GetFunctionPointerForDelegate(DiskDisappeared);
+            var diskAppearedDelegatePtr = Marshal.GetFunctionPointerForDelegate((DaDiskCallback)DiskAppeared);
+            var diskDisappearedDelegatePtr = Marshal.GetFunctionPointerForDelegate((DaDiskCallback)DiskDisappeared);
 
             var cfAllocator = CF.CFAllocatorGetDefault();
             var daSession = DiskArbitration.DASessionCreate(cfAllocator);
