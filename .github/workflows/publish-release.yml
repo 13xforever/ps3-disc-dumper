@@ -1,0 +1,143 @@
+name: 'Publish Release'
+on:
+  push:
+    tags:
+      - v*
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag in format x.y.z[-pre]'
+        required: true
+        type: string
+env:
+  dotnet_version: '8.0'
+jobs:
+  publish:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        include:
+          - os: windows-latest
+            configuration: Release
+            target: '-windows'
+            rid: win-x64
+            command_extra: ''
+          - os: ubuntu-latest
+            configuration: Linux
+            target: ''
+            rid: linux-x64
+            command_extra: ''
+          - os: macos-latest
+            configuration: MacOS
+            target: ''
+            rid: 'osx-arm64'
+            command_extra: '-t:BundleApp'
+    runs-on: '${{ matrix.os }}'
+    env:
+      version_full: '${{ github.ref_name }}'
+      version_short: '${{ github.ref_name }}'
+      artifact_name: 'ps3-disc-dumper_vX.Y.Z.zip'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'Replace full version with custom input value'
+        if: '${{ inputs.version }}'
+        shell: pwsh
+        run: 'Write-Output "version_full=${{ inputs.version }}" >> $env:GITHUB_ENV'
+      - name: 'Fix full version format'
+        shell: pwsh
+        run: |
+          $ver = '${{ env.version_full }}'.TrimStart('v')
+          Write-Output "version_full=$ver" >> $env:GITHUB_ENV
+      - name: 'Generate short version'
+        shell: pwsh
+        run: |
+          $ver = [SemVer]'${{ env.version_full }}'
+          $short_ver = "$($ver.Major).$($ver.Minor).$($ver.Patch)"
+          Write-Host "Got $short_ver from ${{ env.version_full }}"
+          Write-Output "version_short=$short_ver" >> $env:GITHUB_ENV
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '${{ env.dotnet_version }}.x'
+      - name: "Download current redump snapshot"
+        shell: pwsh
+        run: |
+          $uri = 'http://redump.org/keys/ps3/'
+          $response = Invoke-WebRequest -Uri $uri -Method HEAD
+          $fname = $response.Headers['Content-Disposition'].Split('=', 2)[1].Trim('"')
+          Invoke-WebRequest -Uri $uri -OutFile "$fname"
+          Write-Host "Got $fname"
+      - name: 'Build release'
+        run: >-
+          dotnet publish
+          -v:q
+          --runtime ${{ matrix.rid }}
+          --framework net${{ env.dotnet_version }}${{ matrix.target }}
+          --self-contained
+          --configuration ${{ matrix.configuration}}
+          --output distrib
+          UI.Avalonia/UI.Avalonia.csproj
+          -p:PublishTrimmed=False
+          -p:PublishSingleFile=True
+          -p:DebugType=None
+          -p:DebugSymbols=False
+          -p:VersionPrefix=${{ env.version_short }}
+          -p:Version=${{ env.version_full }}
+          ${{ matrix.command_extra }}
+      - name: 'Make artifact'
+        shell: pwsh
+        run: |
+          cd distrib
+          Get-ChildItem -Recurse | Write-Host
+          $artifact_name = "ps3-disc-dumper_v${{ env.version_full }}.zip"
+          if ($IsWindows)
+          {
+            $artifact_name = "ps3-disc-dumper_windows_v${{ env.version_full }}.zip"
+            Compress-Archive -LiteralPath ps3-disc-dumper.exe -DestinationPath "$artifact_name" -CompressionLevel Optimal -Force
+          }
+          elseif ($IsLinux) # Compress-Archive does not preserve rwx attributes, so use zip on *nix
+          {
+            $artifact_name = "ps3-disc-dumper_linux_v${{ env.version_full }}.zip"
+            zip -v9 "$artifact_name" ps3-disc-dumper
+          }
+          elseif ($IsMacOs)
+          {
+            $artifact_name = "ps3-disc-dumper_macos_v${{ env.version_full }}.zip"
+            codesign --deep -fs - 'PS3 Disc Dumper.app'
+            zip -vr9 "$artifact_name" 'PS3 Disc Dumper.app/' -x '*.DS_Store'
+          }
+          Write-Output "artifact_name=$artifact_name" >> $env:GITHUB_ENV
+      - name: 'Create or update GitHub release draft'
+        if: ${{ inputs.version }}
+        uses: ncipollo/release-action@v1
+        with:
+          commit: '${{ github.sha }}'
+          tag: 'v${{ env.version_full }}'
+          draft: true
+          prerelease: true
+          allowUpdates: true
+          generateReleaseNotes: true
+          artifacts: 'distrib/ps3-disc-dumper_*.zip'
+          artifactContentType: application/zip
+          replacesArtifacts: true
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          omitPrereleaseDuringUpdate: true
+      - name: 'Create or update GitHub custom release draft'
+        if: ${{ github.event_name == 'push' }}
+        uses: ncipollo/release-action@v1
+        with:
+          draft: true
+          prerelease: true
+          allowUpdates: true
+          generateReleaseNotes: true
+          artifacts: 'distrib/ps3-disc-dumper_*.zip'
+          artifactContentType: application/zip
+          replacesArtifacts: true
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          omitPrereleaseDuringUpdate: true
+
+
