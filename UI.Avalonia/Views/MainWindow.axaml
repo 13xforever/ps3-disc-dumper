@@ -10,7 +10,7 @@
         
 		WindowStartupLocation="CenterScreen"
 		CanResize="False"
-        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaToDecorationsHint="{OnPlatform False, Windows=True}"
         ExtendClientAreaChromeHints="PreferSystemChrome"
         SystemDecorations="Full"
         Topmost="{Binding CurrentPage.StayOnTop}"

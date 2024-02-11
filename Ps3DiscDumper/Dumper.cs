@@ -8,6 +8,7 @@ using System.Management;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -21,6 +22,7 @@ using Ps3DiscDumper.POCOs;
 using Ps3DiscDumper.Sfb;
 using Ps3DiscDumper.Sfo;
 using Ps3DiscDumper.Utils;
+using Ps3DiscDumper.Utils.MacOS;
 using FileInfo = System.IO.FileInfo;
 
 namespace Ps3DiscDumper;
@@ -120,7 +122,7 @@ public class Dumper: IDisposable
         }
     }
 
-    [SupportedOSPlatform("Windows")]
+    [SupportedOSPlatform("windows")]
     private List<string> EnumeratePhysicalDrivesWindows()
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -159,7 +161,7 @@ public class Dumper: IDisposable
         return physicalDrives;
     }
 
-    [SupportedOSPlatform("Linux")]
+    [SupportedOSPlatform("linux")]
     private List<string> EnumeratePhysicalDrivesLinux()
     {
         var cdInfo = "";
@@ -193,10 +195,51 @@ public class Dumper: IDisposable
 
     }
 
+    [SupportedOSPlatform("osx")]
+    private List<string> EnumeratePhysicalDevicesMacOs()
+    {
+        var physicalDrives = new List<string>();
+        try
+        {
+            var matching = IOKit.IOServiceMatching(IOKit.BdMediaClass);
+            var result = IOKit.IOServiceGetMatchingServices(IOKit.MasterPortDefault, matching, out var iterator);
+            if (result != CoreFoundation.KernSuccess)
+            {
+                Log.Error($"Failed to enumerate blu-ray drives: {result}");
+                return physicalDrives;
+            }
+
+            const int nameBufferSize = 32;
+            Span<byte> bsdNameBuf = stackalloc byte[nameBufferSize];
+            for (var drive = IOKit.IOIteratorNext(iterator); drive != IntPtr.Zero; drive = IOKit.IOIteratorNext(iterator))
+            {
+                var cfBsdName = IOKit.IORegistryEntryCreateCFProperty(drive, IOKit.BsdNameKey, IntPtr.Zero, 0);
+                if (cfBsdName != IntPtr.Zero)
+                {
+                    if (CoreFoundation.CFStringGetCString(cfBsdName, bsdNameBuf, nameBufferSize, CoreFoundation.StringEncodingAscii))
+                    {
+                        // We change "disk" to "rdisk" in the BSD name to be able to open while mounted.
+                        var len = bsdNameBuf.IndexOf((byte)0);
+                        if (len < 0)
+                            len = nameBufferSize;
+                        var bsdName = Encoding.ASCII.GetString(bsdNameBuf[..len]);
+                        physicalDrives.Add($"/dev/r{bsdName}");
+                    }
+                }
+                IOKit.IOObjectRelease(drive);
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "Unable to enumerate physical drives");
+        }
+        return physicalDrives;
+    }
+
     private string CheckDiscSfb(byte[] discSfbData)
     {
         var sfb = SfbReader.Parse(discSfbData);
-        var flags = new HashSet<char>(sfb.KeyEntries.FirstOrDefault(e => e.Key == "HYBRID_FLAG")?.Value?.ToCharArray() ?? new char[0]);
+        var flags = new HashSet<char>(sfb.KeyEntries.FirstOrDefault(e => e.Key == "HYBRID_FLAG")?.Value?.ToCharArray() ?? Array.Empty<char>());
         Log.Debug($"Disc flags: {string.Concat(flags)}");
         if (!flags.Contains('g'))
             Log.Warn("Disc is not a game disc");
@@ -263,7 +306,7 @@ public class Dumper: IDisposable
                 }
             }
         }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             var mountList = inDir is { Length: > 0 }
                 ? new[] { inDir }
@@ -366,6 +409,8 @@ public class Dumper: IDisposable
                 physicalDrives = EnumeratePhysicalDrivesWindows();
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 physicalDrives = EnumeratePhysicalDrivesLinux();
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                physicalDrives = EnumeratePhysicalDevicesMacOs();
             else
                 throw new NotImplementedException("Current OS is not supported");
         }

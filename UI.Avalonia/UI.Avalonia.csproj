@@ -9,25 +9,36 @@
         <LangVersion>latest</LangVersion>
         <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <Configurations>Debug;Release;Debug Linux</Configurations>
+        <Configurations>Debug;Release;MacOS;Linux</Configurations>
         <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)' != 'Linux' ">
-        <TargetFrameworks>net8.0-windows;net8.0</TargetFrameworks>
-    </PropertyGroup>
-    
-    <PropertyGroup Condition=" '$(Configuration)' == 'Linux' ">
-        <TargetFramework>net8.0</TargetFramework>
-        <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
-        <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
-    </PropertyGroup>
-    
-    <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0-windows' ">
+    <PropertyGroup Condition="'$(Configuration)' != 'Linux' And '$(Configuration)' != 'MacOS'">
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <DefineConstants>WINDOWS</DefineConstants>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <PropertyGroup Condition="'$(Configuration)' == 'Linux'">
+        <TargetFramework>net8.0</TargetFramework>
+        <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+        <DefineConstants>LINUX</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'MacOS'">
+        <TargetFramework>net8.0</TargetFramework>
+        <RuntimeIdentifier>osx-arm64</RuntimeIdentifier>
+        <DefineConstants>MACOS</DefineConstants>
+
+        <CFBundleName>PS3 Disc Dumper</CFBundleName>
+        <CFBundleDisplayName>PS3 Disc Dumper</CFBundleDisplayName>
+        <CFBundleIdentifier>com.github.13xforever.ps3-disc-dumper</CFBundleIdentifier>
+        <CFBundleShortVersionString>4.1.4</CFBundleShortVersionString>
+        <CFBundleExecutable>ps3-disc-dumper</CFBundleExecutable>
+        <CFBundleIconFile>icon.icns</CFBundleIconFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)'!='Debug'">
         <PublishSingleFile>true</PublishSingleFile>
         <PublishTrimmed>false</PublishTrimmed>
         <PublishReadyToRun>false</PublishReadyToRun>
@@ -53,6 +64,13 @@
     <ItemGroup Condition="'$(TargetFramework)'=='net8.0-windows'">
         <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.22621.6" />
         <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(Configuration)' == 'MacOS'">
+        <PackageReference Include="Dotnet.Bundle" Version="*" />
+        <ContentWithTargetPath Include="Assets\icon.icns">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>icon.icns</TargetPath>
+        </ContentWithTargetPath>
     </ItemGroup>
 
     <ItemGroup>

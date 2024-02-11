@@ -1,4 +1,4 @@
-#if !WINDOWS
+#if LINUX
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -38,7 +38,7 @@ public partial class MainWindow
     }
 
 
-    [SupportedOSPlatform("Linux")]
+    [SupportedOSPlatform("linux")]
     private void MonitorDmesg()
     {
         try

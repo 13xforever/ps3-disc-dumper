@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deploy", "Deploy", "{BA0C92
 	ProjectSection(SolutionItems) = preProject
 		publish.ps1 = publish.ps1
 		README.md = README.md
+		publish-mac.ps1 = publish-mac.ps1
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI.Avalonia", "UI.Avalonia\UI.Avalonia.csproj", "{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}"
@@ -21,6 +22,7 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+		MacOS|Any CPU = MacOS|Any CPU
 		Linux|Any CPU = Linux|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
@@ -28,26 +30,34 @@ Global
 		{EC25C188-51BB-4665-B79B-2AE17CABB01E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC25C188-51BB-4665-B79B-2AE17CABB01E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC25C188-51BB-4665-B79B-2AE17CABB01E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EC25C188-51BB-4665-B79B-2AE17CABB01E}.Linux|Any CPU.ActiveCfg = Debug|Any CPU
-		{EC25C188-51BB-4665-B79B-2AE17CABB01E}.Linux|Any CPU.Build.0 = Debug|Any CPU
+		{EC25C188-51BB-4665-B79B-2AE17CABB01E}.Linux|Any CPU.ActiveCfg = Release|Any CPU
+		{EC25C188-51BB-4665-B79B-2AE17CABB01E}.Linux|Any CPU.Build.0 = Release|Any CPU
+		{EC25C188-51BB-4665-B79B-2AE17CABB01E}.MacOS|Any CPU.ActiveCfg = Release|Any CPU
+		{EC25C188-51BB-4665-B79B-2AE17CABB01E}.MacOS|Any CPU.Build.0 = Release|Any CPU
 		{C8C058F0-01DA-41B9-BBAA-6787C5C755F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C8C058F0-01DA-41B9-BBAA-6787C5C755F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8C058F0-01DA-41B9-BBAA-6787C5C755F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8C058F0-01DA-41B9-BBAA-6787C5C755F1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C8C058F0-01DA-41B9-BBAA-6787C5C755F1}.Linux|Any CPU.ActiveCfg = Debug|Any CPU
-		{C8C058F0-01DA-41B9-BBAA-6787C5C755F1}.Linux|Any CPU.Build.0 = Debug|Any CPU
+		{C8C058F0-01DA-41B9-BBAA-6787C5C755F1}.Linux|Any CPU.ActiveCfg = Release|Any CPU
+		{C8C058F0-01DA-41B9-BBAA-6787C5C755F1}.Linux|Any CPU.Build.0 = Release|Any CPU
+		{C8C058F0-01DA-41B9-BBAA-6787C5C755F1}.MacOS|Any CPU.ActiveCfg = Release|Any CPU
+		{C8C058F0-01DA-41B9-BBAA-6787C5C755F1}.MacOS|Any CPU.Build.0 = Release|Any CPU
 		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.Linux|Any CPU.ActiveCfg = Debug|Any CPU
-		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.Linux|Any CPU.Build.0 = Debug|Any CPU
+		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.Linux|Any CPU.ActiveCfg = Release|Any CPU
+		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.Linux|Any CPU.Build.0 = Release|Any CPU
+		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.MacOS|Any CPU.ActiveCfg = Release|Any CPU
+		{F5041E4B-77E7-4783-8A74-41BFD49FB9E8}.MacOS|Any CPU.Build.0 = Release|Any CPU
 		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.Linux|Any CPU.ActiveCfg = Linux|Any CPU
 		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.Linux|Any CPU.Build.0 = Linux|Any CPU
+		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.MacOS|Any CPU.ActiveCfg = MacOS|Any CPU
+		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.MacOS|Any CPU.Build.0 = MacOS|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

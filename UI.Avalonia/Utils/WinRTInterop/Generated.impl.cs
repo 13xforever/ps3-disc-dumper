@@ -3,7 +3,7 @@ using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using MicroCom.Runtime;
-#pragma warning disable CS0108, CS8600
+#pragma warning disable CS0108, CS8600, CA2255
 
 namespace UI.Avalonia.Utils.WinRTInterop.Impl;
 
