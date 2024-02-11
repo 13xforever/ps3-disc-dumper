@@ -210,16 +210,19 @@ public class Dumper: IDisposable
             }
 
             const int nameBufferSize = 32;
-            var bsdName = new StringBuilder(nameBufferSize);
+            Span<byte> bsdNameBuf = stackalloc byte[nameBufferSize];
             for (var drive = IOKit.IOIteratorNext(iterator); drive != IntPtr.Zero; drive = IOKit.IOIteratorNext(iterator))
             {
                 var cfBsdName = IOKit.IORegistryEntryCreateCFProperty(drive, IOKit.BsdNameKey, IntPtr.Zero, 0);
                 if (cfBsdName != IntPtr.Zero)
                 {
-                    bsdName.Clear().EnsureCapacity(nameBufferSize);
-                    if (CoreFoundation.CFStringGetCString(cfBsdName, bsdName, nameBufferSize, CoreFoundation.StringEncodingAscii))
+                    if (CoreFoundation.CFStringGetCString(cfBsdName, bsdNameBuf, nameBufferSize, CoreFoundation.StringEncodingAscii))
                     {
                         // We change "disk" to "rdisk" in the BSD name to be able to open while mounted.
+                        var len = bsdNameBuf.IndexOf((byte)0);
+                        if (len < 0)
+                            len = nameBufferSize;
+                        var bsdName = Encoding.ASCII.GetString(bsdNameBuf[..len]);
                         physicalDrives.Add($"/dev/r{bsdName}");
                     }
                 }

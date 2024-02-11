@@ -55,7 +55,7 @@ public static partial class CoreFoundation
     public static partial IntPtr CFDictionaryCreate(IntPtr allocator, IntPtr[] keys, IntPtr[] values, nint numValues, IntPtr keyCallbacks, IntPtr valueCallbacks);
 
     //StringBuilder is not supported for codegen with LibraryImport
-    [DllImport(CfLibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [LibraryImport(CfLibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.U1)]
-    public static extern bool CFStringGetCString(IntPtr theString, StringBuilder buffer, long bufferSize, uint encoding);
+    public static partial bool CFStringGetCString(IntPtr theString, Span<byte> buffer, long bufferSize, uint encoding);
 }
