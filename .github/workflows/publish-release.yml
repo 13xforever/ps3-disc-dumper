@@ -1,8 +1,5 @@
 name: 'Publish Release'
 on:
-  push:
-    tags:
-      - v*
   workflow_dispatch:
     inputs:
       version:
