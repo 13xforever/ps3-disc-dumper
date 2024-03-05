@@ -90,7 +90,7 @@
 		    </Button>
 		    <!-- window title -->
 			<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="14 10 0 0"
-		               FontSize="12"
+		               FontSize="12" IsHitTestVisible="False"
 		               IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=IsExtendedIntoWindowDecorations}"
 		               Text="{Binding CurrentPage.PageTitle}"/>
 	    </StackPanel>
