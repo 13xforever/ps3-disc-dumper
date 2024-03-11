@@ -18,20 +18,31 @@ public partial class MainViewModel
         }
         catch (InvalidOperationException)
         {
-            //ignore in design mode
         }
     }
 
     partial void EnableTaskbarProgress()
     {
-        if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
-            TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal);
+        try
+        {
+            if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
+                TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal);
+        }
+        catch (InvalidOperationException)
+        {
+        }
     }
 
     partial void SetTaskbarProgress(int position)
     {
-        if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
-            TaskbarManager.Instance.SetProgressValue(position, ProgressMax);
+        try
+        {
+            if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
+                TaskbarManager.Instance.SetProgressValue(position, ProgressMax);
+        }
+        catch (InvalidOperationException)
+        {
+        }
     }
 }
 #endif

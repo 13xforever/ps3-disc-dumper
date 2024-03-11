@@ -63,6 +63,7 @@
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.10" />
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.10" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+        <PackageReference Include="FluentAvaloniaUI" Version="2.0.5" />
         <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     </ItemGroup>
     <ItemGroup Condition="'$(TargetFramework)'=='net8.0-windows'">

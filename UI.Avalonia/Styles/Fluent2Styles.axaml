@@ -8,7 +8,6 @@
     <Styles.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceInclude Source="WinUICommonResources.axaml"/>
                 <ResourceInclude Source="Fluent2CustomResources.axaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
@@ -194,6 +193,7 @@
     </Style>
     
     <!-- combobox -->
+    <!--
     <Style Selector="ComboBox">
         <Setter Property="CornerRadius" Value="4"/>
     </Style>
@@ -210,6 +210,7 @@
         <Setter Property="CornerRadius" Value="3"/>
         <Setter Property="Margin" Value="0 2"/>
     </Style>
+    -->
     
     <!-- progress bar -->
     <Style Selector="ProgressBar">
