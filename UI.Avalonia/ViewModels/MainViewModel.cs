@@ -144,7 +144,10 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             ProductCode = dumper.ProductCode;
             GameTitle = dumper.Title;
             DiscSizeInfo = $"{dumper.TotalFileSize.AsStorageUnit()} ({dumper.TotalFileCount} files)";
-            if (Math.Abs(dumper.TotalDiscSize - dumper.TotalFileSize) > 100 * 1024 * 1024)
+            var diffMargin = 100 * 1024 * 1024;
+            if (!SettingsProvider.Settings.CopyPs3Update)
+                diffMargin = 356 * 1024 * 1024;
+            if (Math.Abs(dumper.TotalDiscSize - dumper.TotalFileSize) > diffMargin)
                 DiscSizeDiffInfoLink = SettingsViewModel.WikiUrlBase + "Dump-size-is-significantly-different-from-disc-size";
 
             StepTitle = "Looking for a disc key";
