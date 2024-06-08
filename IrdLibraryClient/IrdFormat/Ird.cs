@@ -18,7 +18,7 @@ public class Ird
     public byte RegionCount;
     public List<byte[]> RegionMd5Checksums = null!; // 16 each
     public int FileCount;
-    public List<IrdFile> Files = new();
+    public List<IrdFile> Files = [];
     public int Unknown; // always 0?
     public byte[]? Pic; // 115, v9 only?
     public byte[] Data1 = null!; // 16

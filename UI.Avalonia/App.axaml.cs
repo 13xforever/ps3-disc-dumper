@@ -17,11 +17,11 @@ namespace UI.Avalonia;
 public partial class App : Application
 {
     private static readonly WindowTransparencyLevel[] DesiredTransparencyHints =
-    {
+    [
         WindowTransparencyLevel.Mica,
         WindowTransparencyLevel.AcrylicBlur,
         WindowTransparencyLevel.None,
-    };
+    ];
 
     private readonly Lazy<bool> isMicaCapable = new(() =>
         Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: Window w }

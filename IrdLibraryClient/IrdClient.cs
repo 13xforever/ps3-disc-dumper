@@ -35,13 +35,13 @@ public abstract class IrdClient: IIrdClient
             catch (Exception e)
             {
                 Log.Warn(e, "Failed to make API call to IRD Library");
-                return new();
+                return [];
             }
         }
         catch (Exception e)
         {
             Log.Error(e);
-            return new();
+            return [];
         }
     }
 

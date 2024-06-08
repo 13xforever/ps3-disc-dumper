@@ -9,7 +9,7 @@ public class Sfb
     public short VersionMajor;
     public short VersionMinor;
     public byte[] Unknown1; // 0x18
-    public readonly List<SfbKeyEntry> KeyEntries = new();
+    public readonly List<SfbKeyEntry> KeyEntries = [];
 }
 
 public class SfbKeyEntry

@@ -12,13 +12,13 @@ public static class HexExtensions
             return null;
 
         if (hexString.Length == 0)
-            return new byte[0];
+            return [];
 
         if (hexString.Length % 2 != 0)
             throw new FormatException("Not a valid hex string");
 
         var result = new byte[hexString.Length / 2];
-        for (int i = 0; i < hexString.Length; i += 2)
+        for (var i = 0; i < hexString.Length; i += 2)
             result[i / 2] = byte.Parse(hexString.Substring(i, 2), NumberStyles.HexNumber);
         return result;
     }

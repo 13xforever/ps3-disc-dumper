@@ -7,11 +7,13 @@ namespace Ps3DiscDumper.Utils;
 
 public static class PatternFormatter
 {
-    private static readonly char[] InvalidChars = Path.GetInvalidFileNameChars()
-        .Concat(Path.GetInvalidPathChars())
-        .Concat(new[] { ':', '/', '\\', '?', '*', '<', '>', '|' })
-        .Distinct()
-        .ToArray();
+    private static readonly char[] InvalidChars = [
+        ..((char[])[
+            ..Path.GetInvalidFileNameChars(),
+            ..Path.GetInvalidPathChars(),
+            ':', '/', '\\', '?', '*', '<', '>', '|'
+        ]).Distinct()
+    ];
         
     public static string Format(string pattern, NameValueCollection items)
     {

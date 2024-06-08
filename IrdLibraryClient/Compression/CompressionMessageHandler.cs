@@ -4,7 +4,7 @@ public class CompressionMessageHandler : DelegatingHandler
 {
     public ICollection<ICompressor> Compressors { get; }
     public static readonly string PostCompressionFlag = "X-Set-Content-Encoding";
-    public static readonly string[] DefaultContentEncodings = { "gzip", "deflate" };
+    public static readonly string[] DefaultContentEncodings = ["gzip", "deflate"];
     public static readonly string DefaultAcceptEncodings = "gzip, deflate";
 
     private bool isServer;

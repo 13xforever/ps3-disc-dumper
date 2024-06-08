@@ -32,7 +32,7 @@ public struct Settings
         (false, false) => BdmvFolders.Concat(Ps3UpdateFolder).ToArray(),
         (false, true) => BdmvFolders,
         (true, false) => Ps3UpdateFolder,
-        _ => Array.Empty<string>(),
+        _ => [],
     };
 
     private static StringComparison Comparison => OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;

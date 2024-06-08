@@ -52,8 +52,8 @@ public partial class Dumper: IDisposable
     private byte[] discSfbData;
     private static readonly Dictionary<string, ImmutableArray<byte>> Detectors = new()
     {
-        [@"\PS3_GAME\LICDIR\LIC.DAT"] = "PS3LICDA"u8.ToImmutableArray(),
-        [@"\PS3_GAME\USRDIR\EBOOT.BIN"] = "SCE"u8.ToArray().Concat(new byte[] { 0, 0, 0, 0, 2 }).ToImmutableArray(),
+        [@"\PS3_GAME\LICDIR\LIC.DAT"] = [.."PS3LICDA"u8],
+        [@"\PS3_GAME\USRDIR\EBOOT.BIN"] = [.."SCE"u8, 0, 0, 0, 0, 2],
     };
     private byte[] detectionSector;
     private ImmutableArray<byte> detectionBytesExpected;
@@ -112,7 +112,7 @@ public partial class Dumper: IDisposable
         get
         {
             var tmp = Decrypter?.SectorPosition;
-            if (tmp == null)
+            if (tmp is null)
                 return currentSector;
             return currentSector = tmp.Value;
         }
@@ -246,7 +246,7 @@ public partial class Dumper: IDisposable
     private string CheckDiscSfb(byte[] discSfbData)
     {
         var sfb = SfbReader.Parse(discSfbData);
-        var flags = new HashSet<char>(sfb.KeyEntries.FirstOrDefault(e => e.Key == "HYBRID_FLAG")?.Value?.ToCharArray() ?? Array.Empty<char>());
+        var flags = new HashSet<char>(sfb.KeyEntries.FirstOrDefault(e => e.Key == "HYBRID_FLAG")?.Value?.ToCharArray() ?? []);
         Log.Debug($"Disc flags: {string.Concat(flags)}");
         if (!flags.Contains('g'))
             Log.Warn("Disc is not a game disc");
