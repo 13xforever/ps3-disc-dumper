@@ -33,7 +33,7 @@ public class IrdTests
 
         await using var decompressedStream = GetDecompressHeader(ird);
         var reader = new CDReader(decompressedStream, true, true);
-        var (files, _) = reader.GetFilesystemStructure();
+        var (files, _) = await reader.GetFilesystemStructureAsync(CancellationToken.None).ConfigureAwait(false);
         Assert.That(files, Has.Count.EqualTo(expectedFileCount));
     }
 

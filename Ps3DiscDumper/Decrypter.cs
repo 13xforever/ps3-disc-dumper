@@ -143,7 +143,7 @@ public class Decrypter : Stream, IDisposable
                     Log.Debug($"Block has only {(readCount % 16) * 8} bits of data, reading raw sector...");
                     discStream.Seek(SectorPosition * sectorSize, SeekOrigin.Begin);
                     var newTmpSector = new byte[sectorSize];
-                    discStream.ReadExact(newTmpSector, 0, sectorSize);
+                    discStream.ReadExactly(newTmpSector, 0, sectorSize);
                     if (!newTmpSector.Take(readCount).SequenceEqual(tmpSector.Take(readCount)))
                         Log.Warn($"Filesystem data and raw data do not match for sector 0x{SectorPosition:x8}");
                     tmpSector = newTmpSector;

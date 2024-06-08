@@ -45,6 +45,18 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private bool? success;
     [ObservableProperty] private bool? validated;
 
+    private string[] AnalyzingMessages =
+    [
+        "Analyzing the file structure",
+        "File structure analysis is taking longer than expected",
+        "Still analyzing the file structure",
+        "Yep, still analyzing the file structure",
+        "You wouldn't believe, but still analyzing",
+        "I can't believe it's taking so long",
+        "Hopefully it'll be over soon",
+        "How many files are there on this disc",
+    ];
+
     internal Dumper? dumper;
     private readonly SemaphoreSlim scanLock = new(1, 1);
 
@@ -86,10 +98,10 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     [RelayCommand]
-    private void ScanDiscs() => Dispatcher.UIThread.Post(() => ScanDiscsAsync(), DispatcherPriority.Background);
+    private void ScanDiscs() => ScanDiscsAsync();
 
     [RelayCommand]
-    private void DumpDisc() => Dispatcher.UIThread.Post(() => DumpDiscAsync(), DispatcherPriority.Background);
+    private void DumpDisc() => DumpDiscAsync();
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
     [RelayCommand]
@@ -116,6 +128,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             StepSubtitle = "Checking the inserted disc…";
             dumper?.Dispose();
             dumper = new();
+            await Task.Yield();
+            
             try
             {
                 dumper.DetectDisc("",
@@ -152,6 +166,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
             StepTitle = "Looking for a disc key";
             StepSubtitle = "Checking IRD and Redump data sets…";
+            await Task.Yield();
             try
             {
                 await dumper.FindDiscKeyAsync(settings.IrdDir).WaitAsync(dumper.Cts.Token).ConfigureAwait(false);
@@ -225,7 +240,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
         StepTitle = "Dumping the disc";
         StepSubtitle = "Decrypting and copying the data…";
-        ProgressInfo = "Analyzing the file structure";
+        ProgressInfo = AnalyzingMessages[0];
         LastOperationSuccess = true;
         LastOperationWarning = false;
         LastOperationNotification = false;
@@ -233,7 +248,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         DumpingInProgress = true;
         CanEditSettings = false;
         EnableTaskbarProgress();
-
+        await Task.Yield();
+        
         try
         {
             var threadCts = new CancellationTokenSource();
@@ -242,6 +258,10 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             {
                 try
                 {
+                    string[] dotsAnimation = ["", ".", "..", "..."];
+                    var animFrameIdx = 0;
+                    var curAnalysisMsgIdx = 0;
+                    var cnt = 0;
                     do
                     {
                         if (dumper.TotalSectors > 0 && !dumper.Cts.IsCancellationRequested)
@@ -251,7 +271,15 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                             Progress = (int)((dumper.ProcessedSectors + dumper.CurrentFileSector) * 10000L / dumper.TotalFileSectors);
                             ProgressInfo = $"Sector data {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
                         }
-                        Task.Delay(200, combinedToken.Token).GetAwaiter().GetResult();
+                        else
+                        {
+                            ProgressInfo = $"{AnalyzingMessages[curAnalysisMsgIdx]}{dotsAnimation[animFrameIdx]}";
+                            if (++cnt % 5 is 0)
+                                animFrameIdx = (animFrameIdx + 1) % dotsAnimation.Length;
+                            if (cnt % 600 is 0)
+                                curAnalysisMsgIdx = (curAnalysisMsgIdx + 1) % AnalyzingMessages.Length;
+                        }
+                        Task.Delay(100, combinedToken.Token).GetAwaiter().GetResult();
                     } while (!combinedToken.Token.IsCancellationRequested);
                 }
                 catch (TaskCanceledException)
@@ -259,7 +287,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                 }
             });
             monitor.Start();
-            await dumper.DumpAsync(settings.OutputDir).WaitAsync(dumper.Cts.Token);
+            await dumper.DumpAsync(settings.OutputDir).WaitAsync(dumper.Cts.Token).ConfigureAwait(false);
             await threadCts.CancelAsync().ConfigureAwait(false);
             monitor.Join(100);
         }
@@ -284,6 +312,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         CanEditSettings = true;
         DumperIsReady = false;
         FoundDisc = false;
+        await Task.Yield();
         if (dumper.Cts.IsCancellationRequested
             || LastOperationSuccess is false
             || LastOperationWarning is true)

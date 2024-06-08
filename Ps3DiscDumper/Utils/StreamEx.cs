@@ -1,9 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Ps3DiscDumper.Utils;
 
 public static class StreamEx
 {
+    [Obsolete]
     public static int ReadExact(this Stream input, byte[] buffer, int offset, int count)
     {
         var result = 0;

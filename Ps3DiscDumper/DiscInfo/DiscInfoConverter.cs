@@ -2,6 +2,8 @@
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using DiscUtils.Iso9660;
 using IrdLibraryClient;
 using IrdLibraryClient.IrdFormat;
@@ -11,18 +13,18 @@ namespace Ps3DiscDumper.DiscInfo;
 
 public static class DiscInfoConverter
 {
-    public static DiscInfo ToDiscInfo(this Ird ird)
+    public static async Task<DiscInfo> ToDiscInfoAsync(this Ird ird, CancellationToken cancellationToken)
     {
         List<FileRecord> fsInfo;
         var sectorSize = 2048L;
         using (var stream = new MemoryStream())
         {
             using (var headerStream = new MemoryStream(ird.Header))
-            using (var gzipStream = new GZipStream(headerStream, CompressionMode.Decompress))
-                gzipStream.CopyTo(stream);
+            await using (var gzipStream = new GZipStream(headerStream, CompressionMode.Decompress))
+                await gzipStream.CopyToAsync(stream, cancellationToken).ConfigureAwait(false);
             stream.Seek(0, SeekOrigin.Begin);
             var reader = new CDReader(stream, true, true);
-            (fsInfo, _) = reader.GetFilesystemStructure();
+            (fsInfo, _) = await reader.GetFilesystemStructureAsync(cancellationToken).ConfigureAwait(false);
             sectorSize = reader.ClusterSize;
         }
         var checksums = new Dictionary<long, List<string>>(ird.FileCount);

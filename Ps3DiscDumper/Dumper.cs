@@ -378,6 +378,7 @@ public partial class Dumper: IDisposable
                 Log.Trace($"Getting keys from {keyProvider.GetType().Name}...");
                 var newKeys = await keyProvider.EnumerateAsync(discKeyCachePath, ProductCode, Cts.Token).ConfigureAwait(false);
                 Log.Trace($"Got {newKeys.Count} keys from {keyProvider.GetType().Name}");
+                await Task.Yield();
                 lock (AllKnownDiscKeys)
                 {
                     foreach (var keyInfo in newKeys)
@@ -427,6 +428,7 @@ public partial class Dumper: IDisposable
             throw;
         }
         Log.Debug($"Found {physicalDrives.Count} physical drives");
+        await Task.Yield();
 
         if (physicalDrives.Count == 0)
             throw new InvalidOperationException("No optical drives were found");
@@ -453,7 +455,7 @@ public partial class Dumper: IDisposable
                         var sector = tmpDiscReader.PathToClusters(discSfbInfo.FullName).First().Offset;
                         Log.Trace($"PS3_DISC.SFB sector number is {sector}, reading content...");
                         discStream.Seek(sector * tmpDiscReader.ClusterSize, SeekOrigin.Begin);
-                        discStream.ReadExact(buf, 0, buf.Length);
+                        await discStream.ReadExactlyAsync(buf, 0, buf.Length).ConfigureAwait(false);
                         if (buf.SequenceEqual(discSfbData))
                         {
                             SelectedPhysicalDevice = drive;
@@ -467,6 +469,7 @@ public partial class Dumper: IDisposable
             {
                 Log.Debug($"Skipping drive {drive}: {e.Message}");
             }
+            await Task.Yield();
         }
         if (SelectedPhysicalDevice == null)
             throw new AccessViolationException("Direct disk access to the drive was denied");
@@ -498,6 +501,7 @@ public partial class Dumper: IDisposable
                     Log.Debug($"Using {path} for disc key detection");
                     break;
                 }
+            await Task.Yield();
         }
         catch (Exception e)
         {
@@ -517,11 +521,12 @@ public partial class Dumper: IDisposable
         detectionBytesExpected = expectedBytes;
         sectorIV = Decrypter.GetSectorIV(detectionRecord.StartSector);
         Log.Debug($"Initialized {nameof(sectorIV)} ({sectorIV?.Length * 8} bit) for sector {detectionRecord.StartSector}: {sectorIV?.ToHexString()}");
-        driveStream.ReadExact(detectionSector, 0, detectionSector.Length);
+        await driveStream.ReadExactlyAsync(detectionSector, 0, detectionSector.Length).ConfigureAwait(false);
         string discKey = null;
         try
         {
             var validKeys = untestedKeys.AsParallel().Where(k => !Cts.IsCancellationRequested && IsValidDiscKey(k)).Distinct().ToList();
+            await Task.Yield();
             if (validKeys.Count > 1)
             {
                 Log.Warn($"Expected only one valid decryption key, but found {validKeys.Count}:");
@@ -566,29 +571,30 @@ public partial class Dumper: IDisposable
         while (!string.IsNullOrEmpty(dumpPath) && !Directory.Exists(dumpPath))
         {
             var parent = Path.GetDirectoryName(dumpPath);
-            if (parent == null || parent == dumpPath)
+            if (parent is null || parent == dumpPath)
                 dumpPath = null;
             else
                 dumpPath = parent;
         }
         if (filesystemStructure is null)
         {
-            (filesystemStructure, emptyDirStructure) = GetFilesystemStructure();
+            (filesystemStructure, emptyDirStructure) = await GetFilesystemStructureAsync(Cts.Token).ConfigureAwait(false);
             var filterDirList = SettingsProvider.Settings.FilterDirList;
             var prefixList = filterDirList.Select(f => f + Path.DirectorySeparatorChar).ToArray();
             if (SettingsProvider.Settings.FilterRequired)
             {
                 filesystemStructure = filesystemStructure
-                    .Where(r => !filterDirList.Any(f => r.TargetFileName == f) &&
-                                !prefixList.Any(p => r.TargetFileName.StartsWith(p)))
-                    .ToList();
+                    .Where(r => !filterDirList.Any(f => r.TargetFileName == f)
+                                && !prefixList.Any(p => r.TargetFileName.StartsWith(p))
+                    ).ToList();
                 emptyDirStructure = emptyDirStructure
-                    .Where(r => !filterDirList.Any(f => r.TargetDirName == f) &&
-                                !prefixList.Any(p => r.TargetDirName.StartsWith(p)))
-                    .ToList();
+                    .Where(r => !filterDirList.Any(f => r.TargetDirName == f)
+                                && !prefixList.Any(p => r.TargetDirName.StartsWith(p))
+                    ).ToList();
             }
         }
-        var validators = GetValidationInfo();
+        await Task.Yield();
+        var validators = await GetValidationInfoAsync().ConfigureAwait(false);
         if (!string.IsNullOrEmpty(dumpPath))
         {
             var fullOutputPath = Path.GetFullPath(output);
@@ -606,11 +612,14 @@ public partial class Dumper: IDisposable
                     Log.Warn($"Target drive might require {diff.AsStorageUnit()} of additional free space");
             }
         }
+        await Task.Yield();
 
         foreach (var dir in emptyDirStructure)
             Log.Trace($"Empty dir: {dir}");
+        await Task.Yield();
         foreach (var file in filesystemStructure)
             Log.Trace($"0x{file.StartSector:x8}: {file.TargetFileName} ({file.SizeInBytes}, {file.FileInfo.CreationTimeUtc:u})");
+        await Task.Yield();
         var outputPathBase = Path.Combine(output, OutputDir);
         Log.Debug($"Output path: {outputPathBase}");
         if (!Directory.Exists(outputPathBase))
@@ -648,6 +657,7 @@ public partial class Dumper: IDisposable
                 BrokenFiles.Add((dir.TargetDirName, "Unexpected error: " + ex.Message));
             }
         }
+        await Task.Yield();
 
         foreach (var file in filesystemStructure)
         {
@@ -733,6 +743,7 @@ public partial class Dumper: IDisposable
                             ValidationStatus = false;
                         }
                     }
+                    await Task.Yield();
                 } while (error && tries > 0 && !Cts.IsCancellationRequested);
 
                 _ = new FileInfo(outputFilename)
@@ -820,36 +831,36 @@ public partial class Dumper: IDisposable
     }
 
         
-    private (List<FileRecord> files, List<DirRecord> dirs) GetFilesystemStructure()
+    private async Task<(List<FileRecord> files, List<DirRecord> dirs)> GetFilesystemStructureAsync(CancellationToken cancellationToken)
     {
         var pos = driveStream.Position;
         var buf = new byte[64 * 1024 * 1024];
         driveStream.Seek(0, SeekOrigin.Begin);
-        driveStream.ReadExact(buf, 0, buf.Length);
+        await driveStream.ReadExactlyAsync(buf, 0, buf.Length, cancellationToken).ConfigureAwait(false);
         driveStream.Seek(pos, SeekOrigin.Begin);
         try
         {
             using var memStream = new MemoryStream(buf, false);
             var reader = new CDReader(memStream, true, true);
-            return reader.GetFilesystemStructure();
+            return await reader.GetFilesystemStructureAsync(cancellationToken).ConfigureAwait(false);
         }
         catch (Exception e)
         {
             Log.Error(e, "Failed to buffer TOC");
         }
-        return discReader.GetFilesystemStructure();
+        return await discReader.GetFilesystemStructureAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    private List<DiscInfo.DiscInfo> GetValidationInfo()
+    private async Task<List<DiscInfo.DiscInfo>> GetValidationInfoAsync()
     {
         var discInfoList = new List<DiscInfo.DiscInfo>();
         foreach (var discKeyInfo in allMatchingKeys.Where(ki => ki.KeyType == KeyType.Ird))
         {
-            var ird = IrdParser.Parse(File.ReadAllBytes(discKeyInfo.FullPath));
+            var ird = IrdParser.Parse(await File.ReadAllBytesAsync(discKeyInfo.FullPath).ConfigureAwait(false));
             if (!DiscVersion.Equals(ird.GameVersion))
                 continue;
 
-            discInfoList.Add(ird.ToDiscInfo());
+            discInfoList.Add(await ird.ToDiscInfoAsync(Cts.Token).ConfigureAwait(false));
         }
         return discInfoList;
     }

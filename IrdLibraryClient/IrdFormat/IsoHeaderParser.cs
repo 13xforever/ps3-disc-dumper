@@ -5,12 +5,14 @@ namespace IrdLibraryClient.IrdFormat;
 
 public static class IsoHeaderParser
 {
-    public static (List<FileRecord> files, List<DirRecord> dirs) GetFilesystemStructure(this CDReader reader)
+    public static async Task<(List<FileRecord> files, List<DirRecord> dirs)> GetFilesystemStructureAsync(this CDReader reader, CancellationToken cancellationToken)
     {
+        Log.Debug("Scanning filesystem structure…");
         var fsObjects = reader.GetFileSystemEntries(reader.Root.FullName).ToList();
         var nextLevel = new List<string>();
-        var filePaths = new List<string>();
+        var filePaths = new List<string>(20_000);
         var dirPaths = new List<string>();
+        var cnt = 0;
         while (fsObjects.Any())
         {
             foreach (var path in fsObjects)
@@ -24,6 +26,11 @@ public static class IsoHeaderParser
                 }
                 else
                     Log.Warn($"Unknown filesystem object: {path}");
+                if (++cnt <= 200)
+                    continue;
+                
+                await Task.Yield();
+                cnt = 0;
             }
             (fsObjects, nextLevel) = (nextLevel, fsObjects);
             nextLevel.Clear();
@@ -38,11 +45,12 @@ public static class IsoHeaderParser
             .Select(di => new DirRecord(di.dir, new(di.info.CreationTimeUtc, di.info.LastWriteTimeUtc)))
             .ToList();
 
+        Log.Debug("Building file cluster map…");
         var fileList = new List<FileRecord>();
         foreach (var filename in filenames)
         {
             var targetFilename = filename.TrimStart('\\');
-            if (targetFilename.EndsWith("."))
+            if (targetFilename.EndsWith('.'))
             {
                 Log.Warn($"Fixing potential mastering error in {filename}");
                 targetFilename = targetFilename.TrimEnd('.');
@@ -59,10 +67,13 @@ public static class IsoHeaderParser
             var parent = fileInfo.Parent;
             var parentInfo = new DirRecord(parent.FullName.TrimStart('\\').Replace('\\', Path.DirectorySeparatorChar), new(parent.CreationTimeUtc, parent.LastWriteTimeUtc));
             fileList.Add(new(targetFilename, startSector, lengthInSectors, length, recordInfo, parentInfo));
+            if (++cnt <= 200)
+                continue;
+            
+            await Task.Yield();
+            cnt = 0;
         }
         fileList = fileList.OrderBy(r => r.StartSector).ToList();
-            
-            
         return (files: fileList, dirs: dirList);
     }
 
