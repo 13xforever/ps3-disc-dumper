@@ -28,7 +28,7 @@ using FileInfo = System.IO.FileInfo;
 
 namespace Ps3DiscDumper;
 
-public class Dumper: IDisposable
+public partial class Dumper: IDisposable
 {
     public static readonly string Version = Assembly.GetEntryAssembly()?
                                                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
@@ -38,9 +38,11 @@ public class Dumper: IDisposable
 
     static Dumper() => Log.Info("PS3 Disc Dumper v" + Version);
 
-    private static readonly Regex VersionParts = new(@"(?<ver>\d+(\.\d+){0,2})[ \-]*(?<pre>.*)", RegexOptions.Singleline | RegexOptions.ExplicitCapture);
-    private static readonly Regex ScsiInfoParts = new(@"Host: .+$\s*Vendor: (?<vendor>.+?)\s* Model: (?<model>.+?)\s* Rev: (?<revision>.+)$\s*Type: \s*(?<type>.+?)\s* ANSI  ?SCSI revision: (?<scsi_rev>.+?)\s*$",
-        RegexOptions.Multiline | RegexOptions.ExplicitCapture);
+    [GeneratedRegex(@"(?<ver>\d+(\.\d+){0,2})[ \-]*(?<pre>.*)", RegexOptions.Singleline | RegexOptions.ExplicitCapture)]
+    private static partial Regex VersionParts();
+    [GeneratedRegex(@"Host: .+$\s*Vendor: (?<vendor>.+?)\s* Model: (?<model>.+?)\s* Rev: (?<revision>.+)$\s*Type: \s*(?<type>.+?)\s* ANSI  ?SCSI revision: (?<scsi_rev>.+?)\s*$", RegexOptions.Multiline | RegexOptions.ExplicitCapture)]
+    private static partial Regex ScsiInfoParts();
+
     private static readonly HashSet<char> InvalidChars = [..Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars())];
     private static readonly char[] MultilineSplit = ['\r', '\n'];
     private long currentSector, fileSector;
@@ -178,7 +180,7 @@ public class Dumper: IDisposable
                 var scsiInfo = File.ReadAllText("/proc/scsi/scsi");
                 if (scsiInfo is { Length: > 0 })
                 {
-                    foreach (Match m in ScsiInfoParts.Matches(scsiInfo))
+                    foreach (Match m in ScsiInfoParts().Matches(scsiInfo))
                     {
                         if (m.Groups["type"].Value is not "CD-ROM")
                             continue;
@@ -778,7 +780,8 @@ public class Dumper: IDisposable
         try
         {
             using var client = new HttpClient();
-            var curVerMatch = VersionParts.Match(Version);
+            var versionParts = VersionParts();
+            var curVerMatch = versionParts.Match(Version);
             var curVerStr = curVerMatch.Groups["ver"].Value;
             var curVerPre = curVerMatch.Groups["pre"].Value;
             client.DefaultRequestHeaders.UserAgent.Add(new("PS3DiscDumper", curVerStr));
@@ -789,7 +792,7 @@ public class Dumper: IDisposable
             var latestBeta = releaseList?.FirstOrDefault(r => r.Prerelease);
             System.Version.TryParse(curVerStr, out var curVer);
             System.Version.TryParse(latest?.TagName.TrimStart('v') ?? "0", out var latestVer);
-            var latestBetaMatch = VersionParts.Match(latestBeta?.TagName ?? "");
+            var latestBetaMatch = versionParts.Match(latestBeta?.TagName ?? "");
             var latestBetaVerStr = latestBetaMatch.Groups["ver"].Value;
             var latestBetaVerPre = latestBetaMatch.Groups["pre"].Value;
             System.Version.TryParse("0" + latestBetaVerStr, out var latestBetaVer);
