@@ -55,18 +55,18 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.0.11" />
-        <PackageReference Include="Avalonia.Desktop" Version="11.0.11" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.11" />
-        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.11" />
+        <PackageReference Include="Avalonia" Version="11.1.0" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.1.0" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.1.0" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.1.0" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.11" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.11" />
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.1.0" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.1.0" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
         <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     </ItemGroup>
     <ItemGroup Condition="'$(TargetFramework)'=='net8.0-windows'">
-        <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.22621.6" />
+        <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.26100" />
         <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
     </ItemGroup>
     <ItemGroup Condition="'$(Configuration)' == 'MacOS'">
