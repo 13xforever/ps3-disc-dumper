@@ -1,4 +1,5 @@
-name: 'Publish Release'
+name: Publish Release
+
 on:
   workflow_dispatch:
     inputs:
@@ -6,8 +7,10 @@ on:
         description: 'Version tag in format x.y.z[-pre]'
         required: true
         type: string
+
 env:
   dotnet_version: '8.0'
+
 jobs:
   publish:
     strategy:
@@ -30,35 +33,47 @@ jobs:
             target: ''
             rid: 'osx-arm64'
             command_extra: '-t:BundleApp'
-    runs-on: '${{ matrix.os }}'
+    
+    runs-on: ${{ matrix.os }}
+    
     env:
-      version_full: '${{ github.ref_name }}'
-      version_short: '${{ github.ref_name }}'
+      version_full: ${{ github.ref_name }}
+      version_short: ${{ github.ref_name }}
       artifact_name: 'ps3-disc-dumper_vX.Y.Z.zip'
+
     permissions:
       contents: write
+
     steps:
-      - uses: actions/checkout@v4
-      - name: 'Replace full version with custom input value'
-        if: '${{ inputs.version }}'
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Replace full version with custom input value
+        if: ${{ inputs.version }}
         shell: pwsh
-        run: 'Write-Output "version_full=${{ inputs.version }}" >> $env:GITHUB_ENV'
-      - name: 'Fix full version format'
+        run: |
+          Write-Output "version_full=${{ inputs.version }}" >> $env:GITHUB_ENV
+
+      - name: Fix full version format
         shell: pwsh
         run: |
           $ver = '${{ env.version_full }}'.TrimStart('v')
           Write-Output "version_full=$ver" >> $env:GITHUB_ENV
-      - name: 'Generate short version'
+
+      - name: Generate short version
         shell: pwsh
         run: |
           $ver = [SemVer]'${{ env.version_full }}'
           $short_ver = "$($ver.Major).$($ver.Minor).$($ver.Patch)"
           Write-Host "Got $short_ver from ${{ env.version_full }}"
           Write-Output "version_short=$short_ver" >> $env:GITHUB_ENV
-      - uses: actions/setup-dotnet@v3
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '${{ env.dotnet_version }}.x'
-      - name: "Download current redump snapshot"
+          dotnet-version: '8.0'
+
+      - name: Download current Redump snapshot
         shell: pwsh
         run: |
           $uri = 'http://redump.org/keys/ps3/'
@@ -66,14 +81,15 @@ jobs:
           $fname = $response.Headers['Content-Disposition'].Split('=', 2)[1].Trim('"')
           Invoke-WebRequest -Uri $uri -OutFile "$fname"
           Write-Host "Got $fname"
-      - name: 'Build release'
+
+      - name: Build release
         run: >-
           dotnet publish
           -v:q
           --runtime ${{ matrix.rid }}
           --framework net${{ env.dotnet_version }}${{ matrix.target }}
           --self-contained
-          --configuration ${{ matrix.configuration}}
+          --configuration ${{ matrix.configuration }}
           --output distrib
           UI.Avalonia/UI.Avalonia.csproj
           -p:PublishTrimmed=False
@@ -83,7 +99,8 @@ jobs:
           -p:VersionPrefix=${{ env.version_short }}
           -p:Version=${{ env.version_full }}
           ${{ matrix.command_extra }}
-      - name: 'Make artifact'
+
+      - name: Make artifact
         shell: pwsh
         run: |
           cd distrib
@@ -106,11 +123,12 @@ jobs:
             zip -vr9 "$artifact_name" 'PS3 Disc Dumper.app/' -x '*.DS_Store'
           }
           Write-Output "artifact_name=$artifact_name" >> $env:GITHUB_ENV
-      - name: 'Create or update GitHub release draft'
+
+      - name: Create or update GitHub release draft
         if: ${{ inputs.version }}
         uses: ncipollo/release-action@v1
         with:
-          commit: '${{ github.sha }}'
+          commit: ${{ github.sha }}
           tag: 'v${{ env.version_full }}'
           draft: true
           prerelease: true
@@ -122,7 +140,8 @@ jobs:
           omitBodyDuringUpdate: true
           omitNameDuringUpdate: true
           omitPrereleaseDuringUpdate: true
-      - name: 'Create or update GitHub custom release draft'
+
+      - name: Create or update GitHub custom release draft
         if: ${{ github.event_name == 'push' }}
         uses: ncipollo/release-action@v1
         with:
@@ -136,5 +155,3 @@ jobs:
           omitBodyDuringUpdate: true
           omitNameDuringUpdate: true
           omitPrereleaseDuringUpdate: true
-
-
