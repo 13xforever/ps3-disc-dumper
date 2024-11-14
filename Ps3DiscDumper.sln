@@ -14,6 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deploy", "Deploy", "{BA0C92
 		publish.ps1 = publish.ps1
 		README.md = README.md
 		publish-mac.ps1 = publish-mac.ps1
+		.github\workflows\publish-release.yml = .github\workflows\publish-release.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI.Avalonia", "UI.Avalonia\UI.Avalonia.csproj", "{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}"

@@ -7,7 +7,7 @@ on:
         required: true
         type: string
 env:
-  dotnet_version: '8.0'
+  dotnet_version: '9.0'
 jobs:
   publish:
     strategy:
@@ -55,7 +55,7 @@ jobs:
           $short_ver = "$($ver.Major).$($ver.Minor).$($ver.Patch)"
           Write-Host "Got $short_ver from ${{ env.version_full }}"
           Write-Output "version_short=$short_ver" >> $env:GITHUB_ENV
-      - uses: actions/setup-dotnet@v3
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '${{ env.dotnet_version }}.x'
       - name: "Download current redump snapshot"
