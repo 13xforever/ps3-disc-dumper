@@ -1,10 +1,5 @@
 ﻿using System.IO.Hashing;
-#if NATIVE
-using Ionic.Zlib;
-#else
 using System.IO.Compression;
-#endif
-
 
 namespace IrdLibraryClient.IrdFormat;
 
