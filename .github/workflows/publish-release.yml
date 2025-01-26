@@ -76,7 +76,7 @@ jobs:
           --configuration ${{ matrix.configuration}}
           --output distrib
           UI.Avalonia/UI.Avalonia.csproj
-          -p:PublishTrimmed=False
+          -p:PublishTrimmed=True
           -p:PublishSingleFile=True
           -p:DebugType=None
           -p:DebugSymbols=False
