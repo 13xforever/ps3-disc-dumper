@@ -146,7 +146,5 @@ public static partial class SettingsProvider
     
     [JsonSourceGenerationOptions(WriteIndented = true)]
     [JsonSerializable(typeof(Settings))]
-    [JsonSerializable(typeof(string))]
-    [JsonSerializable(typeof(bool))]
     internal partial class SettingsSerializer: JsonSerializerContext;
 }

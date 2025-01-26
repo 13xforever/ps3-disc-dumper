@@ -19,9 +19,4 @@ public class GitHubReleaseInfo
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower, WriteIndented = true)]
 [JsonSerializable(typeof(GitHubReleaseInfo[]))]
-[JsonSerializable(typeof(GitHubReleaseInfo))]
-[JsonSerializable(typeof(string))]
-[JsonSerializable(typeof(int))]
-[JsonSerializable(typeof(bool))]
-[JsonSerializable(typeof(DateTime))]
 internal partial class GithubReleaseSerializer: JsonSerializerContext;

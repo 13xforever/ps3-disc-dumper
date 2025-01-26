@@ -1,6 +1,5 @@
 ﻿#if WINDOWS
 using System;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Avalonia.Controls;
@@ -22,10 +21,10 @@ public static unsafe class WndProcHelper
         try
         {
             userFunc = onWndProc;
-            var windowImpl = window.PlatformImpl!;
-            //var platformHandle = windowImpl.GetType().GetProperty("Handle", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(windowImpl);
-            var windowHandle = (IntPtr)windowImpl.GetType().GetProperty("Hwnd", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(windowImpl)!;
-            var hwnd = (HWND)windowHandle;
+            if (window.TryGetPlatformHandle() is not { } platformHandle)
+                return false;
+            
+            var hwnd = (HWND)platformHandle.Handle;
             wrappedWndProc = (delegate* unmanaged<HWND, uint, WPARAM, LPARAM, LRESULT>)TerraFX.Interop.Windows.Windows.GetWindowLongPtr(hwnd, GWLP.GWLP_WNDPROC);
             delegate* unmanaged<HWND, uint, WPARAM, LPARAM, LRESULT> wrapperWinProc = &WndProcHook;
             TerraFX.Interop.Windows.Windows.SetWindowLongPtr(hwnd, GWLP.GWLP_WNDPROC, (nint)wrapperWinProc);
