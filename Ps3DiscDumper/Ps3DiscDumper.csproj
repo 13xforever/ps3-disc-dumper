@@ -5,12 +5,16 @@
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  
+
+  <PropertyGroup Condition="'$(PublishTrimmed)' == 'true'">
+    <DefineConstants>TRIMMED</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="..\*Disc?Keys*.zip" Visible="True" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(PublishTrimmed)' != 'true'">
     <PackageReference Include="System.Management" Version="9.0.1" />
   </ItemGroup>
 

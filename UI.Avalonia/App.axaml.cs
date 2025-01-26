@@ -1,7 +1,9 @@
 using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Platform;
@@ -34,6 +36,9 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
+            // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
+            DisableAvaloniaDataAnnotationValidation();
             var safeToRun = SecurityEx.IsSafe(desktop.Args);
             Window w;
             ViewModelBase vm;
@@ -105,6 +110,18 @@ public partial class App : Application
             vm.CurrentPage.TintColor = ThemeConsts.DarkThemeTintColor;
     }
 
+    private void DisableAvaloniaDataAnnotationValidation()
+    {
+        // Get an array of plugins to remove
+        var dataValidationPluginsToRemove =
+            BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
+
+        // remove each entry found
+        foreach (var plugin in dataValidationPluginsToRemove)
+        {
+            BindingPlugins.DataValidators.Remove(plugin);
+        }
+    }
     internal static void OnThemeChanged(object? sender, EventArgs e)
     {
         Window w;
