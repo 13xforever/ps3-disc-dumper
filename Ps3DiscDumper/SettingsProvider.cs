@@ -2,17 +2,17 @@
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Xml.Linq;
 using IrdLibraryClient;
 using SpecialFolder = System.Environment.SpecialFolder;
 
 namespace Ps3DiscDumper;
 
-public static class SettingsProvider
+public static partial class SettingsProvider
 {
     private static readonly string settingsFolder;
     private static readonly string settingsPath;
-    private static readonly JsonSerializerOptions serializerOptions = new() { WriteIndented = true, };
     
     static SettingsProvider()
     {
@@ -54,7 +54,7 @@ public static class SettingsProvider
             using var reader = new StreamReader(file);
             var settingsContent = reader.ReadToEnd();
             Log.Info($"Current settings: {settingsContent}");
-            return JsonSerializer.Deserialize<Settings>(settingsContent);
+            return JsonSerializer.Deserialize(settingsContent, SettingsSerializer.Default.Settings);
         }
         catch (Exception e)
         {
@@ -104,7 +104,7 @@ public static class SettingsProvider
                 result = result with { OutputDir = output };
             if (ird is { Length: > 0 } && Directory.Exists(ird))
                 result = result with { IrdDir = ird };
-            var newSettingsContent = JsonSerializer.Serialize(result, serializerOptions);
+            var newSettingsContent = JsonSerializer.Serialize(result, SettingsSerializer.Default.Settings);
             Log.Info($"Imported settings: {newSettingsContent}");
             return result;
         }
@@ -126,7 +126,7 @@ public static class SettingsProvider
             if (!Directory.Exists(settingsFolder))
                 Directory.CreateDirectory(settingsFolder);
 
-            var settingsContent = JsonSerializer.Serialize(tmp, serializerOptions);
+            var settingsContent = JsonSerializer.Serialize(tmp, SettingsSerializer.Default.Settings);
             Log.Info($"Updated settings: {settingsContent}");
             using var file = File.Open(settingsPath, FileMode.Create, FileAccess.Write, FileShare.Read);
             using var writer = new StreamWriter(file);
@@ -143,4 +143,8 @@ public static class SettingsProvider
 
     private static Settings savedSettings = new();
     public static Settings Settings { get; set; } = new();
+    
+    [JsonSourceGenerationOptions(WriteIndented = true)]
+    [JsonSerializable(typeof(Settings))]
+    internal partial class SettingsSerializer: JsonSerializerContext;
 }

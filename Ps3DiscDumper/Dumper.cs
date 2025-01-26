@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
-using System.Management;
 using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -60,11 +59,6 @@ public partial class Dumper: IDisposable
     private byte[] sectorIV;
     private Stream driveStream;
     private static readonly byte[] Iso9660PrimaryVolumeDescriptorHeader = [0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0x00];
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = new SnakeCasePolicy(),
-        WriteIndented = true,
-    };
     public static readonly NameValueCollection RegionMapping = new()
     {
         ["A"] = "ASIA",
@@ -136,10 +130,10 @@ public partial class Dumper: IDisposable
             throw new NotImplementedException("This should never happen, shut up msbuild");
             
         var physicalDrives = new List<string>();
-#if !NATIVE
+#if !TRIMMED
         try
         {
-            using var physicalMediaQuery = new ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMedia");
+            using var physicalMediaQuery = new System.Management.ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMedia");
             var drives = physicalMediaQuery.Get();
             foreach (var drive in drives)
             {
@@ -147,7 +141,7 @@ public partial class Dumper: IDisposable
                     && tag.StartsWith(@"\\.\CDROM"))
                     physicalDrives.Add(tag);
             }
-            using var cdromQuery = new ManagementObjectSearcher("SELECT * FROM Win32_CDROMDrive");
+            using var cdromQuery = new System.Management.ManagementObjectSearcher("SELECT * FROM Win32_CDROMDrive");
             drives = cdromQuery.Get();
             foreach (var drive in drives)
             {
@@ -162,8 +156,8 @@ public partial class Dumper: IDisposable
                 physicalDrives.Add($@"\\.\CDROM{i}");
         }
 #else
-            for (var i = 0; i < 32; i++)
-                physicalDrives.Add($@"\\.\CDROM{i}");
+        for (var i = 0; i < 32; i++)
+            physicalDrives.Add($@"\\.\CDROM{i}");
 #endif
         return physicalDrives;
     }
@@ -797,8 +791,9 @@ public partial class Dumper: IDisposable
             var curVerPre = curVerMatch.Groups["pre"].Value;
             client.DefaultRequestHeaders.UserAgent.Add(new("PS3DiscDumper", curVerStr));
             var responseJson = await client.GetStringAsync("https://api.github.com/repos/13xforever/ps3-disc-dumper/releases").ConfigureAwait(false);
-            var releaseList = JsonSerializer.Deserialize<List<GitHubReleaseInfo>>(responseJson, JsonOptions);
-            releaseList = releaseList?.OrderByDescending(r => System.Version.TryParse(r.TagName.TrimStart('v'), out var v) ? v : null).ToList();
+            var releaseList = JsonSerializer.Deserialize(responseJson, GithubReleaseSerializer.Default.GitHubReleaseInfoArray)?
+                .OrderByDescending(r => System.Version.TryParse(r.TagName.TrimStart('v'), out var v) ? v : null)
+                .ToList();
             var latest = releaseList?.FirstOrDefault(r => !r.Prerelease);
             var latestBeta = releaseList?.FirstOrDefault(r => r.Prerelease);
             System.Version.TryParse(curVerStr, out var curVer);

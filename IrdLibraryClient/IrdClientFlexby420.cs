@@ -1,17 +1,17 @@
 ﻿using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using IrdLibraryClient.Compression;
 
 namespace IrdLibraryClient;
 
-public class IrdClientFlexby420: IrdClient
+public partial class IrdClientFlexby420: IrdClient
 {
     public override Uri BaseUri { get; } = new("https://flexby420.github.io/playstation_3_ird_database/all.json");
     protected override Regex IrdFilename => throw new NotImplementedException();
     private Uri BaseDownloadUri { get; } = new("https://github.com/FlexBy420/playstation_3_ird_database/raw/main/");
-    private readonly JsonSerializerOptions jsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.KebabCaseLower, };
 
     [DebuggerDisplay("{Link}", Name="{Title}")]
     public class IrdInfo
@@ -22,6 +22,10 @@ public class IrdClientFlexby420: IrdClient
         public string? AppVer { get; set; }
         public string Link { get; set; } = null!;
     }
+
+    [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.KebabCaseLower)]
+    [JsonSerializable(typeof(Dictionary<string, IrdInfo[]>))]
+    private partial class IrdInfoSerializer : JsonSerializerContext;
     
     public override async Task<List<(string productCode, string irdFilename)>> GetFullListAsync(CancellationToken cancellationToken)
     {
@@ -29,7 +33,7 @@ public class IrdClientFlexby420: IrdClient
         {
             try
             {
-                var data = await Client.GetFromJsonAsync<Dictionary<string, IrdInfo[]>>(BaseUri, jsonOptions, cancellationToken).ConfigureAwait(false);
+                var data = await Client.GetFromJsonAsync(BaseUri, IrdInfoSerializer.Default.DictionaryStringIrdInfoArray, cancellationToken).ConfigureAwait(false);
                 if (data is null or { Count: 0 })
                     return [];
                 

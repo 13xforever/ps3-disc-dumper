@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace Ps3DiscDumper.POCOs;
 
@@ -15,3 +16,7 @@ public class GitHubReleaseInfo
     public DateTime CreatedAt { get; set; }
     public DateTime PublishedAt { get; set; }
 }
+
+[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower, WriteIndented = true)]
+[JsonSerializable(typeof(GitHubReleaseInfo[]))]
+internal partial class GithubReleaseSerializer: JsonSerializerContext;
