@@ -60,11 +60,6 @@ public partial class Dumper: IDisposable
     private byte[] sectorIV;
     private Stream driveStream;
     private static readonly byte[] Iso9660PrimaryVolumeDescriptorHeader = [0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0x00];
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = new SnakeCasePolicy(),
-        WriteIndented = true,
-    };
     public static readonly NameValueCollection RegionMapping = new()
     {
         ["A"] = "ASIA",
@@ -797,8 +792,9 @@ public partial class Dumper: IDisposable
             var curVerPre = curVerMatch.Groups["pre"].Value;
             client.DefaultRequestHeaders.UserAgent.Add(new("PS3DiscDumper", curVerStr));
             var responseJson = await client.GetStringAsync("https://api.github.com/repos/13xforever/ps3-disc-dumper/releases").ConfigureAwait(false);
-            var releaseList = JsonSerializer.Deserialize<List<GitHubReleaseInfo>>(responseJson, JsonOptions);
-            releaseList = releaseList?.OrderByDescending(r => System.Version.TryParse(r.TagName.TrimStart('v'), out var v) ? v : null).ToList();
+            var releaseList = JsonSerializer.Deserialize(responseJson, GithubReleaseSerializer.Default.GitHubReleaseInfoArray)?
+                .OrderByDescending(r => System.Version.TryParse(r.TagName.TrimStart('v'), out var v) ? v : null)
+                .ToList();
             var latest = releaseList?.FirstOrDefault(r => !r.Prerelease);
             var latestBeta = releaseList?.FirstOrDefault(r => r.Prerelease);
             System.Version.TryParse(curVerStr, out var curVer);

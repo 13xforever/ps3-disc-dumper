@@ -44,8 +44,8 @@
 
     <PropertyGroup Condition="'$(Configuration)'!='Debug'">
         <PublishSingleFile>true</PublishSingleFile>
-        <PublishTrimmed>false</PublishTrimmed>
-        <PublishReadyToRun>false</PublishReadyToRun>
+        <PublishTrimmed>true</PublishTrimmed>
+        <PublishReadyToRun>true</PublishReadyToRun>
         <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     </PropertyGroup>
 
