@@ -11,7 +11,11 @@ namespace Ps3DiscDumper.DiscKeyProviders;
 
 public class IrdProvider : IDiscKeyProvider
 {
-    private static readonly IIrdClient[] Clients = [new IrdClientFreeFr(), new IrdClientAldos(), new IrdClientFlexby420()];
+    private static readonly IIrdClient[] Clients = [
+        new IrdClientFlexby420(),
+        new IrdClientFreeFr(),
+        new IrdClientAldos(),
+    ];
 
     public async Task<HashSet<DiscKeyInfo>> EnumerateAsync(string discKeyCachePath, string productCode, CancellationToken cancellationToken)
     {

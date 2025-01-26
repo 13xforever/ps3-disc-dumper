@@ -34,7 +34,7 @@ public abstract class IrdClient: IIrdClient
             }
             catch (Exception e)
             {
-                Log.Warn(e, "Failed to make API call to IRD Library");
+                Log.Warn(e, $"Failed to make API call to IRD Library {requestUri}");
                 return [];
             }
         }

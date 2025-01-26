@@ -4,7 +4,7 @@ namespace IrdLibraryClient;
 
 public partial class IrdClientAldos: IrdClient
 {
-    public override Uri BaseUri { get; } = new Uri("https://ps3.aldostools.org/ird/").SetQueryParameters(new Dictionary<string, string>
+    public override Uri BaseUri { get; } = new Uri("http://ps3.aldostools.org/ird/").SetQueryParameters(new Dictionary<string, string>
     {
         ["F"] = "0",
         ["_"] = DateTime.UtcNow.Ticks.ToString(),
