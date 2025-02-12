@@ -37,6 +37,8 @@ jobs:
       artifact_name: 'ps3-disc-dumper_vX.Y.Z.zip'
     permissions:
       contents: write
+      attestations: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - name: 'Replace full version with custom input value'
@@ -83,6 +85,12 @@ jobs:
           -p:VersionPrefix=${{ env.version_short }}
           -p:Version=${{ env.version_full }}
           ${{ matrix.command_extra }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: sigstore/gh-action-sigstore-python@v3.0.0
+        with:
+          inputs: distrib/ps3-disc-dumper.exe
       - name: 'Make artifact'
         shell: pwsh
         run: |
