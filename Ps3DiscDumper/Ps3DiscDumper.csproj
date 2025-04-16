@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(PublishTrimmed)' != 'true'">
-    <PackageReference Include="System.Management" Version="9.0.1" />
+    <PackageReference Include="System.Management" Version="9.0.4" />
   </ItemGroup>
 
   <ItemGroup>
