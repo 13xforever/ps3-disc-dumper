@@ -44,14 +44,14 @@ public partial class MainWindow
         if (msgType is not (DBT_DEVICEARRIVAL or DBT_DEVICEREMOVEPENDING or DBT_DEVICEREMOVECOMPLETE))
             return;
 
-        var hdr = (DEV_BROADCAST_HDR)Marshal.PtrToStructure(lParam, typeof(DEV_BROADCAST_HDR))!;
+        var hdr = Marshal.PtrToStructure<DEV_BROADCAST_HDR>(lParam)!;
 #if DEBUG
         Debug.WriteLine($"hdr: devicetype 0x{hdr.dbch_devicetype:x4}, reserved 0x{hdr.dbch_reserved:x4}");
 #endif
         if (hdr.dbch_devicetype is not DBT_DEVTYP_VOLUME)
             return;
 
-        var vol = (DEV_BROADCAST_VOLUME)Marshal.PtrToStructure(lParam, typeof(DEV_BROADCAST_VOLUME))!;
+        var vol = Marshal.PtrToStructure<DEV_BROADCAST_VOLUME>(lParam)!;
 #if DEBUG
         Debug.WriteLine($"dbcv: devicetype 0x{vol.dbcv_devicetype:x4}, unitmask 0x{vol.dbcv_unitmask:x4}, flags 0x{vol.dbcv_flags:x8}");
 #endif
