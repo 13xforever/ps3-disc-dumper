@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -23,6 +24,7 @@ using Ps3DiscDumper.Sfb;
 using Ps3DiscDumper.Sfo;
 using Ps3DiscDumper.Utils;
 using Ps3DiscDumper.Utils.MacOS;
+using WmiLight;
 using FileInfo = System.IO.FileInfo;
 
 namespace Ps3DiscDumper;
@@ -130,23 +132,22 @@ public partial class Dumper: IDisposable
             throw new NotImplementedException("This should never happen, shut up msbuild");
             
         var physicalDrives = new List<string>();
-#if !TRIMMED
         try
         {
-            using var physicalMediaQuery = new System.Management.ManagementObjectSearcher("SELECT * FROM Win32_PhysicalMedia");
-            var drives = physicalMediaQuery.Get();
+            using var wmiConnection = new WmiConnection();
+            var drives = wmiConnection.CreateQuery("SELECT * FROM Win32_PhysicalMedia");
             foreach (var drive in drives)
             {
-                if (drive.Properties["Tag"].Value is string tag
+                if (drive["Tag"] is string tag
                     && tag.StartsWith(@"\\.\CDROM"))
                     physicalDrives.Add(tag);
             }
-            using var cdromQuery = new System.Management.ManagementObjectSearcher("SELECT * FROM Win32_CDROMDrive");
-            drives = cdromQuery.Get();
+            drives = wmiConnection.CreateQuery("SELECT * FROM Win32_CDROMDrive");
             foreach (var drive in drives)
             {
                 // Name and Caption are the same, so idk if they can be different
-                Log.Info($"Found optical media drive {drive.Properties["Name"].Value} ({drive.Properties["Drive"].Value})");
+                var logicalUnit = drive["SCSILogicalUnit"]?.ToString();
+                Log.Info($@"Found optical media drive {drive["Name"]} ({drive["Drive"]}; \\.\CDROM{logicalUnit})");
             }
         }
         catch (Exception e)
@@ -155,10 +156,6 @@ public partial class Dumper: IDisposable
             for (var i = 0; i < 32; i++)
                 physicalDrives.Add($@"\\.\CDROM{i}");
         }
-#else
-        for (var i = 0; i < 32; i++)
-            physicalDrives.Add($@"\\.\CDROM{i}");
-#endif
         return physicalDrives;
     }
 

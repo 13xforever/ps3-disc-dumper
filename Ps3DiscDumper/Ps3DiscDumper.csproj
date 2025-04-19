@@ -14,8 +14,8 @@
     <EmbeddedResource Include="..\*Disc?Keys*.zip" Visible="True" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(PublishTrimmed)' != 'true'">
-    <PackageReference Include="System.Management" Version="9.0.4" />
+  <ItemGroup>
+    <PackageReference Include="WmiLight" Version="6.13.0" />
   </ItemGroup>
 
   <ItemGroup>
