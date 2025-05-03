@@ -56,9 +56,9 @@ public static class IsoHeaderParser
                 targetFilename = targetFilename.TrimEnd('.');
             }
             targetFilename = targetFilename.Replace('\\', Path.DirectorySeparatorChar);
-            var clusterRange = reader.PathToClusters(filename);
-            if (clusterRange.Length != 1)
-                Log.Warn($"{targetFilename} is split in {clusterRange.Length} ranges");
+            var clusterRange = reader.PathToClusters(filename).ToList();
+            if (clusterRange.Count != 1)
+                Log.Warn($"{targetFilename} is split in {clusterRange.Count} ranges");
             var startSector = clusterRange.Min(r => r.Offset);
             var lengthInSectors = clusterRange.Sum(r => r.Count);
             var length = reader.GetFileLength(filename);
