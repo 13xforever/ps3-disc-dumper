@@ -51,7 +51,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         "File structure analysis is taking longer than expected",
         "Still analyzing the file structure",
         "Yep, still analyzing the file structure",
-        "You wouldn't believe, but still analyzing",
+        "You wouldn't believe it, but we're still analyzing the file structure",
         "I can't believe it's taking so long",
         "Hopefully it'll be over soon",
         "How many files are there on this disc",

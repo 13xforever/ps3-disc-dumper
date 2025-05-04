@@ -477,7 +477,7 @@ public partial class Dumper: IDisposable
             foreach (var path in Detectors.Keys)
                 if (discReader.FileExists(path))
                 {
-                    var clusterRange = discReader.PathToClusters(path);
+                    var clusterRange = discReader.PathToClusters(path).ToList();
                     var fileInfo = discReader.GetFileSystemInfo(path);
                     var recordInfo = new FileRecordInfo(fileInfo.CreationTimeUtc, fileInfo.LastWriteTimeUtc);
                     var parent = fileInfo.Parent;
@@ -705,9 +705,9 @@ public partial class Dumper: IDisposable
                         else if (decrypter.WasEncrypted)
                             Log.Debug("Decrypted " + file.TargetFileName);
 
-                        if (!expectedHashes.Any())
+                        if (expectedHashes.Count is 0)
                         {
-                            if (ValidationStatus == true)
+                            if (ValidationStatus is true)
                                 ValidationStatus = null;
                         }
                         else if (!IsMatch(resultHashes, expectedHashes))

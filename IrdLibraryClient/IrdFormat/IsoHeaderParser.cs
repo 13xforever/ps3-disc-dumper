@@ -13,7 +13,7 @@ public static class IsoHeaderParser
         var filePaths = new List<string>(20_000);
         var dirPaths = new List<string>();
         var cnt = 0;
-        while (fsObjects.Any())
+        while (fsObjects.Count > 0)
         {
             foreach (var path in fsObjects)
             {
