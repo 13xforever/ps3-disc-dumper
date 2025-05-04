@@ -19,6 +19,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deploy", "Deploy", "{BA0C92
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI.Avalonia", "UI.Avalonia\UI.Avalonia.csproj", "{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DiscUtils", "DiscUtils", "{EB7ADFBA-BA22-4EAD-92D0-2051C8867519}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscUtils.Core", "DiscUtils\Library\DiscUtils.Core\DiscUtils.Core.csproj", "{B337EDC1-A67D-4B4F-9859-DC3C39E78BDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscUtils.Streams", "DiscUtils\Library\DiscUtils.Streams\DiscUtils.Streams.csproj", "{16A6432B-1FB4-4DF6-9DD0-8EB9574CAE33}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscUtils.Iso9660", "DiscUtils\Library\DiscUtils.Iso9660\DiscUtils.Iso9660.csproj", "{0ACF2FB2-6A75-495E-8A6C-9D17A22C9A38}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,11 +67,40 @@ Global
 		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.Linux|Any CPU.Build.0 = Linux|Any CPU
 		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.MacOS|Any CPU.ActiveCfg = MacOS|Any CPU
 		{EBFEB92B-CF70-48C2-B1B4-80CC21EFA072}.MacOS|Any CPU.Build.0 = MacOS|Any CPU
+		{B337EDC1-A67D-4B4F-9859-DC3C39E78BDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B337EDC1-A67D-4B4F-9859-DC3C39E78BDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B337EDC1-A67D-4B4F-9859-DC3C39E78BDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B337EDC1-A67D-4B4F-9859-DC3C39E78BDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B337EDC1-A67D-4B4F-9859-DC3C39E78BDE}.Linux|Any CPU.ActiveCfg = Release|Any CPU
+		{B337EDC1-A67D-4B4F-9859-DC3C39E78BDE}.Linux|Any CPU.Build.0 = Release|Any CPU
+		{B337EDC1-A67D-4B4F-9859-DC3C39E78BDE}.MacOS|Any CPU.ActiveCfg = Release|Any CPU
+		{B337EDC1-A67D-4B4F-9859-DC3C39E78BDE}.MacOS|Any CPU.Build.0 = Release|Any CPU
+		{16A6432B-1FB4-4DF6-9DD0-8EB9574CAE33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16A6432B-1FB4-4DF6-9DD0-8EB9574CAE33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16A6432B-1FB4-4DF6-9DD0-8EB9574CAE33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16A6432B-1FB4-4DF6-9DD0-8EB9574CAE33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16A6432B-1FB4-4DF6-9DD0-8EB9574CAE33}.Linux|Any CPU.ActiveCfg = Release|Any CPU
+		{16A6432B-1FB4-4DF6-9DD0-8EB9574CAE33}.Linux|Any CPU.Build.0 = Release|Any CPU
+		{16A6432B-1FB4-4DF6-9DD0-8EB9574CAE33}.MacOS|Any CPU.ActiveCfg = Release|Any CPU
+		{16A6432B-1FB4-4DF6-9DD0-8EB9574CAE33}.MacOS|Any CPU.Build.0 = Release|Any CPU
+		{0ACF2FB2-6A75-495E-8A6C-9D17A22C9A38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0ACF2FB2-6A75-495E-8A6C-9D17A22C9A38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0ACF2FB2-6A75-495E-8A6C-9D17A22C9A38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0ACF2FB2-6A75-495E-8A6C-9D17A22C9A38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0ACF2FB2-6A75-495E-8A6C-9D17A22C9A38}.Linux|Any CPU.ActiveCfg = Release|Any CPU
+		{0ACF2FB2-6A75-495E-8A6C-9D17A22C9A38}.Linux|Any CPU.Build.0 = Release|Any CPU
+		{0ACF2FB2-6A75-495E-8A6C-9D17A22C9A38}.MacOS|Any CPU.ActiveCfg = Release|Any CPU
+		{0ACF2FB2-6A75-495E-8A6C-9D17A22C9A38}.MacOS|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0472A22B-358A-4484-B2BC-E7536BC2CD44}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B337EDC1-A67D-4B4F-9859-DC3C39E78BDE} = {EB7ADFBA-BA22-4EAD-92D0-2051C8867519}
+		{16A6432B-1FB4-4DF6-9DD0-8EB9574CAE33} = {EB7ADFBA-BA22-4EAD-92D0-2051C8867519}
+		{0ACF2FB2-6A75-495E-8A6C-9D17A22C9A38} = {EB7ADFBA-BA22-4EAD-92D0-2051C8867519}
 	EndGlobalSection
 EndGlobal

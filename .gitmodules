@@ -1,0 +1,3 @@
+[submodule "DiscUtils"]
+	path = DiscUtils
+	url = https://github.com/13xforever/DiscUtils.git

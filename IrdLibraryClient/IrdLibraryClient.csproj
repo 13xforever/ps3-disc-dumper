@@ -16,9 +16,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LTRData.DiscUtils.OpticalDisk" Version="1.0.53" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     <PackageReference Include="System.IO.Hashing" Version="9.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DiscUtils\Library\DiscUtils.Iso9660\DiscUtils.Iso9660.csproj" />
+    <ProjectReference Include="..\DiscUtils\Library\DiscUtils.Streams\DiscUtils.Streams.csproj" />
   </ItemGroup>
 
 </Project>

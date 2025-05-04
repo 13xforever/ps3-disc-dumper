@@ -39,6 +39,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: 'true'
       - name: 'Replace full version with custom input value'
         if: '${{ inputs.version }}'
         shell: pwsh
