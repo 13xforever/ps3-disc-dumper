@@ -21,6 +21,7 @@ public class IrdTests
     private static readonly IrdClient Client = new IrdClientFreeFr();
 
     [TestCase("BLES00932", 12721)]
+    [TestCase("BLES00238", 85)]
     public async Task FileStructureParseTest(string productCode, int expectedFileCount)
     {
         var searchResults = await Client.GetFullListAsync(CancellationToken.None).ConfigureAwait(false);
