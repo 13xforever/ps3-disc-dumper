@@ -50,7 +50,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="Models\" />
         <AvaloniaResource Include="Assets\**" />
     </ItemGroup>
 
@@ -67,6 +66,9 @@
     <ItemGroup Condition="'$(TargetFramework)'=='net9.0-windows'">
         <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.26100.2" />
     </ItemGroup>
+    <ItemGroup Condition="'$(Configuration)'=='Linux'">
+        <PackageReference Include="Tmds.DBus.Protocol" Version="0.21.2" />
+    </ItemGroup>
     <ItemGroup Condition="'$(Configuration)' == 'MacOS'">
         <PackageReference Include="Dotnet.Bundle" Version="0.9.13" />
         <ContentWithTargetPath Include="Assets\icon.icns">
@@ -78,5 +80,9 @@
     <ItemGroup>
       <ProjectReference Include="..\IrdLibraryClient\IrdLibraryClient.csproj" />
       <ProjectReference Include="..\Ps3DiscDumper\Ps3DiscDumper.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Utils\DBus\" />
     </ItemGroup>
 </Project>

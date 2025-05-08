@@ -307,8 +307,8 @@ public partial class Dumper: IDisposable
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             var mountList = inDir is { Length: > 0 }
-                ? new[] { inDir }
-                : DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.CDRom).Select(d => d.RootDirectory.FullName); 
+                ? [inDir]
+                : DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.CDRom).Select(d => d.RootDirectory.FullName).ToList();
             discSfbPath = mountList.SelectMany(mp => IOEx.GetFilepaths(mp, "PS3_DISC.SFB", 2)) .FirstOrDefault();
             if (!string.IsNullOrEmpty(discSfbPath))
                 InputDevicePath = Path.GetDirectoryName(discSfbPath)!;

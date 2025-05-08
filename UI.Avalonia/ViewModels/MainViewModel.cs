@@ -73,7 +73,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     [RelayCommand]
     private void ResetViewModel()
     {
-        StepTitle = "Please insert a PS3 game disc";
+        StepTitle = OperatingSystem.IsLinux()
+            ? "Please insert and mount a PS3 game disc"
+            : "Please insert a PS3 game disc";
         StepSubtitle = "";
         LastOperationSuccess = true;
         LastOperationWarning = false;
@@ -150,7 +152,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             if (dumper.ProductCode is not { Length: > 0 } || dumper.Cts.IsCancellationRequested)
             {
                 ResetViewModel();
-                    return;
+                return;
             }
 
             Success = null;
