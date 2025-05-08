@@ -82,7 +82,4 @@
       <ProjectReference Include="..\Ps3DiscDumper\Ps3DiscDumper.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Utils\DBus\" />
-    </ItemGroup>
 </Project>
