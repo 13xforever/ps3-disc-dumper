@@ -1,5 +1,6 @@
 ﻿using DiscUtils.Iso9660;
 using DiscUtils.Streams;
+using IrdLibraryClient.Utils;
 
 namespace IrdLibraryClient.IrdFormat;
 
@@ -41,7 +42,7 @@ public static class IsoHeaderParser
         var dirNamesWithFiles = filenames.Select(Path.GetDirectoryName).Distinct().ToList();
         var dirList = dirNames.Except(dirNamesWithFiles)
             .OrderBy(d => d, StringComparer.OrdinalIgnoreCase)
-            .Select(dir => (dir: dir!.TrimStart('\\').Replace('\\', Path.DirectorySeparatorChar), info: reader.GetDirectoryInfo(dir)))
+            .Select(dir => (dir: dir!.FixDiscFsPath(), info: reader.GetDirectoryInfo(dir)))
             .Select(di => new DirRecord(di.dir, new(di.info.CreationTimeUtc, di.info.LastWriteTimeUtc)))
             .ToList();
 
@@ -49,13 +50,12 @@ public static class IsoHeaderParser
         var fileList = new List<FileRecord>();
         foreach (var filename in filenames)
         {
-            var targetFilename = filename.TrimStart('\\');
+            var targetFilename = filename.FixDiscFsPath();
             if (targetFilename.EndsWith('.'))
             {
                 Log.Warn($"Fixing potential mastering error in {filename}");
                 targetFilename = targetFilename.TrimEnd('.');
             }
-            targetFilename = targetFilename.Replace('\\', Path.DirectorySeparatorChar);
             var clusterRange = reader.PathToClusters(filename).ToList();
             if (clusterRange.Count != 1)
                 Log.Warn($"{targetFilename} is split in {clusterRange.Count} ranges");
@@ -65,7 +65,7 @@ public static class IsoHeaderParser
             var fileInfo = reader.GetFileSystemInfo(filename);
             var recordInfo = new FileRecordInfo(fileInfo.CreationTimeUtc, fileInfo.LastWriteTimeUtc);
             var parent = fileInfo.Parent;
-            var parentInfo = new DirRecord(parent.FullName.TrimStart('\\').Replace('\\', Path.DirectorySeparatorChar), new(parent.CreationTimeUtc, parent.LastWriteTimeUtc));
+            var parentInfo = new DirRecord(parent.FullName.FixDiscFsPath(), new(parent.CreationTimeUtc, parent.LastWriteTimeUtc));
             fileList.Add(new(targetFilename, startSector, lengthInSectors, length, recordInfo, parentInfo));
             if (++cnt <= 200)
                 continue;

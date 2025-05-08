@@ -38,4 +38,7 @@ public static class Utils
     {
         return Math.Min(high, Math.Max(amount, low));
     }
+
+    public static string FixDiscFsPath(this string path)
+        => path.Replace('\\', Path.DirectorySeparatorChar).TrimStart(Path.DirectorySeparatorChar);
 }
