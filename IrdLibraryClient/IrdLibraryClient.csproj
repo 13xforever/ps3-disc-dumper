@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LTRData.DiscUtils.OpticalDisk" Version="1.0.53" />
+    <PackageReference Include="LTRData.DiscUtils.OpticalDisk" Version="1.0.54" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     <PackageReference Include="System.IO.Hashing" Version="9.0.4" />
   </ItemGroup>
