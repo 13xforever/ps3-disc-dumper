@@ -51,14 +51,11 @@ public static class IsoHeaderParser
         foreach (var filename in filenames)
         {
             var targetFilename = filename.FixDiscFsPath();
-            if (targetFilename.EndsWith('.'))
-            {
-                Log.Warn($"Fixing potential mastering error in {filename}");
-                targetFilename = targetFilename.TrimEnd('.');
-            }
             var clusterRange = reader.PathToClusters(filename).ToList();
+#if DEBUG
             if (clusterRange.Count != 1)
-                Log.Warn($"{targetFilename} is split in {clusterRange.Count} ranges");
+                Log.Debug($"{targetFilename} is split in {clusterRange.Count} ranges");
+#endif
             var startSector = clusterRange.Min(r => r.Offset);
             var lengthInSectors = clusterRange.Sum(r => r.Count);
             var length = reader.GetFileLength(filename);

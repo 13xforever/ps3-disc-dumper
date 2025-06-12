@@ -320,7 +320,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             || LastOperationWarning is true)
             return;
 
-        Success = dumper.ValidationStatus is not false;
+        Success = dumper.ValidationStatus is not false && dumper.BrokenFiles.Count is 0;
         if (Success == false)
         {
             StepTitle = "Dump is not valid";

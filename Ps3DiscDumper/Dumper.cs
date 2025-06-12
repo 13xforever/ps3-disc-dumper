@@ -659,18 +659,43 @@ public partial class Dumper: IDisposable
 
                 Log.Info($"Reading {file.TargetFileName} ({file.SizeInBytes.AsStorageUnit()})");
                 CurrentFileNumber++;
-                var convertedFilename = Path.DirectorySeparatorChar == '\\' ? file.TargetFileName : file.TargetFileName.Replace('\\', Path.DirectorySeparatorChar);
-                var inputFilename = Path.Combine(InputDevicePath, convertedFilename);
+                var targetFilename = file.TargetFileName;
 
-                if (!File.Exists(inputFilename))
+                var trailingPeriod = targetFilename.EndsWith('.');
+                var inputFilePath = Path.Combine(InputDevicePath, targetFilename);
+                // BLES00932 Demon's Souls: trailing . is trimmed on both Windows and Linux
+                if (trailingPeriod && !File.Exists(inputFilePath))
+                {
+                    Log.Warn($"Potential mastering error in {targetFilename}");
+                    targetFilename = targetFilename.TrimEnd('.');
+                    inputFilePath = Path.Combine(InputDevicePath, targetFilename);
+                }
+                // BLJS92001 Tsugime Ranko: trailing . is replaced with #ABCD in Windows, but is kept as . on Linux
+                if (trailingPeriod && OperatingSystem.IsWindows() && !File.Exists(inputFilePath))
+                {
+                    var inputDir = Path.GetDirectoryName(inputFilePath);
+                    var testNameBase = Path.GetFileName(inputFilePath);
+                    var options = new EnumerationOptions {IgnoreInaccessible = true, RecurseSubdirectories = false};
+                    var lst = Directory.GetFiles(inputDir, testNameBase + "#*", options);
+                    if (lst is [var match])
+                    {
+                        Log.Warn($"Using {match} as a match for {file.TargetFileName}");
+                        inputFilePath = match;
+                    }
+                    else
+                    {
+                        Log.Error($"Found {lst.Length} potential matches for {file.TargetFileName}");
+                    }
+                }
+                if (!File.Exists(inputFilePath))
                 {
                     Log.Error($"Missing {file.TargetFileName}");
                     BrokenFiles.Add((file.TargetFileName, "missing"));
                     continue;
                 }
 
-                var outputFilename = Path.Combine(outputPathBase, convertedFilename);
-                var fileDir = Path.GetDirectoryName(outputFilename);
+                var outputFilePath = Path.Combine(outputPathBase, targetFilename);
+                var fileDir = Path.GetDirectoryName(outputFilePath);
                 if (!Directory.Exists(fileDir))
                 {
                     Log.Debug("Creating directory " + fileDir);
@@ -690,8 +715,8 @@ public partial class Dumper: IDisposable
                     try
                     {
                         tries--;
-                        await using var outputStream = File.Open(outputFilename, FileMode.Create, FileAccess.Write, FileShare.Read);
-                        await using var inputStream = File.Open(inputFilename, FileMode.Open, FileAccess.Read, FileShare.Read);
+                        await using var outputStream = File.Open(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+                        await using var inputStream = File.Open(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                         await using var decrypter = new Decrypter(inputStream, driveStream, decryptionKey, file.StartSector, sectorSize, unprotectedRegions);
                         Decrypter = decrypter;
                         await decrypter.CopyToAsync(outputStream, 8 * 1024 * 1024, Cts.Token).ConfigureAwait(false);
@@ -737,7 +762,7 @@ public partial class Dumper: IDisposable
                     await Task.Yield();
                 } while (error && tries > 0 && !Cts.IsCancellationRequested);
 
-                _ = new FileInfo(outputFilename)
+                _ = new FileInfo(outputFilePath)
                 {
                     CreationTimeUtc = file.FileInfo.CreationTimeUtc,
                     LastWriteTimeUtc = file.FileInfo.LastWriteTimeUtc
@@ -774,7 +799,10 @@ public partial class Dumper: IDisposable
                 Log.Warn(e, $"Failed to fix timestamp for directory {dir.TargetDirName}");
             }
         }
-        Log.Info("Completed");
+        if (BrokenFiles.Count is 0)
+            Log.Info("Completed");
+        else
+            Log.Warn($"Completed with {BrokenFiles.Count} broken file{(BrokenFiles.Count == 1 ? "" : "s")}");
     }
 
     public static async Task<(Version, GitHubReleaseInfo)> CheckUpdatesAsync()
