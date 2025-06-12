@@ -1,5 +1,4 @@
 ﻿using System.Collections.Specialized;
-using System.Net;
 
 namespace IrdLibraryClient;
 
@@ -22,7 +21,7 @@ public static class UriExtensions
 
     public static Uri AddQueryParameter(this Uri uri, string name, string value)
     {
-        var queryValue = WebUtility.UrlEncode(name) + "=" + WebUtility.UrlEncode(value);
+        var queryValue = Uri.EscapeDataString(name) + "=" + Uri.EscapeDataString(value);
         return AddQueryValue(uri, queryValue);
     }
 
@@ -60,19 +59,19 @@ public static class UriExtensions
 
     public static string FormatUriParams(NameValueCollection parameters)
     {
-        if (parameters.Count == 0)
+        if (parameters.Count is 0)
             return "";
 
         var result = new StringBuilder();
         foreach (var key in parameters.AllKeys)
         {
             var value = parameters[key];
-            if (value == null)
+            if (value is null)
                 continue;
 
             result.Append($"&{Uri.EscapeDataString(key!)}={Uri.EscapeDataString(value)}");
         }
-        if (result.Length == 0)
+        if (result.Length is 0)
             return "";
         return result.ToString(1, result.Length - 1);
     }
@@ -81,7 +80,7 @@ public static class UriExtensions
     {
         var query = uri.IsAbsoluteUri ? uri.Query : new Uri(FakeHost, uri).Query;
         if (!string.IsNullOrEmpty(query) && query.Length > 1)
-            query = query.Substring(1) + "&" + queryToAppend;
+            query = query[1..] + "&" + queryToAppend;
         else
             query = queryToAppend;
         return SetQueryValue(uri, query);
@@ -97,7 +96,7 @@ public static class UriExtensions
         }
         else
         {
-            var startWithSlash = uri.OriginalString.StartsWith("/");
+            var startWithSlash = uri.OriginalString.StartsWith('/');
             uri = new(FakeHost, uri);
             var builder = new UriBuilder(uri) { Query = value };
             var additionalStrip = startWithSlash ? 0 : 1;

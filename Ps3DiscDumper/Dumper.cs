@@ -246,7 +246,7 @@ public partial class Dumper: IDisposable
         if (string.IsNullOrEmpty(titleId))
             Log.Warn("Disc product code is empty");
         else if (titleId.Length > 9)
-            titleId = titleId.Substring(0, 4) + titleId.Substring(titleId.Length - 5, 5);
+            titleId = titleId[..4] + titleId[^5..];
         return titleId;
     }
 
