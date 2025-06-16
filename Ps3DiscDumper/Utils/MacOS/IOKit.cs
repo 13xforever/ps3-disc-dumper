@@ -8,7 +8,7 @@ namespace Ps3DiscDumper.Utils.MacOS;
 [SupportedOSPlatform("osx")]
 public static partial class IOKit
 {
-    private const string LibraryName = "IOKit.framework/IOKit";
+    private const string LibraryName = "/System/Library/Frameworks/IOKit.framework/Versions/Current/IOKit";
 
     public static readonly IntPtr MasterPortDefault = IntPtr.Zero;
     public const string BdMediaClass = "IOBDMedia";
@@ -20,7 +20,7 @@ public static partial class IOKit
     public static partial IntPtr IOServiceMatching(string name);
 
     [LibraryImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial uint IOServiceGetMatchingServices(IntPtr mainPort, IntPtr matching, out IntPtr existing);
+    public static partial int IOServiceGetMatchingServices(IntPtr mainPort, IntPtr matching, out IntPtr existing);
 
     [LibraryImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial IntPtr IOIteratorNext(IntPtr iterator);
