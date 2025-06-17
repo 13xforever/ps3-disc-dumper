@@ -8,7 +8,7 @@ namespace Ps3DiscDumper.Utils.MacOS;
 [SupportedOSPlatform("osx")]
 public static partial class IOKit
 {
-    private const string LibraryName = "IOKit.framework/IOKit";
+    private const string LibraryName = "/System/Library/Frameworks/IOKit.framework/Versions/Current/IOKit";
 
     public static readonly IntPtr MasterPortDefault = IntPtr.Zero;
     public const string BdMediaClass = "IOBDMedia";

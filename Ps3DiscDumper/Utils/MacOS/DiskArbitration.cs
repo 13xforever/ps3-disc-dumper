@@ -8,7 +8,7 @@ namespace Ps3DiscDumper.Utils.MacOS;
 [SupportedOSPlatform("osx")]
 public static partial class DiskArbitration
 {
-    private const string LibraryName = "DiskArbitration.framework/DiskArbitration";
+    private const string LibraryName = "/System/Library/Framework/DiskArbitration.framework/DiskArbitration";
 
     public static readonly IntPtr DescriptionMediaKindKey = CoreFoundation.__CFStringMakeConstantString("DAMediaKind");
 
