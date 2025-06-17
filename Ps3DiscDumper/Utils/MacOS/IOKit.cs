@@ -20,7 +20,7 @@ public static partial class IOKit
     public static partial IntPtr IOServiceMatching(string name);
 
     [LibraryImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int IOServiceGetMatchingServices(IntPtr mainPort, IntPtr matching, out IntPtr existing);
+    public static partial uint IOServiceGetMatchingServices(IntPtr mainPort, IntPtr matching, out IntPtr existing);
 
     [LibraryImport(LibraryName), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial IntPtr IOIteratorNext(IntPtr iterator);

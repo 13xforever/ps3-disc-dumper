@@ -11,7 +11,6 @@ public static partial class CoreFoundation
 {
     private const string AsLibraryName = "/System/Library/Frameworks/ApplicationServices.framework/Versions/Current/ApplicationServices";
     private const string CfLibraryName = "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation";
-    private const string CfLibraryPath = "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation";
 
     public const uint KernSuccess = 0;
     public const uint StringEncodingAscii = 0x0600;
@@ -21,7 +20,7 @@ public static partial class CoreFoundation
 
     static CoreFoundation()
     {
-        var library = DlOpen(CfLibraryPath, 0);
+        var library = DlOpen(CfLibraryName, 0);
         TypeDictionaryKeyCallBacks = DlSym(library, "kCFTypeDictionaryKeyCallBacks");
         TypeDictionaryValueCallBacks = DlSym(library, "kCFTypeDictionaryValueCallBacks");
     }
