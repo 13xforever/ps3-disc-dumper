@@ -188,6 +188,7 @@ public partial class Dumper: IDisposable
         var lines = cdInfo.Split(MultilineSplit, StringSplitOptions.RemoveEmptyEntries);
         return lines.Where(s => s.StartsWith("drive name:")).Select(l => Path.Combine("/dev", l.Split(':').Last().Trim())).Where(File.Exists)
             .Concat(IOEx.GetFilepaths("/dev", "sr*", SearchOption.TopDirectoryOnly))
+            .Concat(IOEx.GetFilepaths("/dev", "loop*", SearchOption.TopDirectoryOnly))
             .Distinct()
             .ToList();
 
@@ -420,9 +421,6 @@ public partial class Dumper: IDisposable
         }
         Log.Debug($"Found {physicalDrives.Count} physical drives");
         await Task.Yield();
-
-        if (physicalDrives.Count == 0)
-            throw new InvalidOperationException("No optical drives were found");
 
         foreach (var drive in physicalDrives)
         {
