@@ -7,7 +7,7 @@ on:
         required: true
         type: string
 env:
-  dotnet_version: '9.0'
+  dotnet_version: '10.0'
 jobs:
   publish:
     strategy:

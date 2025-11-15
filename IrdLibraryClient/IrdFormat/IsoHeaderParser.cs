@@ -39,13 +39,17 @@ public static class IsoHeaderParser
             
         var filenames = filePaths.Distinct().ToList();
         var dirNames = dirPaths.Distinct().OrderByDescending(n => n.Length).ToList();
-        var dirNamesWithFiles = filenames.Select(Path.GetDirectoryName).Distinct().ToList();
+        var dirNamesWithFiles = filenames
+            .Select(Path.GetDirectoryName)
+            .Distinct()
+            .Where(d => d is {Length: >0})
+            .Cast<string>()
+            .ToList();
         var dirList = dirNames.Except(dirNamesWithFiles)
             .OrderBy(d => d, StringComparer.OrdinalIgnoreCase)
-            .Select(dir => (dir: dir!.FixDiscFsPath(), info: reader.GetDirectoryInfo(dir)))
+            .Select(dir => (dir: dir.FixDiscFsPath(), info: reader.GetDirectoryInfo(dir)))
             .Select(di => new DirRecord(di.dir, new(di.info.CreationTimeUtc, di.info.LastWriteTimeUtc)))
             .ToList();
-
         Log.Debug("Building file cluster map…");
         var fileList = new List<FileRecord>();
         foreach (var filename in filenames)
@@ -61,7 +65,9 @@ public static class IsoHeaderParser
             var length = reader.GetFileLength(filename);
             var fileInfo = reader.GetFileSystemInfo(filename);
             var recordInfo = new FileRecordInfo(fileInfo.CreationTimeUtc, fileInfo.LastWriteTimeUtc);
-            var parent = fileInfo.Parent;
+            if (fileInfo.Parent is not {} parent)
+                continue;
+            
             var parentInfo = new DirRecord(parent.FullName.FixDiscFsPath(), new(parent.CreationTimeUtc, parent.LastWriteTimeUtc));
             fileList.Add(new(targetFilename, startSector, lengthInSectors, length, recordInfo, parentInfo));
             if (++cnt <= 200)

@@ -13,7 +13,7 @@ Remove-Item -LiteralPath UI.Avalonia/bin -Recurse -Force -ErrorAction SilentlyCo
 Remove-Item -LiteralPath UI.Avalonia/obj -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host 'Building macOS binary...' -ForegroundColor Cyan
-dotnet publish -v:q -t:BundleApp -r osx-arm64 -f net9.0 --self-contained -c MacOS -o distrib/gui/mac/ UI.Avalonia/UI.Avalonia.csproj /p:PublishTrimmed=False /p:PublishSingleFile=True
+dotnet publish -v:q -t:BundleApp -r osx-arm64 -f net10.0 --self-contained -c MacOS -o distrib/gui/mac/ UI.Avalonia/UI.Avalonia.csproj /p:PublishTrimmed=False /p:PublishSingleFile=True
 
 Write-Host 'Clearing extra files in distrib...' -ForegroundColor Cyan
 Get-ChildItem -LiteralPath distrib -Include *.pdb,*.config -Recurse | Remove-Item

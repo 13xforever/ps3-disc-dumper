@@ -17,19 +17,19 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' != 'Linux' And '$(Configuration)' != 'MacOS'">
-        <TargetFramework>net9.0-windows</TargetFramework>
+        <TargetFramework>net10.0-windows</TargetFramework>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <DefineConstants>WINDOWS</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Linux'">
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
         <DefineConstants>LINUX</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'MacOS'">
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <RuntimeIdentifier>osx-arm64</RuntimeIdentifier>
         <DefineConstants>MACOS</DefineConstants>
 
@@ -63,8 +63,8 @@
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
         <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     </ItemGroup>
-    <ItemGroup Condition="'$(TargetFramework)'=='net9.0-windows'">
-        <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.26100.2" />
+    <ItemGroup Condition="'$(TargetFramework)'=='net10.0-windows'">
+        <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.26100.5" />
     </ItemGroup>
     <ItemGroup Condition="'$(Configuration)'=='Linux'">
         <PackageReference Include="Tmds.DBus.Protocol" Version="0.21.2" />
