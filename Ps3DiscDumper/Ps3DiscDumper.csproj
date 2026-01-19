@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="WmiLight" Version="6.16.0" />
+    <PackageReference Include="WmiLight" Version="7.1.0" />
   </ItemGroup>
 
   <ItemGroup>
