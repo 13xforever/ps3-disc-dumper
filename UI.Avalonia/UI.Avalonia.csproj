@@ -11,7 +11,7 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Configurations>Debug;Release;MacOS;Linux</Configurations>
         <Platforms>AnyCPU</Platforms>
-        <VersionPrefix>4.2.2</VersionPrefix>
+        <VersionPrefix>4.4.1</VersionPrefix>
         <Version>$(VersionPrefix)-pre1</Version>
         <DebugType>PdbOnly</DebugType>
     </PropertyGroup>

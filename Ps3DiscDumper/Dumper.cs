@@ -36,7 +36,11 @@ public partial class Dumper: IDisposable
                                                 .Split('+', 2)[0]
                                             ?? "x.y.x-unknown";
 
-    static Dumper() => Log.Info("PS3 Disc Dumper v" + Version);
+    static Dumper()
+    {
+        Log.Info($"PS3 Disc Dumper v{Version}");
+        Log.Info($"Running on {RuntimeInformation.OSDescription}");
+    }
 
     [GeneratedRegex(@"(?<ver>\d+(\.\d+){0,2})[ \-]*(?<pre>.*)", RegexOptions.Singleline | RegexOptions.ExplicitCapture)]
     private static partial Regex VersionParts();
@@ -307,8 +311,23 @@ public partial class Dumper: IDisposable
         {
             var mountList = inDir is { Length: > 0 }
                 ? [inDir]
-                : DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.CDRom).Select(d => d.RootDirectory.FullName);
-            discSfbPath = mountList.SelectMany(mp => IOEx.GetFilepaths(mp, "PS3_DISC.SFB", 2)) .FirstOrDefault();
+                : DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.CDRom).Select(d => d.RootDirectory.FullName).ToList();
+            Log.Debug($"Found {mountList.Count} CDRom mount point{(mountList.Count is 1 ? "" : "s")}:");
+            foreach (var mountPath in mountList)
+                Log.Debug($"\t{mountPath}");
+            if (mountList.Count is 0)
+            {
+                mountList = DriveInfo.GetDrives()
+                    .Where(d => d.DriveType == DriveType.NoRootDirectory && d.RootDirectory.Name.Contains('\\'))
+                    .Select(d => Path.GetDirectoryName(d.RootDirectory.FullName))
+                    .Distinct()
+                    .ToList();
+                Log.Debug($"Found {mountList.Count} potential mount point root{(mountList.Count is 1 ? "" : "s")}:");
+                foreach (var mountPath in mountList)
+                    Log.Debug($"\t{mountPath}");
+            }
+            discSfbPath = mountList.SelectMany(mp => IOEx.GetFilepaths(mp, "PS3_DISC.SFB", 2)).FirstOrDefault();
+            Log.Debug($"Found PS3_DISC.SFB path: {discSfbPath}");
             if (!string.IsNullOrEmpty(discSfbPath))
                 InputDevicePath = Path.GetDirectoryName(discSfbPath)!;
         }
