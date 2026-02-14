@@ -54,20 +54,20 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.3.11" />
-        <PackageReference Include="Avalonia.Desktop" Version="11.3.11" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.11" />
-        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.11" />
+        <PackageReference Include="Avalonia" Version="11.3.12" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.12" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.12" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.12" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.11" />
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.12" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
         <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     </ItemGroup>
     <ItemGroup Condition="'$(TargetFramework)'=='net10.0-windows'">
-        <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.26100.5" />
+        <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.26100.6" />
     </ItemGroup>
     <ItemGroup Condition="'$(Configuration)'=='Linux'">
-        <PackageReference Include="Tmds.DBus.Protocol" Version="0.23.0" />
+        <PackageReference Include="Tmds.DBus.Protocol" Version="0.90.3" />
     </ItemGroup>
     <ItemGroup Condition="'$(Configuration)' == 'MacOS'">
         <PackageReference Include="Dotnet.Bundle" Version="0.9.13" />
