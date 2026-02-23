@@ -137,6 +137,7 @@ public partial class Dumper: IDisposable
         var physicalDriveList = new List<string>();
         try
         {
+            // there's no direct mapping from this to device path, I've seen logs with identical logicalUnit for different drives
             using var wmiConnection = new WmiConnection();
             var drives = wmiConnection.CreateQuery("SELECT * FROM Win32_CDROMDrive");
             foreach (var drive in drives)
@@ -147,9 +148,8 @@ public partial class Dumper: IDisposable
                 Log.Info($"Found optical media drive {drive["Name"]} ({drive["Drive"]}; {physicalDrive})");
                 physicalDriveList.Add(physicalDrive);
             }
-            Log.Info($"Found {physicalDriveList.Count} cdrom drvie device{(physicalDriveList.Count is 1 ? "" : "s")}");
-            if (physicalDriveList.Count > 0)
-                return physicalDriveList;
+            var curCount = physicalDriveList.Count;
+            Log.Info($"Found {curCount} cdrom drvie device{(curCount is 1 ? "" : "s")}");
 
             drives = wmiConnection.CreateQuery("SELECT * FROM Win32_PhysicalMedia");
             foreach (var drive in drives)
@@ -158,7 +158,8 @@ public partial class Dumper: IDisposable
                     && tag.StartsWith(@"\\.\CDROM"))
                     physicalDriveList.Add(tag);
             }
-            Log.Info($"Found {physicalDriveList.Count} physical media device{(physicalDriveList.Count is 1 ? "" : "s")}");
+            curCount = physicalDriveList.Count - curCount;
+            Log.Info($"Found {curCount} physical media device{(curCount is 1 ? "" : "s")}");
         }
         catch (Exception e)
         {
@@ -166,7 +167,7 @@ public partial class Dumper: IDisposable
             for (var i = 0; i < 32; i++)
                 physicalDriveList.Add($@"\\.\CDROM{i}");
         }
-        return physicalDriveList;
+        return [.. physicalDriveList.Distinct()];
     }
 
     [SupportedOSPlatform("linux")]
