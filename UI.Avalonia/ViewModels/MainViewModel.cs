@@ -4,6 +4,9 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -16,12 +19,17 @@ namespace UI.Avalonia.ViewModels;
 public partial class MainViewModel : ViewModelBase, IDisposable
 {
     private readonly SettingsViewModel settings;
-    
-    public MainViewModel(): this(new()){}
-    
-    public MainViewModel(SettingsViewModel settings) => this.settings = settings;
+    private string? selectedSourcePath;
 
-    [ObservableProperty] private string stepTitle = "Please insert a PS3 game disc";
+    public MainViewModel() : this(new()) { }
+
+    public MainViewModel(SettingsViewModel settings)
+    {
+        this.settings = settings;
+        StepTitle = DefaultStepTitle();
+    }
+
+    [ObservableProperty] private string stepTitle = "";
     [ObservableProperty] private string stepSubtitle = "";
     [ObservableProperty] private bool lastOperationSuccess = true;
     [ObservableProperty] private bool lastOperationWarning = false;
@@ -69,13 +77,11 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     {
         SetTaskbarProgress(value);
     }
-    
+
     [RelayCommand]
     private void ResetViewModel()
     {
-        StepTitle = OperatingSystem.IsLinux()
-            ? "Please insert and mount a PS3 game disc"
-            : "Please insert a PS3 game disc";
+        StepTitle = DefaultStepTitle();
         StepSubtitle = "";
         LastOperationSuccess = true;
         LastOperationWarning = false;
@@ -100,7 +106,13 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     [RelayCommand]
-    private void ScanDiscs() => ScanDiscsAsync();
+    private void ScanDiscs() => ScanSourceAsync(null, showDetectErrors: false);
+
+    [RelayCommand]
+    private void RescanCurrentSource() => ScanSourceAsync(selectedSourcePath, showDetectErrors: !string.IsNullOrEmpty(selectedSourcePath));
+
+    [RelayCommand]
+    private void SelectIsoFile() => SelectIsoFileAsync();
 
     [RelayCommand]
     private void DumpDisc() => DumpDiscAsync();
@@ -111,8 +123,57 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     {
         dumper?.Cts.Cancel();
     }
-    
-    private async Task ScanDiscsAsync()
+
+    private static string DefaultStepTitle()
+        => OperatingSystem.IsLinux()
+            ? "Please insert and mount a PS3 game disc\nor select a PS3 ISO"
+            : "Please insert a PS3 game disc\nor select a PS3 ISO";
+
+    private Func<Dumper, string> CreateOutputDirFormatter()
+        => d =>
+        {
+            var items = new NameValueCollection
+            {
+                [Patterns.ProductCode] = d.ProductCode,
+                [Patterns.ProductCodeLetters] = d.ProductCode?[..4],
+                [Patterns.ProductCodeNumbers] = d.ProductCode?[4..],
+                [Patterns.Title] = d.Title,
+                [Patterns.Region] = Dumper.RegionMapping[d.ProductCode?[2..3] ?? ""],
+            };
+            settings.TestItems = items;
+            return PatternFormatter.Format(SettingsProvider.Settings.DumpNameTemplate, items);
+        };
+
+    private async Task SelectIsoFileAsync()
+    {
+        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime
+            {
+                MainWindow.StorageProvider: { } sp
+            })
+            return;
+
+        var result = await sp.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Please select a PS3 ISO file",
+            AllowMultiple = false,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("PS3 disc images") { Patterns = ["*.iso"] },
+            ]
+        }).ConfigureAwait(false);
+        if (result is not [var file])
+            return;
+
+        var path = file.Path.IsFile
+            ? file.Path.LocalPath
+            : file.Path.ToString();
+        if (string.IsNullOrEmpty(path))
+            return;
+
+        await ScanSourceAsync(path, showDetectErrors: true).ConfigureAwait(false);
+    }
+
+    private async Task ScanSourceAsync(string? sourcePath, bool showDetectErrors)
     {
         // ReSharper disable once MethodHasAsyncOverload
         if (!scanLock.Wait(0))
@@ -120,37 +181,47 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             Log.Debug("Another disc scan is already in progress, ignoring call");
             return;
         }
-        
+
         try
         {
             ResetViewModel();
 
             FoundDisc = true;
-            StepTitle = "Scanning disc drives";
-            StepSubtitle = "Checking the inserted disc…";
+            StepTitle = sourcePath is { Length: > 0 }
+                ? "Scanning disc image"
+                : "Scanning disc drives";
+            StepSubtitle = sourcePath is { Length: > 0 }
+                ? "Checking the selected ISO…"
+                : "Checking the inserted disc…";
             dumper?.Dispose();
             dumper = new();
             await Task.Yield();
-            
+
             try
             {
-                dumper.DetectDisc("",
-                    d =>
-                    {
-                        var items = new NameValueCollection
-                        {
-                            [Patterns.ProductCode] = d.ProductCode,
-                            [Patterns.ProductCodeLetters] = d.ProductCode?[..4],
-                            [Patterns.ProductCodeNumbers] = d.ProductCode?[4..],
-                            [Patterns.Title] = d.Title,
-                            [Patterns.Region] = Dumper.RegionMapping[d.ProductCode?[2..3] ?? ""],
-                        };
-                    settings.TestItems = items;
-                    return PatternFormatter.Format(SettingsProvider.Settings.DumpNameTemplate, items);
-                });
-            } catch {}
+                dumper.DetectDisc(sourcePath ?? "", CreateOutputDirFormatter());
+                selectedSourcePath = sourcePath;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Failed to detect input source");
+                if (!showDetectErrors)
+                {
+                    selectedSourcePath = null;
+                    ResetViewModel();
+                    return;
+                }
+
+                FoundDisc = false;
+                LastOperationSuccess = false;
+                StepTitle = "Disc check error";
+                StepSubtitle = e.Message;
+                return;
+            }
             if (dumper.ProductCode is not { Length: > 0 } || dumper.Cts.IsCancellationRequested)
             {
+                if (sourcePath is null)
+                    selectedSourcePath = null;
                 ResetViewModel();
                 return;
             }
@@ -190,10 +261,10 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                     IOException when e.Message.Contains("cyclic redundancy check")
                         => "Data-Error-(cyclic-redundancy-check)",
                     _ => "",
-                } is {Length: >0} lnk ? SettingsViewModel.WikiUrlBase + lnk : "";
+                } is { Length: > 0 } lnk ? SettingsViewModel.WikiUrlBase + lnk : "";
                 return;
             }
-        
+
             StepSubtitle = "";
             if (dumper.DiscKeyFilename is { Length: > 0 })
                 DiscKeyName = Path.GetFileName(dumper.DiscKeyFilename);
@@ -208,7 +279,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                 StartButtonCaption = "Overwrite";
                 LastOperationWarning = true;
             }
-            else if (Directory.Exists(Path.Combine(dumper.InputDevicePath, "BDMV")))
+            else if (dumper.HasBdmv)
             {
                 StepTitle = "Ready to dump a hybrid disc";
                 if (CopyBdmv)
@@ -229,7 +300,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             scanLock.Release();
         }
     }
-    
+
     private async Task DumpDiscAsync()
     {
         if (dumper is null)
@@ -251,7 +322,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         CanEditSettings = false;
         EnableTaskbarProgress();
         await Task.Yield();
-        
+
         try
         {
             var threadCts = new CancellationTokenSource();
@@ -338,7 +409,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     partial void ResetTaskbarProgress();
     partial void EnableTaskbarProgress();
     partial void SetTaskbarProgress(int position);
-    
+
     public void Dispose()
     {
         dumper?.Dispose();

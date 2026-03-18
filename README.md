@@ -18,6 +18,7 @@ How to use
 2. Start the dumper
 3. Follow the instructions
     * On Linux you may need to confirm auto-mount or to mount the disc manually (either through file manager or via console command `$ mount`)
+    * If you already have a PS3 disc image, you can also use `Select ISO file` instead of mounting it
 
 By default all files will be copied in the folder where the dumper is, you can select different location in `Settings`.
 

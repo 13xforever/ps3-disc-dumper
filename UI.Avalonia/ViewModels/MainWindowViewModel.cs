@@ -21,14 +21,14 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
     [NotifyPropertyChangedFor(nameof(InSettings))]
     [ObservableProperty] private ViewModelBase currentPage;
     public bool InSettings => CurrentPage is SettingsViewModel;
- 
+
     [ObservableProperty] private GitHubReleaseInfo? updateInfo;
     [ObservableProperty] private bool? updateIsPrerelease;
     [ObservableProperty] private string formattedUpdateInfoHeader = "";
     [ObservableProperty] private string formattedUpdateInfoBody = "";
     [ObservableProperty] private string formattedUpdateInfoUrl = $"{SettingsViewModel.ProjectUrl}/releases/latest";
     [ObservableProperty] private string formattedUpdateInfoVersion = "";
-    
+
 
     [RelayCommand]
     private void ToggleSettingsPage()
@@ -44,7 +44,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
             CurrentPage = mainPage;
             if (!mainPage.DumperIsReady)
                 return;
-            
+
             var newSettings = SettingsProvider.Settings;
             if (newSettings.DumpNameTemplate != oldSettings.DumpNameTemplate
                 || newSettings.OutputDir != oldSettings.OutputDir
@@ -56,7 +56,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
                 {
                     Log.Debug("Settings were changed, trying to re-scan the disc if present…");
                     mainPage.ResetViewModelCommand.Execute(null);
-                    mainPage.ScanDiscsCommand.Execute(null);
+                    mainPage.RescanCurrentSourceCommand.Execute(null);
                 }, DispatcherPriority.Background);
             }
         }
@@ -74,7 +74,7 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
         FormattedUpdateInfoVersion = $"Download v{rel.TagName.TrimStart('v')}";
         FormattedUpdateInfoBody = rel.Body;
     }
-    
+
     public void Dispose()
     {
         mainPage.Dispose();

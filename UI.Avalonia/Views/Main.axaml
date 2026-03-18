@@ -16,7 +16,7 @@
 			StepSubtitle="Direct disk access to the drive was denied"
 			LastOperationSuccess="False"
 			LearnMoreLink="https://github.com/13xforever/ps3-disc-dumper/wiki/Direct-disk-access-to-the-drive-was-denied"
-			
+
 			ProductCode="BLUS00001"
 			GameTitle="Super Long and Obnoxious Game Title That Makes Capcom's Super Ultra Deluxe Edition Look Tame"
 			DiscSizeInfo="6.9 GB (420 files)"
@@ -60,7 +60,7 @@
 		        <TextBlock LineHeight="20">Learn more</TextBlock>
 	        </Button>
         </StackPanel>
-        
+
         <!-- middle -->
         <Expander IsExpanded="{Binding DiscInfoExpanded}" Margin="0 12" Width="500" CornerRadius="4"
                   IsVisible="{Binding ProductCode, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
@@ -101,15 +101,22 @@
 		        </StackPanel>
 	        </Grid>
         </Expander>
-        
+
         <!-- bottom -->
-        <Button HorizontalAlignment="Center" MinWidth="200" Height="48" Margin="0" IsDefault="True"
-                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                Classes="Accent"
-                IsVisible="{Binding !FoundDisc}"
-                Command="{Binding ScanDiscsCommand}">
-	        <TextBlock Classes="BodyTextBlockStyle">Rescan disc devices</TextBlock>
-        </Button>
+        <StackPanel HorizontalAlignment="Center"
+                    IsVisible="{Binding !FoundDisc}">
+	        <Button HorizontalAlignment="Center" MinWidth="200" Height="48" Margin="0"
+	                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+	                Classes="Accent"
+	                Command="{Binding ScanDiscsCommand}">
+		        <TextBlock Classes="BodyTextBlockStyle">Rescan disc devices</TextBlock>
+	        </Button>
+	        <Button HorizontalAlignment="Center" MinWidth="200" Height="40" Margin="0 8 0 0"
+	                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+	                Command="{Binding SelectIsoFileCommand}">
+		        <TextBlock Classes="BodyTextBlockStyle">Select ISO file</TextBlock>
+	        </Button>
+        </StackPanel>
         <Button HorizontalAlignment="Center" MinWidth="200" Height="48" Margin="0" IsDefault="True"
                 HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                 Classes.Accent="{Binding !LastOperationWarning}"
@@ -123,7 +130,7 @@
 	        </Button.IsVisible>
 	        <TextBlock Classes="BodyTextBlockStyle" Text="{Binding StartButtonCaption}"/>
         </Button>
-        
+
         <!-- progress -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
                     IsVisible="{Binding DumpingInProgress}">
