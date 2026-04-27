@@ -197,7 +197,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             }
         
             StepSubtitle = "";
-            DriveName = dumper.SelectedPhysicalDeviceName;
+#if !MACOS            
+            DriveName = dumper.SelectedPhysicalDeviceName ?? "Failed to detect";
+#endif
             if (dumper.DiscKeyFilename is { Length: > 0 })
                 DiscKeyName = Path.GetFileName(dumper.DiscKeyFilename);
             else

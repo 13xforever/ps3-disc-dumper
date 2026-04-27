@@ -86,7 +86,7 @@
 			        <TextBlock Classes="BodyTextBlockStyle">Dump Size</TextBlock>
 			        <TextBlock Classes="BodyTextBlockStyle">Disc Key</TextBlock>
 			        <TextBlock Classes="BodyTextBlockStyle"
-			                   IsVisible="{Binding DriveName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+			                   IsVisible="{Binding DriveName, Converter={x:Static ObjectConverters.IsNotNull}}">
 				        Drive Model
 			        </TextBlock>
 		        </StackPanel>
@@ -106,7 +106,7 @@
 			        <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20"
 			                   ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
 			                   Text="{Binding DriveName}"
-			                   IsVisible="{Binding DriveName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+			                   IsVisible="{Binding DriveName, Converter={x:Static ObjectConverters.IsNotNull}}"/>
 		        </StackPanel>
 	        </Grid>
         </Expander>
