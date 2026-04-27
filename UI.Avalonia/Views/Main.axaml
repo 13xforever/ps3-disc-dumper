@@ -22,6 +22,7 @@
 			DiscSizeInfo="6.9 GB (420 files)"
 			DiscSizeDiffInfoLink="https://github.com/13xforever/ps3-disc-dumper/wiki/Dump-size-is-significantly-different-from-disc-size"
 			DiscKeyName="BLUS00001.ird"
+			DriveName="Sony Optiarc BD-5300S"
 			/>
 	</Design.DataContext>
 
@@ -84,6 +85,10 @@
 			        <TextBlock Classes="BodyTextBlockStyle">Product Code</TextBlock>
 			        <TextBlock Classes="BodyTextBlockStyle">Dump Size</TextBlock>
 			        <TextBlock Classes="BodyTextBlockStyle">Disc Key</TextBlock>
+			        <TextBlock Classes="BodyTextBlockStyle"
+			                   IsVisible="{Binding DriveName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+				        Drive Model
+			        </TextBlock>
 		        </StackPanel>
 		        <StackPanel Grid.Column="1" Margin="0 2 0 0">
 			        <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20" Text="{Binding ProductCode}"/>
@@ -98,6 +103,10 @@
 			        <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20"
 			                   ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
 			                   Text="{Binding DiscKeyName}"/>
+			        <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle" LineHeight="20"
+			                   ClipToBounds="True" TextTrimming="PrefixCharacterEllipsis"
+			                   Text="{Binding DriveName}"
+			                   IsVisible="{Binding DriveName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
 		        </StackPanel>
 	        </Grid>
         </Expander>

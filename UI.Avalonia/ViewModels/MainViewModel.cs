@@ -34,6 +34,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private bool dumpingInProgress;
 
     [ObservableProperty] private bool discInfoExpanded = SettingsProvider.Settings.ShowDetails;
+    [ObservableProperty] private string driveName = "";
     [ObservableProperty] private string productCode = "";
     [ObservableProperty] private string gameTitle = "";
     [ObservableProperty] private string discSizeInfo = "";
@@ -86,6 +87,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         DumperIsReady = false;
         DumpingInProgress = false;
         CanEditSettings = true;
+        DriveName = "";
         ProductCode = "";
         GameTitle = "";
         DiscSizeInfo = "";
@@ -149,7 +151,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                     return PatternFormatter.Format(SettingsProvider.Settings.DumpNameTemplate, items);
                 });
             } catch {}
-            if (dumper.ProductCode is not { Length: > 0 } || dumper.Cts.IsCancellationRequested)
+            if (dumper.ProductCode is not {Length: >0} || dumper.Cts.IsCancellationRequested)
             {
                 ResetViewModel();
                 return;
@@ -195,6 +197,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             }
         
             StepSubtitle = "";
+            DriveName = dumper.SelectedPhysicalDeviceName;
             if (dumper.DiscKeyFilename is { Length: > 0 })
                 DiscKeyName = Path.GetFileName(dumper.DiscKeyFilename);
             else

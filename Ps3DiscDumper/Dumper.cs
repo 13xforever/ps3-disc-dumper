@@ -83,6 +83,7 @@ public partial class Dumper: IDisposable
     public string OutputDir { get; private set; }
     public char Drive { get; set; }
     public string SelectedPhysicalDevice { get; private set; }
+    public string SelectedPhysicalDeviceName { get; private set; }
     public string InputDevicePath { get; private set; }
     private List<FileRecord> filesystemStructure;
     private List<DirRecord> emptyDirStructure;
@@ -104,7 +105,7 @@ public partial class Dumper: IDisposable
     public HashSet<DiscKeyInfo> ValidatingDiscKeys { get; } = [];
     public CancellationTokenSource Cts { get; private set; } = new();
     public bool? ValidationStatus { get; private set; }
-    public bool IsIvInitialized => sectorIV?.Length == 16;
+    public bool IsIvInitialized => sectorIV is {Length: 16};
 
     public long CurrentSector
     {
@@ -122,41 +123,42 @@ public partial class Dumper: IDisposable
         get
         {
             var tmp = Decrypter?.FileSector;
-            if (tmp == null)
+            if (tmp is null)
                 return fileSector;
             return fileSector = tmp.Value;
         }
     }
 
     [SupportedOSPlatform("windows")]
-    private List<string> EnumeratePhysicalDrivesWindows()
+    private List<(string path, string name)> EnumeratePhysicalDrivesWindows()
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             throw new NotImplementedException("This should never happen, shut up msbuild");
             
-        var physicalDriveList = new List<string>();
+        var physicalDriveList = new List<(string path, string? name)>();
         try
         {
             // there's no direct mapping from this to device path, I've seen logs with identical logicalUnit for different drives
             using var wmiConnection = new WmiConnection();
             var drives = wmiConnection.CreateQuery("SELECT * FROM Win32_CDROMDrive");
+            var i = 0;
             foreach (var drive in drives)
             {
                 // Name and Caption are the same, so idk if they can be different
-                var logicalUnit = drive["SCSILogicalUnit"]?.ToString();
-                var physicalDrive = $@"\\.\CDROM{logicalUnit}";
-                Log.Info($"Found optical media drive {drive["Name"]} ({drive["Drive"]}; {physicalDrive})");
-                physicalDriveList.Add(physicalDrive);
+                var physicalDrive = $@"\\.\CDROM{i++}";
+                var driveName = (string?)drive["Name"];
+                Log.Info($"Found optical media drive {driveName} ({drive["Drive"]}; {physicalDrive})");
+                physicalDriveList.Add((physicalDrive, driveName));
             }
             var curCount = physicalDriveList.Count;
-            Log.Info($"Found {curCount} cdrom drvie device{(curCount is 1 ? "" : "s")}");
+            Log.Info($"Found {curCount} cdrom drive device{(curCount is 1 ? "" : "s")}");
 
             drives = wmiConnection.CreateQuery("SELECT * FROM Win32_PhysicalMedia");
             foreach (var drive in drives)
             {
                 if (drive["Tag"] is string tag
                     && tag.StartsWith(@"\\.\CDROM"))
-                    physicalDriveList.Add(tag);
+                    physicalDriveList.Add((tag, null));
             }
             curCount = physicalDriveList.Count - curCount;
             Log.Info($"Found {curCount} physical media device{(curCount is 1 ? "" : "s")}");
@@ -165,15 +167,16 @@ public partial class Dumper: IDisposable
         {
             Log.Error(e, "Failed to enumerate physical media drives using WMI");
             for (var i = 0; i < 32; i++)
-                physicalDriveList.Add($@"\\.\CDROM{i}");
+                physicalDriveList.Add(($@"\\.\CDROM{i}", null));
         }
         return [.. physicalDriveList.Distinct()];
     }
 
     [SupportedOSPlatform("linux")]
-    private List<string> EnumeratePhysicalDrivesLinux()
+    private List<(string path, string name)> EnumeratePhysicalDrivesLinux()
     {
         var cdInfo = "";
+        var modelList = new List<string>();
         try
         {
             cdInfo = File.ReadAllText("/proc/sys/dev/cdrom/info");
@@ -187,7 +190,9 @@ public partial class Dumper: IDisposable
                         if (m.Groups["type"].Value is not "CD-ROM")
                             continue;
 
-                        Log.Info($"Found optical media drive {m.Groups["vendor"].Value} {m.Groups["model"].Value}");
+                        var model = $"{m.Groups["vendor"].Value} {m.Groups["model"].Value}";
+                        modelList.Add(model);
+                        Log.Info($"Found optical media drive {model}");
                     }
                 }
             }
@@ -197,17 +202,20 @@ public partial class Dumper: IDisposable
             Log.Debug(e, e.Message);
         }
         var lines = cdInfo.Split(MultilineSplit, StringSplitOptions.RemoveEmptyEntries);
-        return lines.Where(s => s.StartsWith("drive name:")).Select(l => Path.Combine("/dev", l.Split(':').Last().Trim())).Where(File.Exists)
+        var physicalPaths = lines.Where(s => s.StartsWith("drive name:")).Select(l => Path.Combine("/dev", l.Split(':').Last().Trim())).Where(File.Exists)
             .Concat(IOEx.GetFilepaths("/dev", "sr*", SearchOption.TopDirectoryOnly))
             .Distinct()
             .ToList();
-
+        var result = new List<(string path, string name)>();
+        for (var i = 0; i < physicalPaths.Count; i++)
+            result.Add((physicalPaths[i], modelList.Count > i ? modelList[i] : null));
+        return result;
     }
 
     [SupportedOSPlatform("osx")]
-    private List<string> EnumeratePhysicalDevicesMacOs()
+    private List<(string path, string name)> EnumeratePhysicalDevicesMacOs()
     {
-        var physicalDrives = new List<string>();
+        var physicalDrives = new List<(string path, string name)>();
         try
         {
             var matching = IOKit.IOServiceMatching(IOKit.BdMediaClass);
@@ -232,7 +240,7 @@ public partial class Dumper: IDisposable
                         if (len < 0)
                             len = nameBufferSize;
                         var bsdName = Encoding.ASCII.GetString(bsdNameBuf[..len]);
-                        physicalDrives.Add($"/dev/r{bsdName}");
+                        physicalDrives.Add(($"/dev/r{bsdName}", null));
                     }
                 }
                 IOKit.IOObjectRelease(drive);
@@ -426,7 +434,7 @@ public partial class Dumper: IDisposable
         if (untestedKeys.Count == 0)
             throw new KeyNotFoundException("No valid disc decryption key was found");
 
-        List<string> physicalDrives = [];
+        List<(string path, string name)> physicalDrives;
         Log.Trace("Trying to enumerate physical drives...");
         try
         {
@@ -450,7 +458,7 @@ public partial class Dumper: IDisposable
         if (physicalDrives is [])
             throw new InvalidOperationException("No optical drives were found");
 
-        foreach (var drive in physicalDrives)
+        foreach (var (drive, driveName) in physicalDrives)
         {
             try
             {
@@ -476,6 +484,7 @@ public partial class Dumper: IDisposable
                         if (buf.SequenceEqual(discSfbData))
                         {
                             SelectedPhysicalDevice = drive;
+                            SelectedPhysicalDeviceName = driveName;
                             break;
                         }
                         Log.Trace("SFB content check failed, skipping the drive");
@@ -488,10 +497,10 @@ public partial class Dumper: IDisposable
             }
             await Task.Yield();
         }
-        if (SelectedPhysicalDevice == null)
+        if (SelectedPhysicalDevice is null)
             throw new AccessViolationException("Direct disk access to the drive was denied");
 
-        Log.Debug($"Selected physical drive {SelectedPhysicalDevice}");
+        Log.Debug($"Selected physical drive {SelectedPhysicalDevice} ({(SelectedPhysicalDeviceName is {Length: >0} ? SelectedPhysicalDeviceName : "unknown model")})");
         driveStream = File.Open(SelectedPhysicalDevice, FileMode.Open, FileAccess.Read, FileShare.Read);
 
         // find disc license file
@@ -561,7 +570,7 @@ public partial class Dumper: IDisposable
         {
             Log.Error(e);
         }
-        if (discKey == null)
+        if (discKey is null)
             throw new KeyNotFoundException("No valid disc decryption key was found");
 
         Log.Info($"Selected disc key: {discKey}, known key sources:");
@@ -619,7 +628,7 @@ public partial class Dumper: IDisposable
                 .OrderByDescending(d => d.RootDirectory.FullName.Length)
                 .ThenBy(d => d.RootDirectory.FullName, StringComparer.Ordinal)
                 .FirstOrDefault(d => fullOutputPath.StartsWith(d.RootDirectory.FullName));
-            if (drive != null)
+            if (drive is not null)
             {
                 var spaceAvailable = drive.AvailableFreeSpace;
                 TotalFileSize = filesystemStructure.Sum(f => f.SizeInBytes);
@@ -919,7 +928,7 @@ public partial class Dumper: IDisposable
                 return false;
 
         var key = keys.FirstOrDefault()?.DecryptedKey;
-        if (key == null)
+        if (key is null)
             return false;
 
         return IsValidDiscKey(key);
