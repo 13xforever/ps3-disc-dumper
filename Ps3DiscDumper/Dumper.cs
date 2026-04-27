@@ -136,29 +136,29 @@ public partial class Dumper: IDisposable
             throw new NotImplementedException("This should never happen, shut up msbuild");
             
         var physicalDriveList = new List<(string path, string? name)>();
+        var driveNames = new List<string>();
         try
         {
             // there's no direct mapping from this to device path, I've seen logs with identical logicalUnit for different drives
             using var wmiConnection = new WmiConnection();
             var drives = wmiConnection.CreateQuery("SELECT * FROM Win32_CDROMDrive");
-            var i = 0;
             foreach (var drive in drives)
             {
                 // Name and Caption are the same, so idk if they can be different
-                var physicalDrive = $@"\\.\CDROM{i++}";
                 var driveName = (string?)drive["Name"];
-                Log.Info($"Found optical media drive {driveName} ({drive["Drive"]}; {physicalDrive})");
-                physicalDriveList.Add((physicalDrive, driveName));
+                Log.Info($"Found optical media drive {driveName} ({drive["Drive"]})");
+                driveNames.Add(driveName);
             }
             var curCount = physicalDriveList.Count;
             Log.Info($"Found {curCount} cdrom drive device{(curCount is 1 ? "" : "s")}");
 
             drives = wmiConnection.CreateQuery("SELECT * FROM Win32_PhysicalMedia");
+            var i = 0;
             foreach (var drive in drives)
             {
                 if (drive["Tag"] is string tag
                     && tag.StartsWith(@"\\.\CDROM"))
-                    physicalDriveList.Add((tag, null));
+                    physicalDriveList.Add((tag, driveNames.Count > i ? driveNames[i++] : null));
             }
             curCount = physicalDriveList.Count - curCount;
             Log.Info($"Found {curCount} physical media device{(curCount is 1 ? "" : "s")}");
