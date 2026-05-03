@@ -134,7 +134,7 @@ public partial class Dumper: IDisposable
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             throw new NotImplementedException("This should never happen, shut up msbuild");
-            
+
         var physicalDriveList = new List<(string path, string? name)>();
         var driveNames = new List<string>();
         try
@@ -218,38 +218,74 @@ public partial class Dumper: IDisposable
         var physicalDrives = new List<(string path, string name)>();
         try
         {
-            var matching = IOKit.IOServiceMatching(IOKit.BdMediaClass);
-            var result = IOKit.IOServiceGetMatchingServices(IOKit.MasterPortDefault, matching, out var iterator);
-            if (result != CoreFoundation.KernSuccess)
+            foreach (var mediaClass in new[] { IOKit.BdMediaClass, "IODVDMedia", "IOCDMedia" })
             {
-                Log.Error($"Failed to enumerate blu-ray drives: {result}");
-                return physicalDrives;
-            }
-
-            const int nameBufferSize = 32;
-            Span<byte> bsdNameBuf = stackalloc byte[nameBufferSize];
-            for (var drive = IOKit.IOIteratorNext(iterator); drive != IntPtr.Zero; drive = IOKit.IOIteratorNext(iterator))
-            {
-                var cfBsdName = IOKit.IORegistryEntryCreateCFProperty(drive, IOKit.BsdNameKey, IntPtr.Zero, 0);
-                if (cfBsdName != IntPtr.Zero)
+                var matching = IOKit.IOServiceMatching(mediaClass);
+                var result = IOKit.IOServiceGetMatchingServices(IOKit.MasterPortDefault, matching, out var iterator);
+                if (result != CoreFoundation.KernSuccess)
                 {
-                    if (CoreFoundation.CFStringGetCString(cfBsdName, bsdNameBuf, nameBufferSize, CoreFoundation.StringEncodingAscii))
-                    {
-                        // We change "disk" to "rdisk" in the BSD name to be able to open while mounted.
-                        var len = bsdNameBuf.IndexOf((byte)0);
-                        if (len < 0)
-                            len = nameBufferSize;
-                        var bsdName = Encoding.ASCII.GetString(bsdNameBuf[..len]);
-                        physicalDrives.Add(($"/dev/r{bsdName}", null));
-                    }
+                    Log.Trace($"Failed to enumerate {mediaClass} drives: {result}");
+                    continue;
                 }
-                IOKit.IOObjectRelease(drive);
+
+                const int nameBufferSize = 32;
+                Span<byte> bsdNameBuf = stackalloc byte[nameBufferSize];
+                for (var drive = IOKit.IOIteratorNext(iterator); drive != IntPtr.Zero; drive = IOKit.IOIteratorNext(iterator))
+                {
+                    var cfBsdName = IOKit.IORegistryEntryCreateCFProperty(drive, IOKit.BsdNameKey, IntPtr.Zero, 0);
+                    if (cfBsdName != IntPtr.Zero)
+                    {
+                        if (CoreFoundation.CFStringGetCString(cfBsdName, bsdNameBuf, nameBufferSize, CoreFoundation.StringEncodingAscii))
+                        {
+                            // We change "disk" to "rdisk" in the BSD name to be able to open while mounted.
+                            var len = bsdNameBuf.IndexOf((byte)0);
+                            if (len < 0)
+                                len = nameBufferSize;
+                            var bsdName = Encoding.ASCII.GetString(bsdNameBuf[..len]);
+                            physicalDrives.Add(($"/dev/r{bsdName}", null));
+                        }
+                    }
+                    IOKit.IOObjectRelease(drive);
+                }
             }
         }
         catch (Exception e)
         {
-            Log.Error(e, "Unable to enumerate physical drives");
+            Log.Error(e, "Unable to enumerate physical drives with IOKit");
         }
+
+        // Fallback: resolve mounted disc path to physical device
+        if (physicalDrives.Count == 0 && !string.IsNullOrEmpty(InputDevicePath))
+        {
+            try
+            {
+                var rawDevice = MacOSInterop.GetDeviceFromMountPoint(InputDevicePath);
+                if (!string.IsNullOrEmpty(rawDevice) && File.Exists(rawDevice))
+                {
+                    Log.Info($"Resolved mounted path {InputDevicePath} to physical device {rawDevice}");
+                    physicalDrives.Add((rawDevice, null));
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Failed to resolve mount point to physical device");
+            }
+        }
+
+        // Fallback: scan raw disk devices
+        if (physicalDrives.Count == 0)
+        {
+            try
+            {
+                foreach (var dev in IOEx.GetFilepaths("/dev", "rdisk*", SearchOption.TopDirectoryOnly))
+                    physicalDrives.Add((dev, null));
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Failed to scan /dev for disk devices");
+            }
+        }
+
         return physicalDrives;
     }
 
@@ -459,6 +495,7 @@ public partial class Dumper: IDisposable
             throw new InvalidOperationException("No optical drives were found");
 
         foreach (var (drive, driveName) in physicalDrives)
+
         {
             try
             {
@@ -523,7 +560,7 @@ public partial class Dumper: IDisposable
                     expectedBytes = Detectors[path];
                     if (detectionRecord.SizeInBytes == 0)
                         continue;
-                        
+
                     Log.Debug($"Using {path} for disc key detection");
                     break;
                 }
@@ -867,7 +904,7 @@ public partial class Dumper: IDisposable
                 Log.Warn($"Newer version available: v{latestVer}\n\n{latest?.Name}\n{"".PadRight(latest?.Name.Length ?? 0, '-')}\n{latest?.Body}\n{latest?.HtmlUrl}\n");
                 return (latestVer, latest);
             }
-                
+
             if (latestBetaVer > curVer
                 || (latestBetaVer == curVer
                     && curVerPre is {Length: >0}
@@ -885,7 +922,7 @@ public partial class Dumper: IDisposable
         return (null, null);
     }
 
-        
+
     private async Task<(List<FileRecord> files, List<DirRecord> dirs)> GetFilesystemStructureAsync(CancellationToken cancellationToken)
     {
         var pos = driveStream.Position;

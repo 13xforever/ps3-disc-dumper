@@ -265,4 +265,4 @@ launchSettings.json
 *.dkey
 *.zip
 
-distrib/
+distrib/.DS_Store

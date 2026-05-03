@@ -9,7 +9,6 @@ namespace Ps3DiscDumper.Utils.MacOS;
 [SupportedOSPlatform("osx")]
 public static partial class CoreFoundation
 {
-    private const string AsLibraryName = "/System/Library/Frameworks/ApplicationServices.framework/Versions/Current/ApplicationServices";
     private const string CfLibraryName = "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation";
 
     public const uint KernSuccess = 0;
@@ -31,7 +30,7 @@ public static partial class CoreFoundation
     [LibraryImport("libdl", EntryPoint = "dlsym", StringMarshalling = StringMarshalling.Utf8)]
     private static partial IntPtr DlSym(IntPtr handle, string symbol);
 
-    [LibraryImport(AsLibraryName, StringMarshalling = StringMarshalling.Utf8)]
+    [LibraryImport(CfLibraryName, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial IntPtr __CFStringMakeConstantString(string cStr);
 
