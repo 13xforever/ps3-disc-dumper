@@ -18,6 +18,7 @@ public class DiscKeyInfo
             KeyFileHash = keyFileHash;
         else
             throw new ArgumentException("Key file hash is required and can not be empty", nameof(keyFileHash));
+
         EncryptedKey = encryptedKey;
         DecryptedKeyId = DecryptedKey.ToHexString();
         FullPath = fullPath;
