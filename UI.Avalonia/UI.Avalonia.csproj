@@ -67,7 +67,9 @@
         <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.26100.6" />
     </ItemGroup>
     <ItemGroup Condition="'$(Configuration)'=='Linux'">
-        <PackageReference Include="Tmds.DBus.Protocol" Version="0.92.0" />
+        <PackageReference Include="Tmds.DBus.Protocol" Version="0.95.1" />
+        <PackageReference Include="Tmds.DBus.Generator" Version="0.95.1" />
+        <AdditionalFiles Include="Resources\DBus\org.freedesktop.DBus.ObjectManager.xml" Namespace="UDisks2.DBus" DBusGeneratorMode="Proxy" />
     </ItemGroup>
     <ItemGroup Condition="'$(Configuration)' == 'MacOS'">
         <PackageReference Include="Dotnet.Bundle" Version="0.9.13" />

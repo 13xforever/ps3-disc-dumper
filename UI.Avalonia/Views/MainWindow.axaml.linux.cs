@@ -40,86 +40,23 @@ public partial class MainWindow
         closing = true;
     }
 
-    /*
-     * $ dbus-monitor --system "type='signal',interface='org.freedesktop.DBus.ObjectManager'"
-     *
-     * signal time=1746716823.547392 sender=:1.7 -> destination=(null destination) serial=295 path=/org/freedesktop/UDisks2; interface=org.freedesktop.DBus.ObjectManager; member=InterfacesAdded
-     *   object path "/org/freedesktop/UDisks2/jobs/3"
-     *   array [
-     *      dict entry(
-     *         string "org.freedesktop.UDisks2.Job"
-     *         array [
-     *            dict entry(
-     *               string "Operation"
-     *               variant                   string "filesystem-mount"
-     *            )
-     *            dict entry(
-     *               string "Progress"
-     *               variant                   double 0
-     *            )
-     *            dict entry(
-     *               string "ProgressValid"
-     *               variant                   boolean false
-     *            )
-     *            dict entry(
-     *               string "Bytes"
-     *               variant                   uint64 0
-     *            )
-     *            dict entry(
-     *               string "Rate"
-     *               variant                   uint64 0
-     *            )
-     *            dict entry(
-     *               string "StartTime"
-     *               variant                   uint64 1746716823546146
-     *            )
-     *            dict entry(
-     *               string "ExpectedEndTime"
-     *               variant                   uint64 0
-     *            )
-     *            dict entry(
-     *               string "Objects"
-     *               variant                   array [
-     *                     object path "/org/freedesktop/UDisks2/block_devices/sr0"
-     *                  ]
-     *            )
-     *            dict entry(
-     *               string "StartedByUID"
-     *               variant                   uint32 0
-     *            )
-     *            dict entry(
-     *               string "Cancelable"
-     *               variant                   boolean true
-     *            )
-     *         ]
-     *      )
-     *   ]
-     *
-     * signal time=1746716930.148190 sender=:1.7 -> destination=(null destination) serial=346 path=/org/freedesktop/UDisks2; interface=org.freedesktop.DBus.ObjectManager; member=InterfacesRemoved
-     *   object path "/org/freedesktop/UDisks2/block_devices/sr0"
-     *   array [
-     *      string "org.freedesktop.UDisks2.Filesystem"
-     *   ]
-     */
-
     [SupportedOSPlatform("linux")]
     private async Task MonitorDriveEvents()
     {
         try
         {
-            if (Address.System is not {Length: >0} systemBusAddress)
+            if (DBusAddress.System is not {Length: >0} systemBusAddress)
             {
                 Log.Warn("Failed to get system bus address for DBus");
                 return;
             }
 
-            var connection = new Connection(systemBusAddress);
+            var connection = new DBusConnection(new DBusConnectionOptions(systemBusAddress) { AutoConnect = false });
             await connection.ConnectAsync().ConfigureAwait(false);
             Log.Info("Connected to DBus");
-            var uDisks2Service = new UDisks2Service(connection, "org.freedesktop.UDisks2");
-            var objManager = new ObjectManager(uDisks2Service, "/org/freedesktop/UDisks2");
-            using var addedWatcher = await objManager.WatchInterfacesAddedAsync(OnInterfaceAdded).ConfigureAwait(false);
-            using var removedWatcher = await objManager.WatchInterfacesRemovedAsync(OnInterfaceRemoved).ConfigureAwait(false);
+            var objManager = new ObjectManager(connection, "org.freedesktop.UDisks2", "/org/freedesktop/UDisks2");
+            using var addedWatcher = await objManager.WatchInterfacesAddedAsync(OnInterfaceAdded, ObserverFlags.None).ConfigureAwait(false);
+            using var removedWatcher = await objManager.WatchInterfacesRemovedAsync(OnInterfaceRemoved, ObserverFlags.None).ConfigureAwait(false);
             while (!closing)
             {
                 Thread.Yield();
@@ -133,14 +70,15 @@ public partial class MainWindow
         }
     }
 
-    private void OnInterfaceAdded(Exception? ex, (ObjectPath ObjectPath, DBusData InterfacesAndProperties) data)
+    private void OnInterfaceAdded(Notification<(ObjectPath ObjectPath, DBusData InterfacesAndProperties)> n)
     {
-        if (ex is not null)
+        if (n.IsCompletion)
         {
-            Log.Warn(ex, "DBus error on InterfaceAdded signal");
+            Log.Warn(n.Exception, "DBus error on InterfaceAdded signal");
             return;
         }
 
+        var data = n.Value;
         if (data.InterfacesAndProperties.TryGetValue("org.freedesktop.UDisks2.Job", out var jobProps)
             && jobProps.TryGetValue("Operation", out var operation)
             && operation.Type is VariantValueType.String
@@ -205,14 +143,15 @@ public partial class MainWindow
         }
     }
     
-    private void OnInterfaceRemoved(Exception? ex, (ObjectPath ObjectPath, string[] Interfaces) data)
+    private void OnInterfaceRemoved(Notification<(ObjectPath ObjectPath, string[] Interfaces)> n)
     {
-        if (ex is not null)
+        if (n.IsCompletion)
         {
-            Log.Warn(ex, "DBus error on InterfaceRemoved signal");
+            Log.Warn(n.Exception, "DBus error on InterfaceRemoved signal");
             return;
         }
 
+        var data = n.Value;
         if (data.ObjectPath.ToString() is { Length: > 0 } devicePath
             && devicePath.StartsWith("/org/freedesktop/UDisks2/block_devices/sr")
             && Path.GetFileName(devicePath) is { Length: > 0 } deviceName)

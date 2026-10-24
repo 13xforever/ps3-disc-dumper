@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    org.freedesktop.DBus.ObjectManager interface definition from the D-Bus specification
+    (stable since 2008). Consumed at compile time by Tmds.DBus.Generator (DBusGeneratorMode=Proxy);
+    never embedded in the application. Verified against live introspection of
+    org.freedesktop.UDisks2 /org/freedesktop/UDisks2 (udisks2 on Linux).
+-->
+
+<node>
+    <interface name="org.freedesktop.DBus.ObjectManager">
+        <method name="GetManagedObjects">
+            <arg name="objectpath_interfaces_and_properties" type="a{oa{sa{sv}}}" direction="out"/>
+        </method>
+        <signal name="InterfacesAdded">
+            <arg name="object_path" type="o"/>
+            <arg name="interfaces_and_properties" type="a{sa{sv}}"/>
+        </signal>
+        <signal name="InterfacesRemoved">
+            <arg name="object_path" type="o"/>
+            <arg name="interfaces" type="as"/>
+        </signal>
+    </interface>
+</node>
+
+<!---
+$ dbus-monitor - -system "type='signal',interface='org.freedesktop.DBus.ObjectManager'"
+
+signal time=1746716823.547392 sender=:1.7 -> destination=(null destination) serial=295 path=/org/freedesktop/UDisks2; interface=org.freedesktop.DBus.ObjectManager; member=InterfacesAdded
+  object path "/org/freedesktop/UDisks2/jobs/3"
+  array [
+     dict entry(
+        string "org.freedesktop.UDisks2.Job"
+        array [
+           dict entry(
+              string "Operation"
+              variant                   string "filesystem-mount"
+           )
+           dict entry(
+              string "Progress"
+              variant                   double 0
+           )
+           dict entry(
+              string "ProgressValid"
+              variant                   boolean false
+           )
+           dict entry(
+              string "Bytes"
+              variant                   uint64 0
+           )
+           dict entry(
+              string "Rate"
+              variant                   uint64 0
+           )
+           dict entry(
+              string "StartTime"
+              variant                   uint64 1746716823546146
+           )
+           dict entry(
+              string "ExpectedEndTime"
+              variant                   uint64 0
+           )
+           dict entry(
+              string "Objects"
+              variant                   array [
+                    object path "/org/freedesktop/UDisks2/block_devices/sr0"
+                 ]
+           )
+           dict entry(
+              string "StartedByUID"
+              variant                   uint32 0
+           )
+           dict entry(
+              string "Cancelable"
+              variant                   boolean true
+           )
+        ]
+     )
+  ]
+
+signal time=1746716930.148190 sender=:1.7 -> destination=(null destination) serial=346 path=/org/freedesktop/UDisks2; interface=org.freedesktop.DBus.ObjectManager; member=InterfacesRemoved
+  object path "/org/freedesktop/UDisks2/block_devices/sr0"
+  array [
+     string "org.freedesktop.UDisks2.Filesystem"
+  ]
+-->
