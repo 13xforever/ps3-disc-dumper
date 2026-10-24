@@ -11,16 +11,16 @@
         WindowStartupLocation="CenterScreen"
         CanResize="False"
         ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaChromeHints="PreferSystemChrome"
-        SystemDecorations="Full"
+        WindowDecorations="Full"
         Topmost="{Binding StayOnTop}"
         
         Background="Transparent"
         TransparencyLevelHint="Mica, AcrylicBlur, None"
-        RenderOptions.TextRenderingMode="Antialias"
-        
+        TextOptions.TextRenderingMode="Antialias"
+
         Icon="/Assets/icon.ico"
         Title="{Binding PageTitle}"
+        Loaded="OnLoaded"
         >
         
         <Design.DataContext>
@@ -28,6 +28,10 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
                 <vm:ErrorStubViewModel/>
         </Design.DataContext>
+
+        <Window.Resources>
+            <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="Transparent"/>
+        </Window.Resources>
     
         <Panel>
             <Border IsHitTestVisible="False" Background="{Binding TintColor}">
@@ -61,7 +65,7 @@
             </ExperimentalAcrylicBorder>
 
             <!-- title -->
-            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="19 17 0 0"
+            <TextBlock Name="TitleText" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="19 17 0 0"
                        FontSize="12"
                        IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=IsExtendedIntoWindowDecorations}"
                        Text="{Binding PageTitle}"/>

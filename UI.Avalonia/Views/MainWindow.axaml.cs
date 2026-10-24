@@ -20,16 +20,13 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-#if DEBUG
-        this.AttachDevTools();
-#endif
     }
 
     public override void Show()
     {
         base.Show();
         App.OnThemeChanged(this, EventArgs.Empty);
-        App.OnPlatformColorsChanged(this, PlatformSettings?.GetColorValues() ?? new PlatformColorValues
+        App.OnPlatformColorsChanged(this, Application.Current?.PlatformSettings?.GetColorValues() ?? new PlatformColorValues
         {
             AccentColor1 = Color.Parse(ThemeConsts.BrandColor),
             AccentColor2 = Color.Parse(ThemeConsts.BrandColor),

@@ -10,14 +10,13 @@
         
 		WindowStartupLocation="CenterScreen"
 		CanResize="False"
-        ExtendClientAreaToDecorationsHint="{OnPlatform False, Windows=True}"
-        ExtendClientAreaChromeHints="PreferSystemChrome"
-        SystemDecorations="Full"
+        ExtendClientAreaToDecorationsHint="True"
+        WindowDecorations="Full"
         Topmost="{Binding CurrentPage.StayOnTop}"
         
 		Background="Transparent"
         TransparencyLevelHint="Mica, AcrylicBlur, None"
-        RenderOptions.TextRenderingMode="Antialias"
+        TextOptions.TextRenderingMode="Antialias"
         
 		Icon="/Assets/icon.ico"
         Title="{Binding CurrentPage.PageTitle}"
@@ -30,6 +29,10 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="Transparent"/>
+    </Window.Resources>
  
     <Panel>
 	    <Border IsHitTestVisible="False" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
@@ -78,8 +81,8 @@
 		    </Image>
 		    -->
 		    <!-- back button -->
-		    <Button Width="40" Height="36" Margin="0 0 -8 0"
-		            Classes="Transparent"
+		    <Button Name="BackButton" Width="40" Height="36" Margin="0 0 -8 0"
+	            Classes="Transparent"
 		            VerticalAlignment="Top" HorizontalAlignment="Left"
 		            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
 		            IsVisible="{Binding InSettings}"
@@ -89,7 +92,7 @@
 			               Text="{Binding CurrentPage.BackSymbol}"/>
 		    </Button>
 		    <!-- window title -->
-			<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="14 10 0 0"
+			<TextBlock Name="TitleText" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="14 10 0 0"
 		               FontSize="12" IsHitTestVisible="False"
 		               IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=IsExtendedIntoWindowDecorations}"
 		               Text="{Binding CurrentPage.PageTitle}"/>

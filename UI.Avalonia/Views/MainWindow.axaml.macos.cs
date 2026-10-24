@@ -35,6 +35,10 @@ public partial class MainWindow
 
         diskArbiterThread = new(RunDiskArbiter);
         diskArbiterThread.Start();
+
+        TitleText.IsVisible = false;
+        BackButton.Margin = new(75, 0, -8, 0);
+        TitleButtons.Margin = new(0, 6, 4, 0);
     }
 
     partial void OnClosingPlatform()

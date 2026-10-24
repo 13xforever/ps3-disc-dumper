@@ -1,4 +1,5 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="CaptionCloseButtonBackground" Color="#ffe81123"/>
     <SolidColorBrush x:Key="CaptionCloseButtonBackgroundHover" Color="#c42b1c"/>
     <SolidColorBrush x:Key="CaptionCloseButtonBackgroundPressed" Color="#b3271c"/>
             
@@ -105,6 +106,9 @@
                 </LinearGradientBrush.GradientStops>
             </LinearGradientBrush>
             <SolidColorBrush x:Key="ProgressBarForeground" Color="{DynamicResource SystemAccentColorDark1}" />
+            <!-- system buttons -->
+            <SolidColorBrush x:Key="CaptionGlyphNormal" Color="Black"/>
+            <SolidColorBrush x:Key="CaptionGlyphInactive" Color="#999999"/>
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="Dark">
@@ -127,6 +131,9 @@
                 </LinearGradientBrush.GradientStops>
             </LinearGradientBrush>
             <SolidColorBrush x:Key="ProgressBarForeground" Color="{DynamicResource SystemAccentColorLight2}" />
+            <!-- system buttons -->
+            <SolidColorBrush x:Key="CaptionGlyphNormal" Color="White"/>
+            <SolidColorBrush x:Key="CaptionGlyphInactive" Color="{DynamicResource CaptionGlyphInactiveColor}"/>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>
