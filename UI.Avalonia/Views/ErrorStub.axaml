@@ -31,7 +31,7 @@
                 />
         </Design.DataContext>
 
-        <Panel>
+        <Panel Name="TopWindowPanel">
             <Border IsHitTestVisible="False" Background="{Binding TintColor}">
                 <Border.IsVisible>
                     <MultiBinding Converter="{x:Static BoolConverters.Or}">

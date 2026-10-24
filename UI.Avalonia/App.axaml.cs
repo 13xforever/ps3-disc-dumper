@@ -3,12 +3,15 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Interactivity;
+using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Styling;
 using Avalonia.VisualTree;
 using FluentAvalonia.Styling;
+using IrdLibraryClient;
 using Ps3DiscDumper;
 using Ps3DiscDumper.Utils;
 using UI.Avalonia.Utils.ColorPalette;
@@ -57,12 +60,12 @@ public partial class App : Application
             desktop.MainWindow.Activated += OnActivated;
             desktop.MainWindow.Deactivated += OnDeactivated;
             desktop.MainWindow.ActualThemeVariantChanged += OnThemeChanged;
+#if LINUX
+            desktop.MainWindow.Loaded += OnLoaded;
+#endif
             if (w.GetPlatformSettings() is { } ps)
-            {
                 ps.ColorValuesChanged += OnPlatformColorsChanged;
-                UpdateInactiveSystemButtonForegroundColor(ps.GetColorValues());
-            }
-
+            
             ApplyAccentSetting();
             vm.MicaEnabled = isMicaCapable.Value;
             vm.AcrylicEnabled = w.ActualTransparencyLevel == WindowTransparencyLevel.AcrylicBlur;
@@ -76,12 +79,15 @@ public partial class App : Application
 
     internal static void OnThemeChanged(object? sender, EventArgs e)
     {
-        Window w;
         ViewModelBase vm;
-        if (sender is Window { DataContext: MainWindowViewModel { CurrentPage: {} vm1 } } w1)
-            (w, vm) = (w1, vm1);
-        else if (sender is Window { DataContext: ViewModelBase vm2 } w2)
-            (w, vm) = (w2, vm2);
+        if (sender is not Window w)
+            return;
+        
+        ApplyAccentSetting();
+        if (w is { DataContext: MainWindowViewModel { CurrentPage: {} vm1 } })
+            vm = vm1;
+        else if (w is { DataContext: ViewModelBase vm2 })
+            vm = vm2;
         else
             return;
 
@@ -99,19 +105,36 @@ public partial class App : Application
         }
     }
 
-    internal static void ApplyAccentSetting()
+    private static void OnPlatformColorsChanged(object? sender, PlatformColorValues e)
+        => ApplyAccentSetting(e);
+
+    internal static void ApplyAccentSetting(PlatformColorValues? pcv = null)
     {
         if (Current?.Styles.OfType<FluentAvaloniaTheme>().FirstOrDefault() is not { } theme)
             return;
 
-        theme.CustomAccentColor = SettingsProvider.Settings.PreferSystemAccent ? null : Color.Parse(ThemeConsts.BrandColor);
+        if (SettingsProvider.Settings.PreferSystemAccent && pcv is null)
+        {
+            if (Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime { MainWindow: { } w }
+                || w.GetPlatformSettings() is not { } ps)
+                return;
+
+            pcv = ps.GetColorValues();
+        }
+        
+        if (SettingsProvider.Settings.PreferSystemAccent)
+        {
+            var systemAccentColor = pcv!.AccentColor1;
+            theme.CustomAccentColor = systemAccentColor;
+            Current.Resources["CaptionGlyphInactiveColor"] = ThemeConsts.InactiveSystemButtonForegroundColor(systemAccentColor);
+        }
+        else
+        {
+            var brandColor = Color.Parse(ThemeConsts.BrandColor);
+            theme.CustomAccentColor = brandColor;
+            Current.Resources["CaptionGlyphInactiveColor"] = ThemeConsts.InactiveSystemButtonForegroundColor(brandColor);
+        }
     }
-
-    private static void OnPlatformColorsChanged(object? sender, PlatformColorValues e)
-        => UpdateInactiveSystemButtonForegroundColor(e);
-
-    private static void UpdateInactiveSystemButtonForegroundColor(PlatformColorValues values)
-        => Current?.Resources["CaptionGlyphInactiveColor"] = ThemeConsts.InactiveSystemButtonForegroundColor(values.AccentColor1);
 
     private static void SetSymbolFont(ViewModelBase vm)
     {
@@ -147,4 +170,7 @@ public partial class App : Application
                 vm.CurrentPage.TintColor = ThemeConsts.DarkThemeTintColor;
         }
     }
+
+    private void OnLoaded(object? sender, RoutedEventArgs e) => OnLoadedPlatform(sender, e);
+    partial void OnLoadedPlatform(object? sender, RoutedEventArgs e);
 }

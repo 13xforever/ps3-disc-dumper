@@ -15,8 +15,17 @@ class Program
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
+    {
+        var result = AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace();
+#if LINUX
+        if (Environment.GetEnvironmentVariable("WAYLAND_DISPLAY") is {Length: >0})
+        {
+            result = result.UseWayland();
+        }
+#endif
+        return result;
+    }
 }

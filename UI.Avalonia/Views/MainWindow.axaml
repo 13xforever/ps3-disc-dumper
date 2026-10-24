@@ -30,7 +30,7 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Panel>
+    <Panel Name="TopWindowPanel">
 	    <Border IsHitTestVisible="False" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
 		    <Border.IsVisible>
 			    <MultiBinding Converter="{x:Static BoolConverters.Or}">
