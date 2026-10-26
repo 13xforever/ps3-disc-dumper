@@ -2,7 +2,6 @@
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
         <Nullable>enable</Nullable>
-        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <AssemblyName>ps3-disc-dumper</AssemblyName>
@@ -56,7 +55,7 @@
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="12.1.4" />
         <PackageReference Include="Avalonia.Desktop" Version="12.1.4" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.4" />
+        <PackageReference Include="FluentAvaloniaUI" Version="3.1.0" />
         <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.4" />
         <!--Condition below is needed to remove AvaloniaUI.DiagnosticsSupport package from build output in Release configuration.-->
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3" />

@@ -3,6 +3,7 @@
              x:Class="UI.Avalonia.App"
              xmlns:local="using:UI.Avalonia"
              xmlns:lc="using:UI.Avalonia.Converters"
+             xmlns:sty="using:FluentAvalonia.Styling"
              RequestedThemeVariant="Default">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
@@ -17,9 +18,9 @@
          <lc:ValidationSymbolConverter x:Key="ValidationSymbolConverter"/>
          <lc:OnOffConverter x:Key="OnOffConverter"/>
      </Application.Resources>
-             
+
     <Application.Styles>
-        <FluentTheme/>
+        <sty:FluentAvaloniaTheme PreferUserAccentColor="True" UseSystemFontOnWindows="True"/>
         <StyleInclude Source="Styles/Fluent2Styles.axaml"/>
     </Application.Styles>
 

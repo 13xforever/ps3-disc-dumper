@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -7,6 +8,7 @@ using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Styling;
 using Avalonia.VisualTree;
+using FluentAvalonia.Styling;
 using Ps3DiscDumper;
 using Ps3DiscDumper.Utils;
 using UI.Avalonia.Utils.ColorPalette;
@@ -61,14 +63,13 @@ public partial class App : Application
                 UpdateInactiveSystemButtonForegroundColor(ps.GetColorValues());
             }
 
+            ApplyAccentSetting();
             vm.MicaEnabled = isMicaCapable.Value;
             vm.AcrylicEnabled = w.ActualTransparencyLevel == WindowTransparencyLevel.AcrylicBlur;
 
             var systemFonts = FontManager.Current.SystemFonts;
             if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Text", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
                 w.FontFamily = new("Segoe UI Variable Text");
-            else if (systemFonts.TryGetGlyphTypeface("Segoe UI", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-                w.FontFamily = new("Segoe UI");
         }
         base.OnFrameworkInitializationCompleted();
     }
@@ -96,40 +97,30 @@ public partial class App : Application
             vm.TintOpacity = ThemeConsts.DarkThemeTintOpacity;
             vm.ColorPalette = ThemeConsts.Dark;
         }
-
-        if (!w.IsActive && Current is App app)
-            app.OnDeactivatedPlatform(w);
     }
 
-    internal static void OnPlatformColorsChanged(object? sender, PlatformColorValues e)
+    internal static void ApplyAccentSetting()
     {
-        if (Current is App app)
-            app.UpdateInactiveSystemButtonForegroundColor(e);
-        if (Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime
-            {
-                MainWindow.DataContext: MainWindowViewModel { CurrentPage: ViewModelBase vm }
-            })
+        if (Current?.Styles.OfType<FluentAvaloniaTheme>().FirstOrDefault() is not { } theme)
             return;
 
-        vm.SystemAccentColor = e.AccentColor1.ToString();
-        if (SettingsProvider.Settings.PreferSystemAccent)
-            vm.AccentColor = e.AccentColor1.ToString();
-        else
-            vm.AccentColor = ThemeConsts.BrandColor;
+        theme.CustomAccentColor = SettingsProvider.Settings.PreferSystemAccent ? null : Color.Parse(ThemeConsts.BrandColor);
     }
+
+    private static void OnPlatformColorsChanged(object? sender, PlatformColorValues e)
+        => UpdateInactiveSystemButtonForegroundColor(e);
+
+    private static void UpdateInactiveSystemButtonForegroundColor(PlatformColorValues values)
+        => Current?.Resources["CaptionGlyphInactiveColor"] = ThemeConsts.InactiveSystemButtonForegroundColor(values.AccentColor1);
 
     private static void SetSymbolFont(ViewModelBase vm)
     {
         if (OperatingSystem.IsMacOS())
             return; // TryGetGlyphTypeface always returns true but yields a fallback fonts with missing symbols.
-        
+
         var systemFonts = FontManager.Current.SystemFonts;
         if (systemFonts.TryGetGlyphTypeface("Segoe Fluent Icons", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
             vm.SymbolFontFamily = new("Segoe Fluent Icons");
-        if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Small", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-            vm.SmallFontFamily = new("Segoe UI Variable Small");
-        if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Display", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-            vm.LargeFontFamily = new("Segoe UI Variable Display");
     }
 
     private void OnActivated(object? sender, EventArgs e)
@@ -139,7 +130,6 @@ public partial class App : Application
 
         if (isMicaCapable.Value && SettingsProvider.Settings.EnableTransparency)
             w.TransparencyLevelHint = DesiredTransparencyHints;
-        OnActivatedPlatform(w);
     }
 
     private void OnDeactivated(object? sender, EventArgs e)
@@ -156,10 +146,5 @@ public partial class App : Application
             else if (w.ActualThemeVariant == ThemeVariant.Dark)
                 vm.CurrentPage.TintColor = ThemeConsts.DarkThemeTintColor;
         }
-        OnDeactivatedPlatform(w);
     }
-
-    partial void OnActivatedPlatform(Window w);
-    partial void OnDeactivatedPlatform(Window w);
-    partial void UpdateInactiveSystemButtonForegroundColor(PlatformColorValues values);
 }

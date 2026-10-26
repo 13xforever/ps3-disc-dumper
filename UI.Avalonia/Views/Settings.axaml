@@ -179,9 +179,11 @@
                                 <TextBlock Classes="BodyTextBlockStyle">Blu-ray Video files from hybrid disc</TextBlock>
                                 <TextBlock Classes="CaptionTextBlockStyle SecondaryTextBlockStyle">
                                     Video data will remain encrypted
-                                    <Button Classes="Link" Margin="6 0 0 0" Command="{Binding OpenUrlCommand}" CommandParameter="{Binding HybridDiscWikiLink}">
-                                        Learn more
-                                    </Button>
+                                    <InlineUIContainer BaselineAlignment="TextBottom">
+                                        <Button Classes="Link" Margin="6 0 0 0" Height="14.5" Command="{Binding OpenUrlCommand}" CommandParameter="{Binding HybridDiscWikiLink}">
+                                            Learn more
+                                        </Button>
+                                    </InlineUIContainer>
                                 </TextBlock>
                             </StackPanel>
                             <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0 0 -12 0"

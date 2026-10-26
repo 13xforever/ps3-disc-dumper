@@ -1,4 +1,5 @@
-﻿<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+﻿<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="using:FluentAvalonia.UI.Controls">
     <Design.PreviewWith>
         <Border Padding="20">
             <!-- Add Controls for Previewer Here -->
@@ -8,7 +9,6 @@
     <Styles.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceInclude Source="WinUICommonResources.axaml"/>
                 <ResourceInclude Source="Fluent2CustomResources.axaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
@@ -112,30 +112,49 @@
         <Setter Property="Background" Value="{DynamicResource ControlFillColorSecondaryBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorSecondaryBrush}"/>
     </Style>
-    <Style Selector="Button:pressed">
-        <Setter Property="RenderTransform" Value=""/>
-    </Style>
     <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Foreground" Value="{DynamicResource TextFillColorTertiaryBrush}"/>
         <Setter Property="Background" Value="{DynamicResource ControlFillColorTertiaryBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}"/>
     </Style>
-    <!-- system buttons (custom states are Windows-only; on other platforms the stock Fluent theme values are kept) -->
-    <Style Selector="WindowDrawnDecorations /template/ Button#PART_MinimizeButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{OnPlatform Default={DynamicResource CaptionButtonBackground}, Windows={DynamicResource SystemAccentColor}}"/>
+
+    <!-- buttons -->
+    <!-- FA's caption buttons are plain Buttons inside WindowDrawnDecorations,
+         and app-level styles win over ControlTheme setters (Avalonia 12), so the base Button
+         restyle below leaks into them. Restore transparent background here;
+         keep this in sync with any future theme upgrade. -->
+    <Style Selector="WindowDrawnDecorations /template/ Button">
+        <Setter Property="Background" Value="Transparent"/>
     </Style>
-    <Style Selector="WindowDrawnDecorations /template/ Button#PART_MaximizeButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{OnPlatform Default={DynamicResource CaptionButtonBackground}, Windows={DynamicResource SystemAccentColor}}"/>
+    <!-- WinUI's caption hover is a neutral highlight in light but the accent color in dark
+         (generic.xaml: WindowCaptionButtonBackgroundPointerOver = SystemControlHighlightBaseLowBrush);
+         FA only ships the neutral one, so the accent is scoped to the dark theme via resource. -->
+    <Style Selector="WindowDrawnDecorations /template/ Button#PART_MinimizeButton:pointerover /template/ Border">
+        <Setter Property="Background" Value="{DynamicResource CaptionButtonBackgroundHover}"/>
     </Style>
-    <Style Selector="WindowDrawnDecorations /template/ Button#PART_CloseButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{OnPlatform Default={DynamicResource CaptionCloseButtonBackground}, Windows={DynamicResource CaptionCloseButtonBackgroundHover}}"/>
+    <Style Selector="WindowDrawnDecorations /template/ Button#PART_MaximizeButton:pointerover /template/ Border">
+        <Setter Property="Background" Value="{DynamicResource CaptionButtonBackgroundHover}"/>
     </Style>
-    <Style Selector="WindowDrawnDecorations /template/ Button#PART_CloseButton:pressed /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{OnPlatform Default={DynamicResource CaptionButtonBorderBrush}, Windows={DynamicResource CaptionCloseButtonBackgroundPressed}}"/>
+    <!-- WinUI's close button hover/pressed backgrounds (#e81123/#f1707a, both themes) already match
+         FA's .Close theme; only the pressed glyph differs (WinUI: black). -->
+    <Style Selector="WindowDrawnDecorations /template/ Button#PART_CloseButton:pressed /template/ ui|FAFontIcon#ButtonIcon">
+        <Setter Property="Foreground" Value="Black"/>
     </Style>
-    <Style Selector="WindowDrawnDecorations /template/ Button:pointerover Path">
-        <Setter Property="Fill" Value="{DynamicResource CaptionGlyphNormal}"/>
+    <Style Selector="WindowDrawnDecorations /template/ Button.inactive /template/ ui|FAFontIcon#ButtonIcon">
+        <Setter Property="Foreground" Value="{DynamicResource CaptionGlyphInactive}"/>
     </Style>
+    <!-- scoped to min/max: close keeps FA's .Close white glyph on hover, even when inactive -->
+    <Style Selector="WindowDrawnDecorations /template/ Button#PART_MinimizeButton.inactive:pointerover /template/ ui|FAFontIcon#ButtonIcon">
+        <Setter Property="Foreground" Value="{DynamicResource CaptionGlyphNormal}"/>
+    </Style>
+    <Style Selector="WindowDrawnDecorations /template/ Button#PART_MaximizeButton.inactive:pointerover /template/ ui|FAFontIcon#ButtonIcon">
+        <Setter Property="Foreground" Value="{DynamicResource CaptionGlyphNormal}"/>
+    </Style>
+    <!-- the generic .inactive rule above still matches close on hover; force the WinUI white glyph -->
+    <Style Selector="WindowDrawnDecorations /template/ Button#PART_CloseButton.inactive:pointerover /template/ ui|FAFontIcon#ButtonIcon">
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+
     <!-- the app draws its own title -->
     <Style Selector="WindowDrawnDecorations:has-titlebar /template/ Panel#PART_TitleTextPanel">
         <Setter Property="IsVisible" Value="False"/>
@@ -143,11 +162,13 @@
     <Style Selector="WindowDrawnDecorations /template/ Button#PART_FullScreenButton">
         <Setter Property="IsVisible" Value="False"/>
     </Style>
+
     <!-- custom buttons -->
     <!-- transparent -->
     <Style Selector="Button.Transparent">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
     </Style>
     <Style Selector="Button.Transparent:pointerover /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}"/>
@@ -201,32 +222,35 @@
     <Style Selector="Expander.Critical ToggleButton">
         <Setter Property="Background" Value="{DynamicResource SystemFillColorCriticalBackgroundBrush}"/>
     </Style>
-    
+    <!-- FA's theme only changes the header border + chevron pill on hover/press; these fill the whole
+         title row. Scoped to plain expanders so Success/Critical headers stay solid (pre-port layering:
+         app-level class setters beat the theme's state rules). -->
+    <Style Selector="Expander:not(.Success):not(.Critical) /template/ ToggleButton#ExpanderHeader:pointerover">
+        <Setter Property="Background" Value="{DynamicResource ExpanderHeaderBackgroundPointerOver}"/>
+    </Style>
+    <Style Selector="Expander:not(.Success):not(.Critical) /template/ ToggleButton#ExpanderHeader:pressed">
+        <Setter Property="Background" Value="{DynamicResource ExpanderHeaderBackgroundPressed}"/>
+    </Style>
+
     <!-- combobox -->
-    <Style Selector="ComboBox">
-        <Setter Property="CornerRadius" Value="4"/>
-    </Style>
-    <Style Selector="ComboBox:pressed">
-        <Setter Property="Foreground" Value="{DynamicResource ComboBoxForegroundPressed}"/>
-    </Style>
-    <Style Selector="ComboBox /template/ PathIcon#DropDownGlyph" >
-        <Setter Property="RenderTransform" Value="scale(0.69)"/>
-    </Style>
-    <Style Selector="ComboBox:pressed /template/ PathIcon#DropDownGlyph">
-        <Setter Property="Margin" Value="0 4 10 0"/>
-    </Style>
+    <!-- WinUI's ComboBoxItem radius is 3; FA defaults to ControlCornerRadius (4).
+         Item spacing comes from FA's template (5,2,5,2), so no margin override. -->
     <Style Selector="ComboBoxItem">
         <Setter Property="CornerRadius" Value="3"/>
-        <Setter Property="Margin" Value="0 2"/>
     </Style>
     
+    <!-- textbox: focus stripe lives in Fluent2TextBox.axaml (full template override) -->
+
     <!-- progress bar -->
+    <!-- WinUI values are 1.5/0.5; on Avalonia v11's built-in theme these had to be doubled (3/1)
+         due to a rendering quirk — the keys live in Fluent2CustomResources so each value can be
+         re-tested under FA by editing one line. -->
     <Style Selector="ProgressBar">
         <Setter Property="Background" Value="{DynamicResource ProgressBarBackground}"/>
         <Setter Property="Foreground" Value="{DynamicResource ProgressBarForeground}"/>
         <Setter Property="BorderThickness" Value="{DynamicResource ProgressBarBorderThemeThickness}"/>
         <Setter Property="MinHeight" Value="{DynamicResource ProgressBarMinHeight}"/>
-        <Setter Property="CornerRadius" Value="{DynamicResource ProgressBarCornerRadius}"></Setter>
+        <Setter Property="CornerRadius" Value="{DynamicResource ProgressBarCornerRadius}"/>
     </Style>
     <Style Selector="ProgressBar:horizontal /template/ Border#ProgressBarRoot">
         <Setter Property="Background" Value="Transparent"/>
@@ -241,7 +265,9 @@
         <Setter Property="MinHeight" Value="{DynamicResource ProgressBarTrackHeight}"/>
         <Setter Property="Height" Value="{DynamicResource ProgressBarTrackHeight}"/>
     </Style>
-    <Style Selector="ProgressBar:horizontal /template/ Panel#DeterminateRoot Border">
+    <!-- Target the track border by name: a bare "Border" here also matches PART_Indicator and,
+         with no specificity in Avalonia, would override the indicator's own radius. -->
+    <Style Selector="ProgressBar:horizontal /template/ Border#ProgressBarTrack">
         <Setter Property="CornerRadius" Value="{DynamicResource ProgressBarTrackCornerRadius}"/>
     </Style>
 </Styles>

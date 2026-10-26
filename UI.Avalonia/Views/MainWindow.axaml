@@ -30,10 +30,6 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Window.Resources>
-        <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="Transparent"/>
-    </Window.Resources>
- 
     <Panel>
 	    <Border IsHitTestVisible="False" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
 		    <Border.IsVisible>
