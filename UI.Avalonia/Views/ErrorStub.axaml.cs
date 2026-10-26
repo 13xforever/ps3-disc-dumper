@@ -15,6 +15,13 @@ public partial class ErrorStub : Window
     public ErrorStub()
     {
         InitializeComponent();
+
+        // TODO: remove this workaround once https://github.com/AvaloniaUI/Avalonia/issues/22339 is fixed upstream.
+        LearnMoreButton.AttachedToVisualTree += (_, _) =>
+        {
+            if (LearnMoreButton.GetVisualParent() is TextBlock { IsVisible: false })
+                LearnMoreButton.Measure(new(0, double.PositiveInfinity));
+        };
     }
     
     public override void Show()
