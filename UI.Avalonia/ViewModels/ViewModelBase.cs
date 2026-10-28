@@ -31,7 +31,7 @@ public partial class ViewModelBase: ObservableObject
     [NotifyPropertyChangedFor(nameof(SettingsSymbol))]
     [ObservableProperty] private static FontFamily symbolFontFamily = new("avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free");
 
-    private bool UseSegoeIcons => SymbolFontFamily.Name is "Segoe Fluent Icons";
+    public bool UseSegoeIcons => SymbolFontFamily.Name is "Segoe Fluent Icons";
     public string SettingsSymbol => UseSegoeIcons ? "\ue713" : "\uf013";
     //public string UpdateSymbol => UseSegoeIcons ? "\ue946" : "\uf05a"; //"\uf06a" // exclamation mark in circle
     public string UpdateSymbol => UseSegoeIcons ? "\ue895" : "\uf021";
@@ -50,6 +50,8 @@ public partial class ViewModelBase: ObservableObject
     public string ValidationInformationSymbol => UseSegoeIcons ? "\ue946" : "\uf05a";
     public string DiagnosticsSymbol => UseSegoeIcons ? "\ue9d9" : "\uf478";
     public string ColorSymbol => UseSegoeIcons ? "\ue790" : "\uf53f";
+    public string SuccessSymbol => UseSegoeIcons ? "\ue73e" : "\uf058";
+    public string FailureSymbol => UseSegoeIcons ? "\ueb90" : "\uf06a";
 
     public static bool IsDebug =>
 #if DEBUG

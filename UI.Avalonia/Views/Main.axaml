@@ -27,6 +27,8 @@
 			DiscSizeDiffInfoLink="https://github.com/13xforever/ps3-disc-dumper/wiki/Dump-size-is-significantly-different-from-disc-size"
 			DiscKeyName="BLUS00001.ird"
 			DriveName="Sony Optiarc BD-5300S"
+			
+			Success="True"
 			/>
 	</Design.DataContext>
 
@@ -81,7 +83,7 @@
 			                   IsVisible="{Binding Success, Converter={x:Static ObjectConverters.IsNotNull}}"
 			                   Classes.Success="{Binding Success}"
 			                   Classes.Critical="{Binding !Success}"
-			                   Text="{Binding Success, Converter={StaticResource ValidationSymbolConverter}}"/>
+			                   Text="{Binding Success, Converter={StaticResource ValidationSymbolConverter}, ConverterParameter={Binding UseSegoeIcons}}"/>
 		        </StackPanel>
 	        </Expander.Header>
 	        <Grid ColumnDefinitions="120,*">
