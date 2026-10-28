@@ -29,7 +29,7 @@ public partial class ViewModelBase: ObservableObject
     [ObservableProperty] private static string layer2BackgroundColor = "#ff0000"; //ThemeConsts.LightThemeLayerHover;
     [ObservableProperty] private static string layer2GroundedColor = "#7f0000"; //ThemeConsts.LightThemeLayerHover;
     [NotifyPropertyChangedFor(nameof(SettingsSymbol))]
-    [ObservableProperty] private static FontFamily symbolFontFamily = new("avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free");
+    [ObservableProperty] private static FontFamily symbolFontFamily = new("avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 7 Free");
 
     public bool UseSegoeIcons => SymbolFontFamily.Name is "Segoe Fluent Icons";
     public string SettingsSymbol => UseSegoeIcons ? "\ue713" : "\uf013";

@@ -12,7 +12,7 @@
     </Application.DataTemplates>
 
      <Application.Resources>
-         <FontFamily x:Key="FontAwesome">avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free</FontFamily>
+         <FontFamily x:Key="FontAwesome">avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 7 Free</FontFamily>
          <lc:ColorConverter x:Key="ColorConverter"/>
          <lc:BrushConverter x:Key="BrushConverter"/>
          <lc:ValidationSymbolConverter x:Key="ValidationSymbolConverter"/>
