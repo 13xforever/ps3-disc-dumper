@@ -69,8 +69,10 @@ public partial class App : Application
             vm.AcrylicEnabled = w.ActualTransparencyLevel == WindowTransparencyLevel.AcrylicBlur;
 
             var systemFonts = FontManager.Current.SystemFonts;
-            if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Text", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
+            if (!OperatingSystem.IsMacOS() // apparently macos returns true for this font even though it's not true
+                && systemFonts.TryGetGlyphTypeface("Segoe UI Variable Text", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
                 w.FontFamily = new("Segoe UI Variable Text");
+            ApplyPlatformStyles(w);
         }
         base.OnFrameworkInitializationCompleted();
     }
@@ -171,4 +173,5 @@ public partial class App : Application
 
     private void OnLoaded(object? sender, RoutedEventArgs e) => OnLoadedPlatform(sender, e);
     partial void OnLoadedPlatform(object? sender, RoutedEventArgs e);
+    partial void ApplyPlatformStyles(Window w);
 }
