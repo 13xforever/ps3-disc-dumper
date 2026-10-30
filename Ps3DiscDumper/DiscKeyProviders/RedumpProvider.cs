@@ -21,7 +21,7 @@ public class RedumpProvider : IDiscKeyProvider
         var result = new HashSet<DiscKeyInfo>();
         try
         {
-            var keyStreams = new List<Stream>();
+            List<Stream> keyStreams = [];
             var snapshotStream = await Client.GetKeysZipContent(discKeyCachePath, cancellationToken).ConfigureAwait(false);
             if (snapshotStream is not null)
             {
@@ -54,17 +54,17 @@ public class RedumpProvider : IDiscKeyProvider
                 {
                     if (zipStream.CanSeek)
                         zipStream.Seek(0, SeekOrigin.Begin);
-                    using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read);
+                    await using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read);
                     foreach (var zipEntry in zip.Entries.Where(e => e.Name.EndsWith(".dkey", StringComparison.InvariantCultureIgnoreCase)
                                                                     || e.Name.EndsWith(".key", StringComparison.InvariantCultureIgnoreCase)))
                     {
-                        await using var keyStream = zipEntry.Open();
+                        await using var keyStream = await zipEntry.OpenAsync(cancellationToken).ConfigureAwait(false);
                         await using var memStream = new MemoryStream();
                         await keyStream.CopyToAsync(memStream, cancellationToken).ConfigureAwait(false);
                         var discKey = memStream.ToArray();
                         if (zipEntry.Length > 256 / 8 * 2)
                         {
-                            Log.Warn($"Disc key size is too big: {discKey} ({zipEntry.FullName})");
+                            Log.Warn($"Disc key size is too big: {discKey.Length*8} bits ({zipEntry.FullName})");
                             continue;
                         }
                         if (discKey.Length > 16)
@@ -78,14 +78,14 @@ public class RedumpProvider : IDiscKeyProvider
                         }
                         catch (Exception e)
                         {
-                            Log.Warn(e, $"Invalid disc key format: {discKey}");
+                            Log.Warn(e, $"Invalid disc key format: {discKey.ToHexString()}");
                         }
                     }
                 }
-            if (result.Any())
+            if (result is {Count: >0})
                 Log.Info($"Found {result.Count} redump keys");
             else
-                Log.Warn($"Failed to load any redump keys");
+                Log.Warn("Failed to load any redump keys");
         }
         catch (Exception e)
         {

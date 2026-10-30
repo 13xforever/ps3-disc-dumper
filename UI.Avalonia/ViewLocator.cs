@@ -35,7 +35,7 @@ public class ViewLocator : IDataTemplate
             return (Control)Activator.CreateInstance(type)!;
         */
         
-        return new TextBlock { Text = "Couldn't fine view for " + vmName };
+        return new TextBlock { Text = "Couldn't find view for " + vmName };
     }
 
     public bool Match(object? data) => data is ViewModelBase;

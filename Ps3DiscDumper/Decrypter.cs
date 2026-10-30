@@ -159,9 +159,9 @@ public class Decrypter : Stream, IDisposable
                 sha1.TransformBlock(decryptedSector, 0, readCount, buffer, offset);
                 sha256.TransformBlock(decryptedSector, 0, readCount, buffer, offset);
                 offset += readCount;
-                count -= readCount;
                 resultCount += readCount;
                 Position += readCount;
+                count -= readCount;
                 SectorPosition++;
                 FileSector++;
             }
@@ -172,9 +172,9 @@ public class Decrypter : Stream, IDisposable
                 sha1.TransformBlock(decryptedSector, 0, count, buffer, offset);
                 sha256.TransformBlock(decryptedSector, 0, count, buffer, offset);
                 offset += count;
-                count = 0;
                 resultCount += count;
                 Position += count;
+                count = 0;
             }
         } while (count > 0 && readCount == sectorSize);
         return resultCount;

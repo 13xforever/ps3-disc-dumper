@@ -175,6 +175,12 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             {
                 await dumper.FindDiscKeyAsync(settings.IrdDir).WaitAsync(dumper.Cts.Token).ConfigureAwait(false);
             }
+            catch (OperationCanceledException)
+            {
+                Log.Warn("Disc scan was cancelled");
+                ResetViewModel();
+                return;
+            }
             catch (Exception e)
             {
                 Log.Error(e, "Failed to find a matching key");
@@ -275,12 +281,17 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                         {
                             //Progress = (int)(dumper.CurrentSector * 10000L / dumper.TotalSectors);
                             //ProgressInfo = $"Sector data {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
-                            Progress = (int)((dumper.ProcessedSectors + dumper.CurrentFileSector) * 10000L / dumper.TotalFileSectors);
-                            ProgressInfo = $"Sector data {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
+                            Dispatcher.UIThread.Post(() =>
+                            {
+                                Progress = (int)((dumper.ProcessedSectors + dumper.CurrentFileSector) * 10000L / dumper.TotalFileSectors);
+                                ProgressInfo = $"Sector data {(dumper.CurrentSector * dumper.SectorSize).AsStorageUnit()} of {(dumper.TotalSectors * dumper.SectorSize).AsStorageUnit()} / File {dumper.CurrentFileNumber} of {dumper.TotalFileCount}";
+                            });
                         }
                         else
                         {
-                            ProgressInfo = $"{AnalyzingMessages[curAnalysisMsgIdx]}{dotsAnimation[animFrameIdx]}";
+                            var msg = AnalyzingMessages[curAnalysisMsgIdx];
+                            var dots = dotsAnimation[animFrameIdx];
+                            Dispatcher.UIThread.Post(() => ProgressInfo = $"{msg}{dots}");
                             if (++cnt % 5 is 0)
                                 animFrameIdx = (animFrameIdx + 1) % dotsAnimation.Length;
                             if (cnt % 600 is 0)

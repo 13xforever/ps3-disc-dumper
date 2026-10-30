@@ -28,7 +28,7 @@ using FileInfo = System.IO.FileInfo;
 
 namespace Ps3DiscDumper;
 
-public partial class Dumper: IDisposable
+public sealed partial class Dumper: IDisposable
 {
     public static readonly string Version = Assembly.GetEntryAssembly()?
                                                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
@@ -469,7 +469,7 @@ public partial class Dumper: IDisposable
                     Access = FileAccess.Read,
                     Options = FileOptions.Asynchronous | FileOptions.SequentialScan
                 });
-                var tmpDiscReader = new CDReader(discStream, true, true);
+                using var tmpDiscReader = new CDReader(discStream, true, true);
                 if (tmpDiscReader.FileExists("PS3_DISC.SFB"))
                 {
                     Log.Trace("Found PS3_DISC.SFB, getting sector data...");
@@ -536,8 +536,7 @@ public partial class Dumper: IDisposable
         if (detectionRecord is null)
             throw new FileNotFoundException("Couldn't find a single disc key detection file, please report");
 
-        if (Cts.IsCancellationRequested)
-            return;
+        Cts.Token.ThrowIfCancellationRequested();
 
         SectorSize = discReader.ClusterSize;
 
@@ -578,8 +577,7 @@ public partial class Dumper: IDisposable
         foreach (var ki in keyInfoList)
             Log.Debug($"\t{ki.KeyType}: {Path.GetFileName(ki.FullPath)}");
 
-        if (Cts.IsCancellationRequested)
-            return;
+        Cts.Token.ThrowIfCancellationRequested();
 
         lock (AllKnownDiscKeys)
             AllKnownDiscKeys.TryGetValue(discKey, out allMatchingKeys);
@@ -774,7 +772,7 @@ public partial class Dumper: IDisposable
                         {
                             error = true;
                             var msg = "Unexpected hash: " + resultMd5;
-                            if (resultMd5 == lastHash || decrypter.LastBlockCorrupted)
+                            if (resultMd5 == lastHash || decrypter.LastBlockCorrupted || tries == 0)
                             {
                                 Log.Error(msg);
                                 BrokenFiles.Add((file.TargetFileName, "corrupted"));
@@ -890,11 +888,17 @@ public partial class Dumper: IDisposable
     {
         var pos = driveStream.Position;
         var buf = new byte[64 * 1024 * 1024];
-        driveStream.Seek(0, SeekOrigin.Begin);
-        await driveStream.ReadExactlyAsync(buf, 0, buf.Length, cancellationToken).ConfigureAwait(false);
-        driveStream.Seek(pos, SeekOrigin.Begin);
         try
         {
+            try
+            {
+                driveStream.Seek(0, SeekOrigin.Begin);
+                await driveStream.ReadExactlyAsync(buf, 0, buf.Length, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                driveStream.Seek(pos, SeekOrigin.Begin);
+            }
             using var memStream = new MemoryStream(buf, false);
             var reader = new CDReader(memStream, true, true);
             return await reader.GetFilesystemStructureAsync(cancellationToken).ConfigureAwait(false);
@@ -962,6 +966,7 @@ public partial class Dumper: IDisposable
 
     public void Dispose()
     {
+        discReader?.Dispose();
         driveStream?.Dispose();
         ((IDisposable)Decrypter)?.Dispose();
         Cts?.Dispose();

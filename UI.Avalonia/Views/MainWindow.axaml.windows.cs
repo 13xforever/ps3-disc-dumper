@@ -44,19 +44,25 @@ public partial class MainWindow
         if (msgType is not (DBT_DEVICEARRIVAL or DBT_DEVICEREMOVEPENDING or DBT_DEVICEREMOVECOMPLETE))
             return;
 
-        var hdr = Marshal.PtrToStructure<DEV_BROADCAST_HDR>(lParam)!;
+        var hdr = Marshal.PtrToStructure<DEV_BROADCAST_HDR>(lParam);
 #if DEBUG
         Debug.WriteLine($"hdr: devicetype 0x{hdr.dbch_devicetype:x4}, reserved 0x{hdr.dbch_reserved:x4}");
 #endif
         if (hdr.dbch_devicetype is not DBT_DEVTYP_VOLUME)
             return;
 
-        var vol = Marshal.PtrToStructure<DEV_BROADCAST_VOLUME>(lParam)!;
+        var vol = Marshal.PtrToStructure<DEV_BROADCAST_VOLUME>(lParam);
 #if DEBUG
         Debug.WriteLine($"dbcv: devicetype 0x{vol.dbcv_devicetype:x4}, unitmask 0x{vol.dbcv_unitmask:x4}, flags 0x{vol.dbcv_flags:x8}");
 #endif
         if (msgType == DBT_DEVICEARRIVAL) //&& (vol.dbcv_flags & (DBTF_MEDIA | DBTF_MOUNT_ISO)) != 0
-            Dispatcher.UIThread.Post(() => vm.ScanDiscsCommand.Execute(null), DispatcherPriority.Background); 
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (vm.DumpingInProgress || vm is { FoundDisc: true, DumperIsReady: false })
+                    return;
+                
+                vm.ScanDiscsCommand.Execute(null);
+            }, DispatcherPriority.Background);
         else if (msgType is DBT_DEVICEREMOVEPENDING or DBT_DEVICEREMOVECOMPLETE)
         {
             var dumper = vm.dumper;
