@@ -11,7 +11,7 @@ using FileInfo = System.IO.FileInfo;
 
 namespace Ps3DiscDumper;
 
-public class Detector
+public static class Detector
 {
     private static string? CheckDiscSfb(byte[] discSfbData)
     {
@@ -51,7 +51,7 @@ public class Detector
         return (productCode, title, discVersion);
     }
 
-    public DiscDetectionResult DetectDisc(string inDir = "")
+    public static DiscDetectionResult DetectDisc(string inDir = "")
     {
         string? discSfbPath = null;
         string? inputDevicePath = null;
@@ -161,6 +161,5 @@ public class Detector
             TotalDiscSize =  totalDiscSize,
             Drive = drive,
         };
-
     }
 }

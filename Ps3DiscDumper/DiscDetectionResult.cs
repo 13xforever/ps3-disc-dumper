@@ -3,7 +3,7 @@ using Ps3DiscDumper.Sfo;
 
 namespace Ps3DiscDumper;
 
-public class DiscDetectionResult
+public sealed class DiscDetectionResult
 {
     public required byte[] DiscSfbData { get; init; } 
     public required List<string> DiscFilenames { get; init; }

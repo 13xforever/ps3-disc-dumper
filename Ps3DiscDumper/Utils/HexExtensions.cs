@@ -23,12 +23,12 @@ public static class HexExtensions
 
     [return: NotNullIfNotNull("bytes")]
     public static string? ToHexString(this byte[]? bytes)
+        => bytes?.AsSpan().ToHexString();
+
+    public static string ToHexString(this ReadOnlySpan<byte> bytes)
     {
-        switch (bytes)
-        {
-            case null: return null;
-            case []: return "";
-        }
+        if (bytes is [])
+            return "";
 
         var result = new StringBuilder(bytes.Length*2);
         foreach (var b in bytes)

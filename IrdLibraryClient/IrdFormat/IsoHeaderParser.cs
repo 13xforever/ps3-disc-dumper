@@ -51,7 +51,7 @@ public static class IsoHeaderParser
             .Select(di => new DirRecord(di.dir, new(di.info.CreationTimeUtc, di.info.LastWriteTimeUtc)))
             .ToList();
         Log.Debug("Building file cluster map…");
-        var fileList = new List<FileRecord>();
+        List<FileRecord> fileList = [];
         foreach (var filename in filenames)
         {
             var targetFilename = filename.FixDiscFsPath();
@@ -103,7 +103,7 @@ public static class IsoHeaderParser
     }
 }
 
-public record FileRecord(string TargetFileName, long StartSector, long LengthInSectors, long SizeInBytes, FileRecordInfo FileInfo, DirRecord Parent);
+public record FileRecord(string TargetFileName, long StartSector, long LengthInSectors, long SizeInBytes, FileRecordInfo FileInfo, DirRecord? Parent);
 
 public record FileRecordInfo(DateTime CreationTimeUtc, DateTime LastWriteTimeUtc);
 

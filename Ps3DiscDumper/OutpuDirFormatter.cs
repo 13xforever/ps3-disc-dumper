@@ -6,7 +6,7 @@ using Ps3DiscDumper.Utils;
 
 namespace Ps3DiscDumper;
 
-public class OutputDirFormatter
+public static class OutputDirFormatter
 {
     public static string Format(DiscDetectionResult discInfo, Func<DiscDetectionResult, string>? outputDirFormatter = null)
     {

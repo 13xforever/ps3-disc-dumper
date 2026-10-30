@@ -2,6 +2,7 @@
 
 public enum KeyType
 {
+    Unknown,
     Ird,
     Redump,
 }
