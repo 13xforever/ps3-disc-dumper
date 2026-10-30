@@ -1,7 +1,7 @@
 #if MACOS
-using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Styling;
 using IrdLibraryClient;
@@ -18,6 +18,7 @@ public partial class App
         var style = new Style(s => s.Is<ComboBox>());
         style.Setters.Add(new Setter(ComboBox.PaddingProperty, new Thickness(12, 6.5, 0, 5.5)));
         style.Setters.Add(new Setter(Control.MinHeightProperty, 32.0));
+        style.Setters.Add(new Setter(ComboBox.VerticalContentAlignmentProperty, VerticalAlignment.Center));
         app.Styles.Add(style);
 
         LogFontMetrics(w);
