@@ -72,7 +72,6 @@ public partial class App : Application
             if (!OperatingSystem.IsMacOS() // apparently macos returns true for this font even though it's not true
                 && systemFonts.TryGetGlyphTypeface("Segoe UI Variable Text", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
                 w.FontFamily = new("Segoe UI Variable Text");
-            ApplyPlatformStyles(w);
         }
         base.OnFrameworkInitializationCompleted();
     }
