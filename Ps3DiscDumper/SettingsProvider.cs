@@ -11,17 +11,17 @@ namespace Ps3DiscDumper;
 
 public static partial class SettingsProvider
 {
-    private static readonly string settingsFolder;
-    private static readonly string settingsPath;
+    private static readonly string SettingsFolder;
+    private static readonly string SettingsPath;
     
     static SettingsProvider()
     {
+        Log.Info("Loading settings…");
+        SettingsFolder = Path.Combine(Environment.GetFolderPath(SpecialFolder.LocalApplicationData), "ps3-disc-dumper");
+        SettingsPath = Path.Combine(SettingsFolder, "settings.json");
         try
         {
-            Log.Info("Loading settings…");
-            settingsFolder = Path.Combine(Environment.GetFolderPath(SpecialFolder.LocalApplicationData), "ps3-disc-dumper");
-            settingsPath = Path.Combine(settingsFolder, "settings.json");
-            if (File.Exists(settingsPath))
+            if (File.Exists(SettingsPath))
             {
                 Log.Debug("Found existing settings file, reading…");
                 savedSettings = Read() ?? savedSettings;
@@ -50,7 +50,7 @@ public static partial class SettingsProvider
     {
         try
         {
-            using var file = File.Open(settingsPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var file = File.Open(SettingsPath, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var reader = new StreamReader(file);
             var settingsContent = reader.ReadToEnd();
             Log.Info($"Current settings: {settingsContent}");
@@ -88,21 +88,21 @@ public static partial class SettingsProvider
             if (xml.Root?.Element("userSettings")?.FirstNode is not XElement settingsNode)
                 return null;
 
-            var template = (string)settingsNode.Descendants("setting")
-                .FirstOrDefault(el => (string)el.Attribute("name") == "DumpNameTemplate")?
+            var template = (string?)settingsNode.Descendants("setting")
+                .FirstOrDefault(el => (string?)el.Attribute("name") == "DumpNameTemplate")?
                 .Element("value");
-            var output = (string)settingsNode.Descendants("setting")
-                .FirstOrDefault(el => (string)el.Attribute("name") == "OutputDir")?
+            var output = (string?)settingsNode.Descendants("setting")
+                .FirstOrDefault(el => (string?)el.Attribute("name") == "OutputDir")?
                 .Element("value");
-            var ird = (string)settingsNode.Descendants("setting")
-                .FirstOrDefault(el => (string)el.Attribute("name") == "IrdDir")?
+            var ird = (string?)settingsNode.Descendants("setting")
+                .FirstOrDefault(el => (string?)el.Attribute("name") == "IrdDir")?
                 .Element("value");
             var result = new Settings();
-            if (template is { Length: > 0 })
+            if (template is { Length: >0 })
                 result = result with { DumpNameTemplate = template };
-            if (output is { Length: > 0 } && Directory.Exists(output))
+            if (output is { Length: >0 } && Directory.Exists(output))
                 result = result with { OutputDir = output };
-            if (ird is { Length: > 0 } && Directory.Exists(ird))
+            if (ird is { Length: >0 } && Directory.Exists(ird))
                 result = result with { IrdDir = ird };
             var newSettingsContent = JsonSerializer.Serialize(result, SettingsSerializer.Default.Settings);
             Log.Info($"Imported settings: {newSettingsContent}");
@@ -123,12 +123,12 @@ public static partial class SettingsProvider
 
         try
         {
-            if (!Directory.Exists(settingsFolder))
-                Directory.CreateDirectory(settingsFolder);
+            if (!Directory.Exists(SettingsFolder))
+                Directory.CreateDirectory(SettingsFolder);
 
             var settingsContent = JsonSerializer.Serialize(tmp, SettingsSerializer.Default.Settings);
             Log.Info($"Updated settings: {settingsContent}");
-            using var file = File.Open(settingsPath, FileMode.Create, FileAccess.Write, FileShare.Read);
+            using var file = File.Open(SettingsPath, FileMode.Create, FileAccess.Write, FileShare.Read);
             using var writer = new StreamWriter(file);
             writer.Write(settingsContent);
             writer.Flush();

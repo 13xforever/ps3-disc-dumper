@@ -5,7 +5,7 @@ namespace Ps3DiscDumper.Utils;
 
 public static class StreamEx
 {
-    [Obsolete]
+    [Obsolete("Migrate to a BCL equivalent")]
     public static int ReadExact(this Stream input, byte[] buffer, int offset, int count)
     {
         var result = 0;

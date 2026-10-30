@@ -10,14 +10,14 @@ public class ParamSfo
 {
     private ParamSfo() { }
 
-    public string Magic { get; private set; }
-    public byte MajorVersion { get; private set; }
-    public byte MinorVersion { get; private set; }
-    public short Reserved1 { get; private set; }
-    public int KeysOffset { get; private set; }
-    public int ValuesOffset { get; private set; }
-    private int ItemCount { get; set; }
-    public List<ParamSfoEntry> Items { get; private set; }
+    private static readonly int Magic = BitConverter.ToInt32("\0PSF"u8);
+    public byte MajorVersion { get; private init; }
+    public byte MinorVersion { get; private init; }
+    public short Reserved1 { get; private init; }
+    public int KeysOffset { get; private init; }
+    public int ValuesOffset { get; private init; }
+    private int ItemCount { get; init; }
+    public List<ParamSfoEntry> Items { get; private init; } = null!;
 
     public static ParamSfo ReadFrom(Stream stream)
     {
@@ -25,67 +25,28 @@ public class ParamSfo
             throw new ArgumentException("Stream must be seekable", nameof(stream));
 
         stream.Seek(0, SeekOrigin.Begin);
-        var result = new ParamSfo();
         using var reader = new BinaryReader(stream, new UTF8Encoding(false), true);
-        result.Magic = new(reader.ReadChars(4));
-        if (result.Magic != "\0PSF")
+        if (reader.ReadInt32() != Magic)
             throw new FormatException("Not a valid SFO file");
 
-        result.MajorVersion = reader.ReadByte();
-        result.MinorVersion = reader.ReadByte();
-        result.Reserved1 = reader.ReadInt16();
-        result.KeysOffset = reader.ReadInt32();
-        result.ValuesOffset = reader.ReadInt32();
-        result.ItemCount = reader.ReadInt32();
-        result.Items = new(result.ItemCount);
-
-        for (var i = 0; i < result.ItemCount; i++)
-            result.Items.Add(ParamSfoEntry.Read(reader, result, i));
-
-        return result;
-    }
-
-    public void WriteTo(Stream stream)
-    {
-        if (!stream.CanSeek)
-            throw new ArgumentException("Stream must be seekable", nameof(stream));
-
-        var utf8 = new UTF8Encoding(false);
-        using var writer = new BinaryWriter(stream, utf8, true);
-        writer.Write(utf8.GetBytes(Magic));
-        writer.Write(MajorVersion);
-        writer.Write(MinorVersion);
-        writer.Write(Reserved1);
-        KeysOffset = 0x14 + Items.Count * 0x10;
-        writer.Write(KeysOffset);
-        ValuesOffset = KeysOffset + Items.Sum(i => i.Key.Length + 1);
-        if (ValuesOffset % 4 != 0)
-            ValuesOffset = (ValuesOffset / 4 + 1) * 4;
-        writer.Write(ValuesOffset);
-        ItemCount = Items.Count;
-        writer.Write(ItemCount);
-
-        int lastKeyOffset = KeysOffset;
-        int lastValueOffset = ValuesOffset;
-        for (var i = 0; i < Items.Count; i++)
+        var majorVersion = reader.ReadByte();
+        var minorVersion = reader.ReadByte();
+        var reserved1 = reader.ReadInt16();
+        var keysOffset = reader.ReadInt32();
+        var valuesOffset = reader.ReadInt32();
+        var itemCount = reader.ReadInt32();
+        var result = new ParamSfo
         {
-            var entry = Items[i];
-
-            writer.BaseStream.Seek(0x14 + i * 0x10, SeekOrigin.Begin);
-            writer.Write((ushort)(lastKeyOffset - KeysOffset));
-            writer.Write((ushort)entry.ValueFormat);
-            writer.Write(entry.ValueLength);
-            writer.Write(entry.ValueMaxLength);
-            writer.Write(lastValueOffset - ValuesOffset);
-
-            writer.BaseStream.Seek(lastKeyOffset, SeekOrigin.Begin);
-            writer.Write(utf8.GetBytes(entry.Key));
-            writer.Write((byte)0);
-            lastKeyOffset = (int)writer.BaseStream.Position;
-
-            writer.BaseStream.Seek(lastValueOffset, SeekOrigin.Begin);
-            writer.Write(entry.BinaryValue);
-            lastValueOffset = (int)writer.BaseStream.Position;
-        }
+            MajorVersion = majorVersion,
+            MinorVersion = minorVersion,
+            Reserved1 = reserved1,
+            KeysOffset = keysOffset,
+            ValuesOffset = valuesOffset,
+            ItemCount = itemCount,
+            Items = new(itemCount),
+        };
+        for (var i = 0; i < itemCount; i++)
+            result.Items.Add(ParamSfoEntry.Read(reader, result, i));
+        return result;
     }
 }

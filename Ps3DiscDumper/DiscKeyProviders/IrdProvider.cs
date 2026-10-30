@@ -33,7 +33,7 @@ public class IrdProvider : IDiscKeyProvider
                     try
                     {
                         var ird = IrdParser.Parse(await File.ReadAllBytesAsync(irdFile, cancellationToken).ConfigureAwait(false));
-                        result.Add(new(ird.Data1, null, irdFile, KeyType.Ird, ird.Crc32.ToString("x8")));
+                        result.Add(new(ird.Data1, true, irdFile, KeyType.Ird, ird.Crc32.ToString("x8")));
                         knownFilenames.Add(Path.GetRelativePath(discKeyCachePath, irdFile).Replace('\\', '/'));
                     }
                     catch (InvalidDataException)
@@ -74,7 +74,7 @@ public class IrdProvider : IDiscKeyProvider
                 Log.Warn(e, $"Failed to get IRD list from {client.BaseUri.Host}");
             }
         }
-        if (irdList.Count == 0)
+        if (irdList is [])
             Log.Debug("No new matching IRD file was found at any source");
         else
         {
@@ -90,8 +90,8 @@ public class IrdProvider : IDiscKeyProvider
                 try
                 {
                     Log.Debug($"Trying to download {irdName} from {client.BaseUri.Host}...");
-                    var ird = await client.DownloadAsync(irdName, discKeyCachePath, cancellationToken).ConfigureAwait(false);
-                    result.Add(new(ird.Data1, null, Path.Combine(discKeyCachePath, irdName), KeyType.Ird, ird.Crc32.ToString("x8")));
+                    if (await client.DownloadAsync(irdName, discKeyCachePath, cancellationToken).ConfigureAwait(false) is {} ird)
+                        result.Add(new(ird.Data1, true, Path.Combine(discKeyCachePath, irdName), KeyType.Ird, ird.Crc32.ToString("x8")));
                     knownFilenames.Add(irdName);
                 }
                 catch (Exception e)
@@ -100,7 +100,7 @@ public class IrdProvider : IDiscKeyProvider
                 }
             }
         }
-        if (knownFilenames.Count == 0)
+        if (knownFilenames.Count is 0)
         {
             Log.Warn("No valid matching IRD file could be found");
             Log.Info($"If you have matching IRD file, you can put it in '{discKeyCachePath}' and try dumping the disc again");

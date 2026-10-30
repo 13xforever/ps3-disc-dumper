@@ -38,7 +38,7 @@ public struct Settings
     private static StringComparison Comparison => OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
     private static StringComparer Comparer => OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
         => obj is Settings other && Equals(other);
 
     public bool Equals(Settings other)
@@ -66,4 +66,7 @@ public struct Settings
         hashCode.Add(CopyPs3Update);
         return hashCode.ToHashCode();
     }
+
+    public static bool operator ==(Settings left, Settings right) => left.Equals(right);
+    public static bool operator !=(Settings left, Settings right) => !(left == right);
 }

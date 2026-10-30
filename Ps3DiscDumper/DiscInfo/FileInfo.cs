@@ -4,7 +4,7 @@ namespace Ps3DiscDumper.DiscInfo;
 
 public class FileInfo
 {
-    public long Offset;
-    public long Size;
-    public Dictionary<string, List<string>> Hashes;
+    public required long Offset;
+    public required long Size;
+    public required Dictionary<string, List<string>> Hashes;
 }

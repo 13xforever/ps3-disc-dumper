@@ -5,34 +5,33 @@ namespace Ps3DiscDumper;
 
 public class DiscKeyInfo
 {
-    public DiscKeyInfo(byte[] encryptedKey, byte[] decryptedKey, string fullPath, KeyType keyType, string keyFileHash)
+    public DiscKeyInfo(byte[] key, bool keyIsEncrypted, string fullPath, KeyType keyType, string keyFileHash)
     {
-        if (encryptedKey is {Length: >0})
-            DecryptedKey = Decrypter.DecryptDiscKey(encryptedKey);
-        else if (decryptedKey is {Length: >0})
-            DecryptedKey = decryptedKey;
-        else
-            throw new ArgumentException("At least one type of disc key must be provided", nameof(encryptedKey));
+        Key = (key, keyIsEncrypted) switch
+        {
+            ({ Length: >0 } k, true) => Decrypter.DecryptDiscKey(k),
+            ({ Length: >0 } k, false) => k,
+            _ => throw new ArgumentException("At least one type of disc key must be provided", nameof(key))
+        };
 
-        if (keyFileHash is {Length: >0})
-            KeyFileHash = keyFileHash;
-        else
-            throw new ArgumentException("Key file hash is required and can not be empty", nameof(keyFileHash));
+        this.keyFileHash = keyFileHash switch
+        {
+            { Length: >0 } => keyFileHash,
+            _ => throw new ArgumentException("Key file hash is required and can not be empty", nameof(keyFileHash))
+        };
 
-        EncryptedKey = encryptedKey;
-        DecryptedKeyId = DecryptedKey.ToHexString();
+        KeyId = Key.ToHexString();
         FullPath = fullPath;
         KeyType = keyType;
     }
 
-    public readonly byte[] EncryptedKey;
-    public readonly byte[] DecryptedKey;
+    public readonly byte[] Key;
     public readonly string FullPath;
     public readonly KeyType KeyType;
-    public readonly string DecryptedKeyId;
-    public readonly string KeyFileHash;
+    public readonly string KeyId;
+    private readonly string keyFileHash;
 
-    public override bool Equals(object obj) {
+    public override bool Equals(object? obj) {
         if (ReferenceEquals(null, obj)) return false;
         if (ReferenceEquals(this, obj)) return true;
         if (obj.GetType() != typeof(DiscKeyInfo)) return false;
@@ -40,18 +39,16 @@ public class DiscKeyInfo
     }
 
     protected bool Equals(DiscKeyInfo other)
-    {
-        return string.Equals(DecryptedKeyId, other.DecryptedKeyId)
-               && string.Equals(KeyFileHash, other.KeyFileHash)
-               && KeyType == other.KeyType;
-    }
+        => string.Equals(KeyId, other.KeyId)
+           && string.Equals(keyFileHash, other.keyFileHash)
+           && KeyType == other.KeyType;
 
     public override int GetHashCode()
     {
         unchecked
         {
-            var hashCode = DecryptedKeyId?.GetHashCode() ?? 0;
-            hashCode = (hashCode * 397) ^ (KeyFileHash?.GetHashCode() ?? 0);
+            var hashCode = KeyId.GetHashCode();
+            hashCode = (hashCode * 397) ^ keyFileHash.GetHashCode();
             hashCode = (hashCode * 397) ^ (int)KeyType;
             return hashCode;
         }
@@ -59,10 +56,4 @@ public class DiscKeyInfo
 
     public static bool operator ==(DiscKeyInfo left, DiscKeyInfo right) { return Equals(left, right); }
     public static bool operator !=(DiscKeyInfo left, DiscKeyInfo right) { return !Equals(left, right); }
-}
-
-public enum KeyType
-{
-    Ird,
-    Redump,
 }

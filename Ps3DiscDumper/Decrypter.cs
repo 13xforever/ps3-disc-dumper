@@ -13,17 +13,18 @@ public class Decrypter : Stream, IDisposable
     private static readonly byte[] Secret = "380bcf0b53455b3c7817ab4fa3ba90ed".ToByteArray();
     private static readonly byte[] IV = "69474772af6fdab342743aefaa186287".ToByteArray();
 
-    private Stream inputStream;
-    private Stream discStream;
-    private byte[] decryptionKey;
+    private readonly Stream inputStream;
+    private readonly Stream discStream;
+    private readonly byte[] decryptionKey;
     private readonly int sectorSize;
     private readonly MD5 md5;
     private readonly SHA1 sha1;
     private readonly SHA256 sha256;
     private readonly Aes aes;
-    private byte[] bufferedSector, tmpSector;
-    private Dictionary<string, string> hashes = new(3);
+    private readonly byte[] bufferedSector;
+    private readonly Dictionary<string, string> hashes = new(3);
     private readonly List<(int start, int end)> unprotectedSectorRanges;
+    private byte[] tmpSector;
 
     public static byte[] DecryptDiscKey(byte[] data1)
     {
@@ -67,10 +68,10 @@ public class Decrypter : Stream, IDisposable
 
     public Decrypter(Stream fileStream, Stream discStream, byte[] decryptionKey, long startSector, int sectorSize, List<(int start, int end)> unprotectedSectorRanges)
     {
-        if (fileStream == null)
+        if (fileStream is null)
             throw new ArgumentNullException(nameof(fileStream));
 
-        if (decryptionKey == null)
+        if (decryptionKey is null)
             throw new ArgumentNullException(nameof(decryptionKey));
 
         if (decryptionKey.Length != 128 / 8 && decryptionKey.Length != 256 / 8)
@@ -79,10 +80,10 @@ public class Decrypter : Stream, IDisposable
         if (!fileStream.CanRead)
             throw new ArgumentException("Input stream should be readable", nameof(fileStream));
 
-        if (discStream == null)
+        if (discStream is null)
             throw new ArgumentException("Physical device is needed for proper decryption");
 
-        if (sectorSize == 0)
+        if (sectorSize is 0)
             throw new ArgumentException("Sector size cannot be 0", nameof(sectorSize));
 
         inputStream = fileStream;
@@ -182,15 +183,15 @@ public class Decrypter : Stream, IDisposable
 
     public Dictionary<string, string> GetHashes()
     {
-        if (hashes.Count == 0)
-        {
-            md5.TransformFinalBlock(tmpSector, 0, 0);
-            sha1.TransformFinalBlock(tmpSector, 0, 0);
-            sha256.TransformFinalBlock(tmpSector, 0, 0);
-            hashes["MD5"] = md5.Hash.ToHexString();
-            hashes["SHA1"] = sha1.Hash.ToHexString();
-            hashes["SHA256"] = sha256.Hash.ToHexString();
-        }
+        if (hashes.Count > 0)
+            return hashes;
+        
+        md5.TransformFinalBlock(tmpSector, 0, 0);
+        sha1.TransformFinalBlock(tmpSector, 0, 0);
+        sha256.TransformFinalBlock(tmpSector, 0, 0);
+        hashes["MD5"] = md5.Hash!.ToHexString();
+        hashes["SHA1"] = sha1.Hash!.ToHexString();
+        hashes["SHA256"] = sha256.Hash!.ToHexString();
         return hashes;
     }
 

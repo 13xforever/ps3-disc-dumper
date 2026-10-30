@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 
@@ -8,13 +9,10 @@ public static class HexExtensions
 {
     public static byte[] ToByteArray(this string hexString)
     {
-        if (hexString == null)
-            return null;
-
-        if (hexString.Length == 0)
+        if (hexString is "")
             return [];
 
-        if (hexString.Length % 2 != 0)
+        if (hexString.Length % 2 is 1)
             throw new FormatException("Not a valid hex string");
 
         var result = new byte[hexString.Length / 2];
@@ -23,13 +21,14 @@ public static class HexExtensions
         return result;
     }
 
-    public static string ToHexString(this byte[] bytes)
+    [return: NotNullIfNotNull("bytes")]
+    public static string? ToHexString(this byte[]? bytes)
     {
-        if (bytes == null)
-            return null;
-
-        if (bytes.Length == 0)
-            return "";
+        switch (bytes)
+        {
+            case null: return null;
+            case []: return "";
+        }
 
         var result = new StringBuilder(bytes.Length*2);
         foreach (var b in bytes)

@@ -9,38 +9,38 @@ internal class IOEx
 {
     public static IEnumerable<string> GetFilepaths(string rootPath, string patternMatch, SearchOption searchOption)
     {
-        var foundFiles = Enumerable.Empty<string>();
+        IEnumerable<string> foundFiles = [];
         try
         {
             foundFiles = foundFiles.Concat(Directory.EnumerateFiles(rootPath, patternMatch));
         }
-        catch (Exception e) when (e is UnauthorizedAccessException || e is PathTooLongException)
+        catch (Exception e) when (e is UnauthorizedAccessException or PathTooLongException)
         {
             Console.WriteLine($"{rootPath}: {e.Message}");
         }
 
-        if (searchOption == SearchOption.AllDirectories)
+        if (searchOption is not SearchOption.AllDirectories)
+            return foundFiles;
+        
+        try
         {
-            try
+            var subDirs = Directory.EnumerateDirectories(rootPath);
+            foreach (var dir in subDirs)
             {
-                var subDirs = Directory.EnumerateDirectories(rootPath);
-                foreach (var dir in subDirs)
+                try
                 {
-                    try
-                    {
-                        var newFiles = GetFilepaths(dir, patternMatch, searchOption);
-                        foundFiles = foundFiles.Concat(newFiles);
-                    }
-                    catch (Exception e) when (e is UnauthorizedAccessException || e is PathTooLongException)
-                    {
-                        Console.WriteLine($"{dir}: {e.Message}");
-                    }
+                    var newFiles = GetFilepaths(dir, patternMatch, searchOption);
+                    foundFiles = foundFiles.Concat(newFiles);
+                }
+                catch (Exception e) when (e is UnauthorizedAccessException or PathTooLongException)
+                {
+                    Console.WriteLine($"{dir}: {e.Message}");
                 }
             }
-            catch (Exception e) when (e is UnauthorizedAccessException || e is PathTooLongException)
-            {
-                Console.WriteLine($"{rootPath}: {e.Message}");
-            }
+        }
+        catch (Exception e) when (e is UnauthorizedAccessException or PathTooLongException)
+        {
+            Console.WriteLine($"{rootPath}: {e.Message}");
         }
         return foundFiles;
     }
@@ -50,38 +50,38 @@ internal class IOEx
 
     private static IEnumerable<string> GetFilepaths(string rootPath, string patternMatch, int currentLevel, int maxLevel)
     {
-        var foundFiles = Enumerable.Empty<string>();
+        IEnumerable<string> foundFiles = [];
         try
         {
             foundFiles = foundFiles.Concat(Directory.EnumerateFiles(rootPath, patternMatch));
         }
-        catch (Exception e) when (e is UnauthorizedAccessException || e is PathTooLongException)
+        catch (Exception e) when (e is UnauthorizedAccessException or PathTooLongException)
         {
             Console.WriteLine($"{rootPath}: {e.Message}");
         }
 
-        if (currentLevel < maxLevel)
+        if (currentLevel >= maxLevel)
+            return foundFiles;
+        
+        try
         {
-            try
+            var subDirs = Directory.EnumerateDirectories(rootPath);
+            foreach (var dir in subDirs)
             {
-                var subDirs = Directory.EnumerateDirectories(rootPath);
-                foreach (var dir in subDirs)
+                try
                 {
-                    try
-                    {
-                        var newFiles = GetFilepaths(dir, patternMatch, currentLevel+1, maxLevel);
-                        foundFiles = foundFiles.Concat(newFiles);
-                    }
-                    catch (Exception e) when (e is UnauthorizedAccessException || e is PathTooLongException)
-                    {
-                        Console.WriteLine($"{dir}: {e.Message}");
-                    }
+                    var newFiles = GetFilepaths(dir, patternMatch, currentLevel+1, maxLevel);
+                    foundFiles = foundFiles.Concat(newFiles);
+                }
+                catch (Exception e) when (e is UnauthorizedAccessException or PathTooLongException)
+                {
+                    Console.WriteLine($"{dir}: {e.Message}");
                 }
             }
-            catch (Exception e) when (e is UnauthorizedAccessException || e is PathTooLongException)
-            {
-                Console.WriteLine($"{rootPath}: {e.Message}");
-            }
+        }
+        catch (Exception e) when (e is UnauthorizedAccessException or PathTooLongException)
+        {
+            Console.WriteLine($"{rootPath}: {e.Message}");
         }
         return foundFiles;
     }

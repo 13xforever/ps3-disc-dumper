@@ -42,8 +42,8 @@ public class RedumpProvider : IDiscKeyProvider
                     Log.Info("Loading embedded redump keys");
                     foreach (var res in embeddedResources)
                     {
-                        var resStream = assembly.GetManifestResourceStream(res);
-                        keyStreams.Add(resStream);
+                        if (assembly.GetManifestResourceStream(res) is {} resStream)
+                            keyStreams.Add(resStream);
                     }
                 }
                 else
@@ -74,7 +74,7 @@ public class RedumpProvider : IDiscKeyProvider
 
                         try
                         {
-                            result.Add(new(null, discKey, zipEntry.FullName, KeyType.Redump, discKey.ToHexString()));
+                            result.Add(new(discKey, false, zipEntry.FullName, KeyType.Redump, discKey.ToHexString()));
                         }
                         catch (Exception e)
                         {
@@ -118,7 +118,7 @@ public class RedumpProvider : IDiscKeyProvider
                                     Log.Warn(e, $"Failed to convert {discKey.ToHexString()} from hex to binary");
                                 }
                             }
-                            result.Add(new(null, discKey, dkeyFile, KeyType.Redump, discKey.ToString()));
+                            result.Add(new(discKey, false, dkeyFile, KeyType.Redump, discKey.ToHexString()));
                         }
                         catch (InvalidDataException)
                         {

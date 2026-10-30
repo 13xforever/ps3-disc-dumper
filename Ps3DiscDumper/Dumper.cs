@@ -35,35 +35,6 @@ public sealed partial class Dumper: IDisposable
                                                 .InformationalVersion
                                                 .Split('+', 2)[0]
                                             ?? "x.y.x-unknown";
-
-    static Dumper()
-    {
-        Log.Info($"PS3 Disc Dumper v{Version}");
-        Log.Info($"Running on {RuntimeInformation.OSDescription}");
-    }
-
-    [GeneratedRegex(@"(?<ver>\d+(\.\d+){0,2})[ \-]*(?<pre>.*)", RegexOptions.Singleline | RegexOptions.ExplicitCapture)]
-    private static partial Regex VersionParts();
-    [GeneratedRegex(@"Host: .+$\s*Vendor: (?<vendor>.+?)\s* Model: (?<model>.+?)\s* Rev: (?<revision>.+)$\s*Type: \s*(?<type>.+?)\s* ANSI  ?SCSI revision: (?<scsi_rev>.+?)\s*$", RegexOptions.Multiline | RegexOptions.ExplicitCapture)]
-    private static partial Regex ScsiInfoParts();
-
-    private static readonly HashSet<char> InvalidChars = [..Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars())];
-    private static readonly char[] MultilineSplit = ['\r', '\n'];
-    private long currentSector, fileSector;
-    private static readonly IDiscKeyProvider[] DiscKeyProviders = [new IrdProvider(), new RedumpProvider()];
-    private static readonly Dictionary<string, HashSet<DiscKeyInfo>> AllKnownDiscKeys = new();
-    private readonly HashSet<string> TestedDiscKeys = [];
-    private byte[] discSfbData;
-    private static readonly Dictionary<string, ImmutableArray<byte>> Detectors = new()
-    {
-        [@"\PS3_GAME\LICDIR\LIC.DAT"] = [.."PS3LICDA"u8],
-        [@"\PS3_GAME\USRDIR\EBOOT.BIN"] = [.."SCE"u8, 0, 0, 0, 0, 2],
-    };
-    private byte[] detectionSector;
-    private ImmutableArray<byte> detectionBytesExpected;
-    private byte[] sectorIV;
-    private Stream driveStream;
-    private static readonly byte[] Iso9660PrimaryVolumeDescriptorHeader = [0x01, 0x43, 0x44, 0x30, 0x30, 0x31, 0x01, 0x00];
     public static readonly NameValueCollection RegionMapping = new()
     {
         ["A"] = "ASIA",
@@ -76,15 +47,42 @@ public sealed partial class Dumper: IDisposable
         ["U"] = "US",
     };
 
+    [GeneratedRegex(@"(?<ver>\d+(\.\d+){0,2})[ \-]*(?<pre>.*)", RegexOptions.Singleline | RegexOptions.ExplicitCapture)]
+    private static partial Regex VersionParts();
+    [GeneratedRegex(@"Host: .+$\s*Vendor: (?<vendor>.+?)\s* Model: (?<model>.+?)\s* Rev: (?<revision>.+)$\s*Type: \s*(?<type>.+?)\s* ANSI  ?SCSI revision: (?<scsi_rev>.+?)\s*$", RegexOptions.Multiline | RegexOptions.ExplicitCapture)]
+    private static partial Regex ScsiInfoParts();
+
+    private static readonly HashSet<char> InvalidChars = [..Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars())];
+    private static readonly char[] MultilineSplit = ['\r', '\n'];
+    private static readonly IDiscKeyProvider[] DiscKeyProviders = [new IrdProvider(), new RedumpProvider()];
+    private static readonly Dictionary<string, HashSet<DiscKeyInfo>> AllKnownDiscKeys = new();
+    private static readonly Dictionary<string, ImmutableArray<byte>> Detectors = new()
+    {
+        [@"\PS3_GAME\LICDIR\LIC.DAT"] = [.."PS3LICDA"u8],
+        [@"\PS3_GAME\USRDIR\EBOOT.BIN"] = [.."SCE"u8, 0, 0, 0, 0, 2],
+    };
+    private readonly HashSet<string> TestedDiscKeys = []; // todo: fix usage
+
+    // these values are set after disc detection
+    private byte[] discSfbData; 
     public ParamSfo ParamSfo { get; private set; }
     public string ProductCode { get; private set; }
-    public string DiscVersion { get; private set; }
+    public string? DiscVersion { get; private set; }
     public string Title { get; private set; }
     public string OutputDir { get; private set; }
-    public char Drive { get; set; }
+    public string InputDevicePath { get; private set; }
+    public int TotalFileCount { get; private set; }
+    public long TotalFileSize { get; private set; }
+    public long TotalDiscSize { get; private set; } // can be 0
+    public char Drive { get; private set; } // only on windows
+    
+    private byte[]? detectionSector;
+    private ImmutableArray<byte> detectionBytesExpected;
+    private byte[]? sectorIV;
+    private Stream? driveStream;
+    private long currentSector, fileSector;
     public string SelectedPhysicalDevice { get; private set; }
     public string SelectedPhysicalDeviceName { get; private set; }
-    public string InputDevicePath { get; private set; }
     private List<FileRecord> filesystemStructure;
     private List<DirRecord> emptyDirStructure;
     private CDReader discReader;
@@ -92,15 +90,12 @@ public sealed partial class Dumper: IDisposable
     public KeyType DiscKeyType { get; set; }
     public string DiscKeyFilename { get; set; }
     private Decrypter Decrypter { get; set; }
-    public int TotalFileCount { get; private set; }
     public int CurrentFileNumber { get; private set; }
     public long TotalSectors { get; private set; }
     public long TotalFileSectors { get; private set; }
     public long ProcessedSectors { get; private set; }
-    public long TotalFileSize { get; private set; }
-    public long TotalDiscSize { get; private set; }
     public long SectorSize { get; private set; }
-    private List<string> DiscFilenames { get; set; }
+    private List<string> DiscFilenames { get; set; } = [];
     public List<(string filename, string error)> BrokenFiles { get; } = [];
     public HashSet<DiscKeyInfo> ValidatingDiscKeys { get; } = [];
     public CancellationTokenSource Cts { get; private set; } = new();
@@ -127,6 +122,12 @@ public sealed partial class Dumper: IDisposable
                 return fileSector;
             return fileSector = tmp.Value;
         }
+    }
+
+    static Dumper()
+    {
+        Log.Info($"PS3 Disc Dumper v{Version}");
+        Log.Info($"Running on {RuntimeInformation.OSDescription}");
     }
 
     [SupportedOSPlatform("windows")]
@@ -253,7 +254,7 @@ public sealed partial class Dumper: IDisposable
         return physicalDrives;
     }
 
-    private string CheckDiscSfb(byte[] discSfbData)
+    private static string? CheckDiscSfb(byte[] discSfbData)
     {
         var sfb = SfbReader.Parse(discSfbData);
         var flags = new HashSet<char>(sfb.KeyEntries.FirstOrDefault(e => e.Key == "HYBRID_FLAG")?.Value?.ToCharArray() ?? []);
@@ -262,7 +263,7 @@ public sealed partial class Dumper: IDisposable
             Log.Warn("Disc is not a game disc");
         var titleId = sfb.KeyEntries.FirstOrDefault(e => e.Key == "TITLE_ID")?.Value;
         Log.Debug($"Disc product code: {titleId}");
-        if (string.IsNullOrEmpty(titleId))
+        if (titleId is not {Length: >0})
             Log.Warn("Disc product code is empty");
         else if (titleId.Length > 9)
             titleId = titleId[..4] + titleId[^5..];
@@ -271,35 +272,51 @@ public sealed partial class Dumper: IDisposable
 
     private void CheckParamSfo(ParamSfo sfo)
     {
-        Title = sfo.Items.FirstOrDefault(i => i.Key == "TITLE")?.StringValue?.Trim(' ', '\0');
-        var titleParts = Title.Split(MultilineSplit, StringSplitOptions.RemoveEmptyEntries);
-        if (titleParts.Length > 1)
-            Title = string.Join(" ", titleParts);
-        ProductCode = sfo.Items.FirstOrDefault(i => i.Key == "TITLE_ID")?.StringValue?.Trim(' ', '\0');
-        DiscVersion = sfo.Items.FirstOrDefault(i => i.Key == "VERSION")?.StringValue?.Trim();
+        var title = sfo.Items.FirstOrDefault(i => i.Key is "TITLE")?.StringValue.Trim(' ', '\0');
+        if (title?.Split(MultilineSplit, StringSplitOptions.RemoveEmptyEntries) is {Length: >0} titleParts)
+            title = string.Join(" ", titleParts);
+        var productCode = sfo.Items.FirstOrDefault(i => i.Key is "TITLE_ID")?.StringValue.Trim(' ', '\0');
+        DiscVersion = sfo.Items.FirstOrDefault(i => i.Key is "VERSION")?.StringValue.Trim();
         var appVer = sfo.Items.FirstOrDefault(i => i.Key == "APP_VER")?.StringValue.Trim();
 
-        Log.Info($"Game title: {Title}");
-        Log.Info($"Game product code: {ProductCode}");
+        Log.Info($"Game title: {title}");
+        Log.Info($"Game product code: {productCode}");
         Log.Info($"Game version: {DiscVersion}");
         Log.Info($"App version: {appVer}");
+
+        if (title is null)
+            throw new InvalidDataException("PARAM.SFO is missing mandatory TITLE key");
+        if (productCode is null)
+            throw new InvalidDataException("PARAM.SFO is missing mandatory TITLE_ID key");
+
+        Title = title;
+        ProductCode = productCode;
     }
 
-    public void DetectDisc(string inDir = "", Func<Dumper, string> outputDirFormatter = null)
+    public void DetectDisc(string inDir = "", Func<Dumper, string>? outputDirFormatter = null)
     {
         outputDirFormatter ??= d => PatternFormatter.Format(SettingsProvider.Settings.DumpNameTemplate, new()
         {
             [Patterns.ProductCode] = d.ProductCode,
-            [Patterns.ProductCodeLetters] = d.ProductCode?[..4],
-            [Patterns.ProductCodeNumbers] = d.ProductCode?[4..],
+            [Patterns.ProductCodeLetters] = d.ProductCode[..4],
+            [Patterns.ProductCodeNumbers] = d.ProductCode[4..],
             [Patterns.Title] = d.Title,
-            [Patterns.Region] = RegionMapping[d.ProductCode?[2..3] ?? ""],
+            [Patterns.Region] = RegionMapping[d.ProductCode[2..3] ?? ""],
         });
-        string discSfbPath = null;
+        string? discSfbPath = null;
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            var drives = DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.CDRom && d.IsReady);
-            if (string.IsNullOrEmpty(inDir))
+            var drives = DriveInfo.GetDrives().Where(d => d is { DriveType: DriveType.CDRom, IsReady: true });
+            if (inDir is { Length: >0 })
+            {
+                discSfbPath = Path.Combine(inDir, "PS3_DISC.SFB");
+                if (File.Exists(discSfbPath))
+                {
+                    InputDevicePath = Path.GetPathRoot(discSfbPath)!;
+                    Drive = discSfbPath[0];
+                }
+            }
+            else
             {
                 foreach (var drive in drives)
                 {
@@ -311,15 +328,6 @@ public sealed partial class Dumper: IDisposable
                     Drive = drive.Name[0];
                     TotalDiscSize = drive.TotalSize;
                     break;
-                }
-            }
-            else
-            {
-                discSfbPath = Path.Combine(inDir, "PS3_DISC.SFB");
-                if (File.Exists(discSfbPath))
-                {
-                    InputDevicePath = Path.GetPathRoot(discSfbPath);
-                    Drive = discSfbPath[0];
                 }
             }
         }
@@ -334,9 +342,10 @@ public sealed partial class Dumper: IDisposable
             if (mountList.Count is 0)
             {
                 mountList = DriveInfo.GetDrives()
-                    .Where(d => d.DriveType == DriveType.NoRootDirectory && d.RootDirectory.Name.Contains('\\'))
-                    .Select(d => Path.GetDirectoryName(d.RootDirectory.FullName))
+                    .Where(d => d.DriveType is DriveType.NoRootDirectory && d.RootDirectory.Name.Contains('\\'))
+                    .Select(d => Path.GetDirectoryName(d.RootDirectory.FullName) ?? "")
                     .Distinct()
+                    .Where(p => p is {Length: >0})
                     .ToList();
                 Log.Debug($"Found {mountList.Count} potential mount point root{(mountList.Count is 1 ? "" : "s")}:");
                 foreach (var mountPath in mountList)
@@ -350,7 +359,7 @@ public sealed partial class Dumper: IDisposable
         else
             throw new NotImplementedException("Current OS is not supported");
 
-        if (string.IsNullOrEmpty(InputDevicePath) || string.IsNullOrEmpty(discSfbPath))
+        if (InputDevicePath is not {Length: >0} || discSfbPath is not {Length: >0})
             throw new DriveNotFoundException("No valid PS3 disc was detected. Disc must be detected and mounted.");
 
         Log.Info("Selected disc: " + InputDevicePath);
@@ -363,7 +372,7 @@ public sealed partial class Dumper: IDisposable
         using (var stream = File.Open(paramSfoPath, FileMode.Open, FileAccess.Read, FileShare.Read))
             ParamSfo = ParamSfo.ReadFrom(stream);
         CheckParamSfo(ParamSfo);
-        if (titleId != ProductCode)
+        if (titleId is {Length: >0} && titleId != ProductCode)
             Log.Warn($"Product codes in ps3_disc.sfb ({titleId}) and in param.sfo ({ProductCode}) do not match");
 
         // todo: maybe use discutils instead to read TOC as one block
@@ -386,7 +395,7 @@ public sealed partial class Dumper: IDisposable
         TotalFileSize = totalFilesize;
         TotalFileCount = DiscFilenames.Count;
 
-        var path = new string(outputDirFormatter(this).ToCharArray().Where(c => !InvalidChars.Contains(c)).ToArray());
+        var path = new string([.. outputDirFormatter(this).Where(c => !InvalidChars.Contains(c))]);
         var separators = new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
         var pathParts = path.Split(separators, StringSplitOptions.RemoveEmptyEntries).Select(p => p.TrimEnd('.'));
         OutputDir = string.Join(Path.DirectorySeparatorChar, pathParts);
@@ -410,8 +419,8 @@ public sealed partial class Dumper: IDisposable
                     {
                         try
                         {
-                            if (!AllKnownDiscKeys.TryGetValue(keyInfo.DecryptedKeyId, out var duplicates))
-                                AllKnownDiscKeys[keyInfo.DecryptedKeyId] = duplicates = [];
+                            if (!AllKnownDiscKeys.TryGetValue(keyInfo.KeyId, out var duplicates))
+                                AllKnownDiscKeys[keyInfo.KeyId] = duplicates = [];
                             duplicates.Add(keyInfo);
                         }
                         catch (Exception e)
@@ -431,7 +440,7 @@ public sealed partial class Dumper: IDisposable
         lock (AllKnownDiscKeys)
             untestedKeys.UnionWith(AllKnownDiscKeys.Keys);
         untestedKeys.ExceptWith(TestedDiscKeys);
-        if (untestedKeys.Count == 0)
+        if (untestedKeys.Count is 0)
             throw new KeyNotFoundException("No valid disc decryption key was found");
 
         List<(string path, string name)> physicalDrives;
@@ -545,7 +554,7 @@ public sealed partial class Dumper: IDisposable
         detectionSector = new byte[discReader.ClusterSize];
         detectionBytesExpected = expectedBytes;
         sectorIV = Decrypter.GetSectorIV(detectionRecord.StartSector);
-        Log.Debug($"Initialized {nameof(sectorIV)} ({sectorIV?.Length * 8} bit) for sector {detectionRecord.StartSector}: {sectorIV?.ToHexString()}");
+        Log.Debug($"Initialized {nameof(sectorIV)} ({sectorIV.Length * 8} bit) for sector {detectionRecord.StartSector}: {sectorIV.ToHexString()}");
         await driveStream.ReadExactlyAsync(detectionSector, 0, detectionSector.Length).ConfigureAwait(false);
         string discKey = null;
         try
@@ -652,8 +661,8 @@ public sealed partial class Dumper: IDisposable
         TotalFileCount = filesystemStructure.Count;
         TotalSectors = discReader.TotalClusters;
         ProcessedSectors = 0;
-        Log.Debug("Using decryption key: " + allMatchingKeys.First().DecryptedKeyId);
-        var decryptionKey = allMatchingKeys.First().DecryptedKey;
+        Log.Debug("Using decryption key: " + allMatchingKeys.First().KeyId);
+        var decryptionKey = allMatchingKeys.First().Key;
         var sectorSize = (int)discReader.ClusterSize;
         var unprotectedRegions = driveStream.GetUnprotectedRegions();
         ValidationStatus = true;
@@ -758,7 +767,7 @@ public sealed partial class Dumper: IDisposable
 
                         var resultHashes = decrypter.GetHashes();
                         var resultMd5 = resultHashes["MD5"];
-                        if (decrypter.WasEncrypted && decrypter.WasUnprotected)
+                        if (decrypter is { WasEncrypted: true, WasUnprotected: true })
                             Log.Debug("Partially decrypted " + file.TargetFileName);
                         else if (decrypter.WasEncrypted)
                             Log.Debug("Decrypted " + file.TargetFileName);
@@ -931,7 +940,7 @@ public sealed partial class Dumper: IDisposable
             if (!AllKnownDiscKeys.TryGetValue(discKeyId, out keys))
                 return false;
 
-        var key = keys.FirstOrDefault()?.DecryptedKey;
+        var key = keys.FirstOrDefault()?.Key;
         if (key is null)
             return false;
 
