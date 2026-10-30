@@ -2,7 +2,6 @@
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
         <Nullable>enable</Nullable>
-        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <AssemblyName>ps3-disc-dumper</AssemblyName>
@@ -54,12 +53,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.3.22" />
-        <PackageReference Include="Avalonia.Desktop" Version="11.3.22" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.22" />
-        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.22" />
-        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.22" />
+        <PackageReference Include="Avalonia" Version="12.1.4" />
+        <PackageReference Include="Avalonia.Desktop" Version="12.1.4" />
+        <PackageReference Include="FluentAvaloniaUI" Version="3.1.0" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.4" />
+        <!--Condition below is needed to remove AvaloniaUI.DiagnosticsSupport package from build output in Release configuration.-->
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
         <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     </ItemGroup>
@@ -67,7 +66,10 @@
         <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.26100.6" />
     </ItemGroup>
     <ItemGroup Condition="'$(Configuration)'=='Linux'">
-        <PackageReference Include="Tmds.DBus.Protocol" Version="0.92.0" />
+        <PackageReference Include="Avalonia.Wayland" Version="12.1.4" />
+        <PackageReference Include="Tmds.DBus.Protocol" Version="0.95.1" />
+        <PackageReference Include="Tmds.DBus.Generator" Version="0.95.1" />
+        <AdditionalFiles Include="Resources\DBus\org.freedesktop.DBus.ObjectManager.xml" Namespace="UDisks2.DBus" DBusGeneratorMode="Proxy" />
     </ItemGroup>
     <ItemGroup Condition="'$(Configuration)' == 'MacOS'">
         <PackageReference Include="Dotnet.Bundle" Version="0.9.13" />

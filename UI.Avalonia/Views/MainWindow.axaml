@@ -10,14 +10,13 @@
         
 		WindowStartupLocation="CenterScreen"
 		CanResize="False"
-        ExtendClientAreaToDecorationsHint="{OnPlatform False, Windows=True}"
-        ExtendClientAreaChromeHints="PreferSystemChrome"
-        SystemDecorations="Full"
+        ExtendClientAreaToDecorationsHint="True"
+        WindowDecorations="Full"
         Topmost="{Binding CurrentPage.StayOnTop}"
         
 		Background="Transparent"
         TransparencyLevelHint="Mica, AcrylicBlur, None"
-        RenderOptions.TextRenderingMode="Antialias"
+        TextOptions.TextRenderingMode="Antialias"
         
 		Icon="/Assets/icon.ico"
         Title="{Binding CurrentPage.PageTitle}"
@@ -30,8 +29,8 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
- 
-    <Panel>
+
+    <Panel Name="TopWindowPanel">
 	    <Border IsHitTestVisible="False" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
 		    <Border.IsVisible>
 			    <MultiBinding Converter="{x:Static BoolConverters.Or}">
@@ -78,8 +77,8 @@
 		    </Image>
 		    -->
 		    <!-- back button -->
-		    <Button Width="40" Height="36" Margin="0 0 -8 0"
-		            Classes="Transparent"
+		    <Button Name="BackButton" Width="40" Height="36" Margin="0 0 -8 0"
+	            Classes="Transparent"
 		            VerticalAlignment="Top" HorizontalAlignment="Left"
 		            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
 		            IsVisible="{Binding InSettings}"
@@ -89,7 +88,7 @@
 			               Text="{Binding CurrentPage.BackSymbol}"/>
 		    </Button>
 		    <!-- window title -->
-			<TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="14 10 0 0"
+			<TextBlock Name="TitleText" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="14 10 0 0"
 		               FontSize="12" IsHitTestVisible="False"
 		               IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=IsExtendedIntoWindowDecorations}"
 		               Text="{Binding CurrentPage.PageTitle}"/>
@@ -97,7 +96,7 @@
 	    <!-- top right -->
 	    <StackPanel Name="TitleButtons" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0 0 138 0">
 		    <!-- update button -->
-		    <Button Width="46" Height="31" CornerRadius="0"
+		    <Button Width="46" Height="32" CornerRadius="0"
 		            Classes="Transparent" Background="Transparent"
 		            Classes.Accent="{Binding !UpdateIsPrerelease}"
 		            Classes.AccentInverted="{Binding !UpdateIsPrerelease}"
@@ -127,7 +126,7 @@
 				</Button.Flyout>
 			</Button>
 		    <!-- settings button -->
-		    <Button Width="46" Height="31"
+		    <Button Width="46" Height="32"
 		            Classes="Transparent" CornerRadius="0"
 		            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="0"
 		            Command="{Binding ToggleSettingsPageCommand}"

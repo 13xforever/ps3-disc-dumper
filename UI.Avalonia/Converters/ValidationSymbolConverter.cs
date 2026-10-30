@@ -4,11 +4,11 @@ using Avalonia.Data.Converters;
 
 namespace UI.Avalonia.Converters;
 
-public class ValidationSymbolConverter: SymbolConverterBase, IValueConverter
+public class ValidationSymbolConverter: IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         => value is bool b
-            ? HasFluentIcons.Value
+            ? parameter is true
                 ? b ? "\ue73e" : "\ueb90"
                 : b ? "\uf058" : "\uf06a"
             : null;

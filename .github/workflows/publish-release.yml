@@ -9,7 +9,34 @@ on:
 env:
   dotnet_version: '10.0'
 jobs:
-  publish:
+  prepare:
+    runs-on: ubuntu-latest
+    env:
+      version_full: '${{ github.ref_name }}'
+    outputs:
+      version_full: '${{ steps.fix-version.outputs.version_full }}'
+      version_short: '${{ steps.short-version.outputs.version_short }}'
+    steps:
+      - name: 'Replace full version with custom input value'
+        if: '${{ inputs.version }}'
+        shell: pwsh
+        run: 'Write-Output "version_full=${{ inputs.version }}" >> $env:GITHUB_ENV'
+      - name: 'Fix full version format'
+        id: fix-version
+        shell: pwsh
+        run: |
+          $ver = '${{ env.version_full }}'.TrimStart('v')
+          Write-Output "version_full=$ver" >> $env:GITHUB_OUTPUT
+      - name: 'Generate short version'
+        id: short-version
+        shell: pwsh
+        run: |
+          $ver = [SemVer]'${{ env.version_full }}'
+          $short_ver = "$($ver.Major).$($ver.Minor).$($ver.Patch)"
+          Write-Host "Got $short_ver from ${{ env.version_full }}"
+          Write-Output "version_short=$short_ver" >> $env:GITHUB_OUTPUT
+  build:
+    needs: prepare
     strategy:
       fail-fast: false
       matrix:
@@ -32,30 +59,12 @@ jobs:
             command_extra: '-t:BundleApp'
     runs-on: '${{ matrix.os }}'
     env:
-      version_full: '${{ github.ref_name }}'
-      version_short: '${{ github.ref_name }}'
+      version_full: '${{ needs.prepare.outputs.version_full }}'
+      version_short: '${{ needs.prepare.outputs.version_short }}'
       artifact_name: 'ps3-disc-dumper_vX.Y.Z.zip'
-    permissions:
-      contents: write
     steps:
-      - uses: actions/checkout@v4
-      - name: 'Replace full version with custom input value'
-        if: '${{ inputs.version }}'
-        shell: pwsh
-        run: 'Write-Output "version_full=${{ inputs.version }}" >> $env:GITHUB_ENV'
-      - name: 'Fix full version format'
-        shell: pwsh
-        run: |
-          $ver = '${{ env.version_full }}'.TrimStart('v')
-          Write-Output "version_full=$ver" >> $env:GITHUB_ENV
-      - name: 'Generate short version'
-        shell: pwsh
-        run: |
-          $ver = [SemVer]'${{ env.version_full }}'
-          $short_ver = "$($ver.Major).$($ver.Minor).$($ver.Patch)"
-          Write-Host "Got $short_ver from ${{ env.version_full }}"
-          Write-Output "version_short=$short_ver" >> $env:GITHUB_ENV
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '${{ env.dotnet_version }}.x'
       - name: "Download current redump snapshot"
@@ -106,17 +115,34 @@ jobs:
             zip -vr9 "$artifact_name" 'PS3 Disc Dumper.app/' -x '*.DS_Store'
           }
           Write-Output "artifact_name=$artifact_name" >> $env:GITHUB_ENV
+      - name: 'Upload artifact'
+        uses: actions/upload-artifact@v7
+        with:
+          name: '${{ env.artifact_name }}'
+          path: 'distrib/${{ env.artifact_name }}'
+  release:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: 'Download artifacts'
+        uses: actions/download-artifact@v8
+        with:
+          pattern: 'ps3-disc-dumper_*'
+          merge-multiple: true
+          path: 'artifacts'
       - name: 'Create or update GitHub release draft'
         if: ${{ inputs.version }}
         uses: ncipollo/release-action@v1
         with:
           commit: '${{ github.sha }}'
-          tag: 'v${{ env.version_full }}'
+          tag: 'v${{ needs.prepare.outputs.version_full }}'
           draft: true
           prerelease: true
           allowUpdates: true
           generateReleaseNotes: true
-          artifacts: 'distrib/ps3-disc-dumper_*.zip'
+          artifacts: 'artifacts/ps3-disc-dumper_*.zip'
           artifactContentType: application/zip
           replacesArtifacts: true
           omitBodyDuringUpdate: true
@@ -130,11 +156,9 @@ jobs:
           prerelease: true
           allowUpdates: true
           generateReleaseNotes: true
-          artifacts: 'distrib/ps3-disc-dumper_*.zip'
+          artifacts: 'artifacts/ps3-disc-dumper_*.zip'
           artifactContentType: application/zip
           replacesArtifacts: true
           omitBodyDuringUpdate: true
           omitNameDuringUpdate: true
           omitPrereleaseDuringUpdate: true
-
-

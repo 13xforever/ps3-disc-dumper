@@ -3,6 +3,7 @@
              x:Class="UI.Avalonia.App"
              xmlns:local="using:UI.Avalonia"
              xmlns:lc="using:UI.Avalonia.Converters"
+             xmlns:sty="using:FluentAvalonia.Styling"
              RequestedThemeVariant="Default">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
@@ -11,15 +12,15 @@
     </Application.DataTemplates>
 
      <Application.Resources>
-         <FontFamily x:Key="FontAwesome">avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 6 Free</FontFamily>
+         <FontFamily x:Key="FontAwesome">avares://ps3-disc-dumper/Assets/Fonts#Font Awesome 7 Free</FontFamily>
          <lc:ColorConverter x:Key="ColorConverter"/>
          <lc:BrushConverter x:Key="BrushConverter"/>
          <lc:ValidationSymbolConverter x:Key="ValidationSymbolConverter"/>
          <lc:OnOffConverter x:Key="OnOffConverter"/>
      </Application.Resources>
-             
+
     <Application.Styles>
-        <FluentTheme/>
+        <sty:FluentAvaloniaTheme PreferUserAccentColor="True" UseSystemFontOnWindows="True"/>
         <StyleInclude Source="Styles/Fluent2Styles.axaml"/>
     </Application.Styles>
 

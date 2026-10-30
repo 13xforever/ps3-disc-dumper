@@ -11,25 +11,27 @@
         WindowStartupLocation="CenterScreen"
         CanResize="False"
         ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaChromeHints="PreferSystemChrome"
-        SystemDecorations="Full"
+        WindowDecorations="Full"
         Topmost="{Binding StayOnTop}"
         
         Background="Transparent"
         TransparencyLevelHint="Mica, AcrylicBlur, None"
-        RenderOptions.TextRenderingMode="Antialias"
-        
+        TextOptions.TextRenderingMode="Antialias"
+
         Icon="/Assets/icon.ico"
         Title="{Binding PageTitle}"
+        Loaded="OnLoaded"
         >
         
         <Design.DataContext>
                 <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-                <vm:ErrorStubViewModel/>
+                <vm:ErrorStubViewModel
+                    UacIsEnabled="False"
+                />
         </Design.DataContext>
-    
-        <Panel>
+
+        <Panel Name="TopWindowPanel">
             <Border IsHitTestVisible="False" Background="{Binding TintColor}">
                 <Border.IsVisible>
                     <MultiBinding Converter="{x:Static BoolConverters.Or}">
@@ -61,7 +63,7 @@
             </ExperimentalAcrylicBorder>
 
             <!-- title -->
-            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="19 17 0 0"
+            <TextBlock Name="TitleText" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="19 17 0 0"
                        FontSize="12"
                        IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=IsExtendedIntoWindowDecorations}"
                        Text="{Binding PageTitle}"/>
@@ -81,10 +83,13 @@
                         Please do not run software as an Administrator unless the application is designed to properly handle it, and it is explicitly required.
                     </TextBlock>
                     <TextBlock Classes="BodyTextBlockStyle" TextWrapping="Wrap" IsVisible="{Binding !UacIsEnabled}">
-                        You are running software with Administrator privileges. Please do not disable standard security mechanisms built into operating systems, including User Account Control. <Button Classes="Link"
-                            Command="{Binding OpenUrlCommand}" CommandParameter="{Binding UacInfoLink}">
-                            Learn more
-                        </Button>
+                        You are running software with Administrator privileges. Please do not disable standard security mechanisms built into operating systems, including User Account Control. 
+                        <InlineUIContainer BaselineAlignment="TextBottom" >
+                            <Button Classes="Link" Height="18" AttachedToVisualTree="OnAttachedToVisualTree"
+                                    Command="{Binding OpenUrlCommand}" CommandParameter="{Binding UacInfoLink}">
+                                Learn more
+                            </Button>
+                        </InlineUIContainer>
                     </TextBlock>
                 </StackPanel>
                 

@@ -3,11 +3,13 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core.Plugins;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Styling;
+using Avalonia.VisualTree;
+using FluentAvalonia.Styling;
 using Ps3DiscDumper;
 using Ps3DiscDumper.Utils;
 using UI.Avalonia.Utils.ColorPalette;
@@ -36,9 +38,6 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
-            // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
-            DisableAvaloniaDataAnnotationValidation();
             var safeToRun = SecurityEx.IsSafe(desktop.Args);
             Window w;
             ViewModelBase vm;
@@ -59,77 +58,36 @@ public partial class App : Application
             desktop.MainWindow.Activated += OnActivated;
             desktop.MainWindow.Deactivated += OnDeactivated;
             desktop.MainWindow.ActualThemeVariantChanged += OnThemeChanged;
-            if (w.PlatformSettings is { } ps)
+#if LINUX
+            desktop.MainWindow.Loaded += OnLoaded;
+#endif
+            if (w.GetPlatformSettings() is { } ps)
                 ps.ColorValuesChanged += OnPlatformColorsChanged;
-
+            
+            ApplyAccentSetting();
             vm.MicaEnabled = isMicaCapable.Value;
             vm.AcrylicEnabled = w.ActualTransparencyLevel == WindowTransparencyLevel.AcrylicBlur;
 
             var systemFonts = FontManager.Current.SystemFonts;
-            if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Text", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
+            if (!OperatingSystem.IsMacOS() // apparently macos returns true for this font even though it's not true
+                && systemFonts.TryGetGlyphTypeface("Segoe UI Variable Text", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
                 w.FontFamily = new("Segoe UI Variable Text");
-            else if (systemFonts.TryGetGlyphTypeface("Segoe UI", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-                w.FontFamily = new("Segoe UI");
+            ApplyPlatformStyles(w);
         }
         base.OnFrameworkInitializationCompleted();
     }
 
-    private static void SetSymbolFont(ViewModelBase vm)
-    {
-        if (OperatingSystem.IsMacOS())
-            return; // TryGetGlyphTypeface always returns true but yields a fallback fonts with missing symbols.
-        
-        var systemFonts = FontManager.Current.SystemFonts;
-        if (systemFonts.TryGetGlyphTypeface("Segoe Fluent Icons", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-            vm.SymbolFontFamily = new("Segoe Fluent Icons");
-        if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Small", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-            vm.SmallFontFamily = new("Segoe UI Variable Small");
-        if (systemFonts.TryGetGlyphTypeface("Segoe UI Variable Display", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
-            vm.LargeFontFamily = new("Segoe UI Variable Display");
-    }
-
-    private void OnActivated(object? sender, EventArgs e)
-    {
-        if (sender is not Window w)
-            return;
-
-        if (isMicaCapable.Value && SettingsProvider.Settings.EnableTransparency)
-            w.TransparencyLevelHint = DesiredTransparencyHints;
-    }
-
-    private void OnDeactivated(object? sender, EventArgs e)
-    {
-        if (sender is not Window { DataContext: MainWindowViewModel vm } w)
-            return;
-
-        if (isMicaCapable.Value)
-            w.TransparencyLevelHint = Array.Empty<WindowTransparencyLevel>();
-        if (w.ActualThemeVariant == ThemeVariant.Light)
-            vm.CurrentPage.TintColor = ThemeConsts.LightThemeTintColor;
-        else if (w.ActualThemeVariant == ThemeVariant.Dark)
-            vm.CurrentPage.TintColor = ThemeConsts.DarkThemeTintColor;
-    }
-
-    private void DisableAvaloniaDataAnnotationValidation()
-    {
-        // Get an array of plugins to remove
-        var dataValidationPluginsToRemove =
-            BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
-
-        // remove each entry found
-        foreach (var plugin in dataValidationPluginsToRemove)
-        {
-            BindingPlugins.DataValidators.Remove(plugin);
-        }
-    }
     internal static void OnThemeChanged(object? sender, EventArgs e)
     {
-        Window w;
         ViewModelBase vm;
-        if (sender is Window { DataContext: MainWindowViewModel { CurrentPage: {} vm1 } } w1)
-            (w, vm) = (w1, vm1);
-        else if (sender is Window { DataContext: ViewModelBase vm2 } w2)
-            (w, vm) = (w2, vm2);
+        if (sender is not Window w)
+            return;
+        
+        ApplyAccentSetting();
+        if (w is { DataContext: MainWindowViewModel { CurrentPage: {} vm1 } })
+            vm = vm1;
+        else if (w is { DataContext: ViewModelBase vm2 })
+            vm = vm2;
         else
             return;
 
@@ -147,18 +105,73 @@ public partial class App : Application
         }
     }
 
-    internal static void OnPlatformColorsChanged(object? sender, PlatformColorValues e)
+    private static void OnPlatformColorsChanged(object? sender, PlatformColorValues e)
+        => ApplyAccentSetting(e);
+
+    internal static void ApplyAccentSetting(PlatformColorValues? pcv = null)
     {
-        if (Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime
-            {
-                MainWindow.DataContext: MainWindowViewModel { CurrentPage: ViewModelBase vm }
-            })
+        if (Current?.Styles.OfType<FluentAvaloniaTheme>().FirstOrDefault() is not { } theme)
             return;
 
-        vm.SystemAccentColor = e.AccentColor1.ToString();
+        if (SettingsProvider.Settings.PreferSystemAccent && pcv is null)
+        {
+            if (Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime { MainWindow: { } w }
+                || w.GetPlatformSettings() is not { } ps)
+                return;
+
+            pcv = ps.GetColorValues();
+        }
+        
         if (SettingsProvider.Settings.PreferSystemAccent)
-            vm.AccentColor = e.AccentColor1.ToString();
+        {
+            var systemAccentColor = pcv!.AccentColor1;
+            theme.CustomAccentColor = systemAccentColor;
+            Current.Resources["CaptionGlyphInactiveColor"] = ThemeConsts.InactiveSystemButtonForegroundColor(systemAccentColor);
+        }
         else
-            vm.AccentColor = ThemeConsts.BrandColor;
+        {
+            var brandColor = Color.Parse(ThemeConsts.BrandColor);
+            theme.CustomAccentColor = brandColor;
+            Current.Resources["CaptionGlyphInactiveColor"] = ThemeConsts.InactiveSystemButtonForegroundColor(brandColor);
+        }
     }
+
+    private static void SetSymbolFont(ViewModelBase vm)
+    {
+        if (OperatingSystem.IsMacOS())
+            return; // TryGetGlyphTypeface always returns true but yields a fallback fonts with missing symbols.
+
+        var systemFonts = FontManager.Current.SystemFonts;
+        if (systemFonts.TryGetGlyphTypeface("Segoe Fluent Icons", FontStyle.Normal, FontWeight.Normal, FontStretch.Normal, out _))
+            vm.SymbolFontFamily = new("Segoe Fluent Icons");
+    }
+
+    private void OnActivated(object? sender, EventArgs e)
+    {
+        if (sender is not Window w)
+            return;
+
+        if (isMicaCapable.Value && SettingsProvider.Settings.EnableTransparency)
+            w.TransparencyLevelHint = DesiredTransparencyHints;
+    }
+
+    private void OnDeactivated(object? sender, EventArgs e)
+    {
+        if (sender is not Window w)
+            return;
+
+        if (isMicaCapable.Value)
+            w.TransparencyLevelHint = [];
+        if (w.DataContext is MainWindowViewModel vm)
+        {
+            if (w.ActualThemeVariant == ThemeVariant.Light)
+                vm.CurrentPage.TintColor = ThemeConsts.LightThemeTintColor;
+            else if (w.ActualThemeVariant == ThemeVariant.Dark)
+                vm.CurrentPage.TintColor = ThemeConsts.DarkThemeTintColor;
+        }
+    }
+
+    private void OnLoaded(object? sender, RoutedEventArgs e) => OnLoadedPlatform(sender, e);
+    partial void OnLoadedPlatform(object? sender, RoutedEventArgs e);
+    partial void ApplyPlatformStyles(Window w);
 }
