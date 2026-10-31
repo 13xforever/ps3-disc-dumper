@@ -83,7 +83,7 @@
 			                   IsVisible="{Binding Success, Converter={x:Static ObjectConverters.IsNotNull}}"
 			                   Classes.Success="{Binding Success}"
 			                   Classes.Critical="{Binding !Success}"
-			                   Text="{Binding Success, Converter={StaticResource ValidationSymbolConverter}, ConverterParameter={Binding UseSegoeIcons}}"/>
+			                   Text="{Binding ValidationStatusSymbol}"/>
 		        </StackPanel>
 	        </Expander.Header>
 	        <Grid ColumnDefinitions="120,*">

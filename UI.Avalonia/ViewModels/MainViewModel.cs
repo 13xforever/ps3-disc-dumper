@@ -57,8 +57,15 @@ public sealed partial class MainViewModel(SettingsViewModel settings) : ViewMode
     public partial int ProgressMax { get; set; } = 10_000;
     [ObservableProperty]
     public partial string ProgressInfo { get; set; } = "";
-    [ObservableProperty]
+    [ObservableProperty, NotifyPropertyChangedFor(nameof(ValidationStatusSymbol))]
     public partial bool? Success { get; set; }
+        
+    public string? ValidationStatusSymbol => Success switch
+    {
+        true => SuccessSymbol,
+        false => FailureSymbol,
+        _ => null,
+    };
 
     private readonly string[] analyzingMessages =
     [
