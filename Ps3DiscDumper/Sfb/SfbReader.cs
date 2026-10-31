@@ -13,7 +13,7 @@ public static class SfbReader
         
         if (content.Length < 200)
             throw new ArgumentException("Data is too small to be a valid SFB structure", nameof(content));
-        if (BitConverter.ToInt32(content.AsSpan(0, 4)) != Sfb.Magic)
+        if (BinaryPrimitives.ReadInt32LittleEndian(content.AsSpan(0, 4)) != Sfb.Magic)
             throw new ArgumentException("Specified file is not a valid SFB file", nameof(content));
 
         using var stream = new MemoryStream(content, false);

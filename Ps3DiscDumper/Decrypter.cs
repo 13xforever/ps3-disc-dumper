@@ -148,6 +148,7 @@ public sealed class Decrypter : Stream, IDisposable
                         Log.Warn($"Filesystem data and raw data do not match for sector 0x{SectorPosition:x8}");
                     tmpSector = newTmpSector;
                 }
+                GenerateSectorIV(SectorPosition, iv);
                 using var aesTransform = aes.CreateDecryptor(decryptionKey, iv);
                 decryptedSector = aesTransform.TransformFinalBlock(tmpSector, 0, sectorSize);
             }

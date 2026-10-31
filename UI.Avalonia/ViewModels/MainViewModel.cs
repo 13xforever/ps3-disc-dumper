@@ -13,13 +13,9 @@ using Ps3DiscDumper.Utils;
 
 namespace UI.Avalonia.ViewModels;
 
-public partial class MainViewModel : ViewModelBase, IDisposable
+public sealed partial class MainViewModel(SettingsViewModel settings) : ViewModelBase, IDisposable
 {
-    private readonly SettingsViewModel settings;
-    
     public MainViewModel(): this(new()){}
-    
-    public MainViewModel(SettingsViewModel settings) => this.settings = settings;
 
     [ObservableProperty]
     public partial string StepTitle { get; set; } = "Please insert a PS3 game disc";
@@ -63,8 +59,6 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     public partial string ProgressInfo { get; set; } = "";
     [ObservableProperty]
     public partial bool? Success { get; set; }
-    [ObservableProperty]
-    public partial bool? Validated { get; set; }
 
     private readonly string[] analyzingMessages =
     [
@@ -80,6 +74,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     internal Dumper? Dumper;
     internal CancellationTokenSource Cts = new();
+    internal char? LastDetectedDrive = null;
     private readonly SemaphoreSlim scanLock = new(1, 1);
 
     partial void OnDiscInfoExpandedChanged(bool value)
@@ -113,7 +108,6 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         Progress = 0;
         ProgressInfo = "";
         Success = null;
-        Validated = null;
         ResetTaskbarProgress();
     }
 
@@ -147,6 +141,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             FoundDisc = true;
             StepTitle = "Scanning disc drives";
             StepSubtitle = "Checking the inserted disc…";
+            Cts.Dispose();
             Cts = new();
             Dumper?.Dispose();
             Dumper = null;
@@ -156,6 +151,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             try
             {
                 discInfo = Detector.DetectDisc();
+                LastDetectedDrive = discInfo.Drive;
             } catch {}
             if (discInfo is null)
             {
@@ -164,7 +160,6 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             }
 
             Success = null;
-            Validated = null;
             ProductCode = discInfo.ProductCode;
             GameTitle = discInfo.Title;
             DiscSizeInfo = $"{discInfo.TotalFileSize.AsStorageUnit()} ({discInfo.TotalFileCount} files)";
@@ -384,6 +379,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     
     public void Dispose()
     {
+        Cts.Dispose();
         Dumper?.Dispose();
         OnDisposePlatform();
     }

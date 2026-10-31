@@ -34,8 +34,6 @@ public partial class KeyFinder
     };
 
     private ImmutableArray<byte> detectionBytesExpected;
-    private readonly Lock testedDiscKeysSync = new();
-    private readonly HashSet<string> testedDiscKeys = []; // todo: fix usage
     
     [SupportedOSPlatform("windows")]
     private static List<(string path, string? name)> EnumeratePhysicalDrivesWindows()
@@ -203,8 +201,6 @@ public partial class KeyFinder
         lock (AllKnownDiscKeysSync)
         {
             untestedKeys.UnionWith(AllKnownDiscKeys.Keys);
-            lock (testedDiscKeysSync)
-                untestedKeys.ExceptWith(testedDiscKeys);
             if (untestedKeys.Count is 0)
                 throw new KeyNotFoundException("No valid disc decryption key was found");
         }
@@ -322,15 +318,15 @@ public partial class KeyFinder
         driveStream.Seek(detectionRecord.StartSector * sectorSize, SeekOrigin.Begin);
         var detectionSector = new byte[sectorSize];
         detectionBytesExpected = expectedBytes;
-        var sectorIV = new byte[16];
-        Decrypter.GenerateSectorIV(detectionRecord.StartSector, sectorIV);
-        Log.Debug($"Initialized {nameof(sectorIV)} ({sectorIV.Length * 8} bit) for sector {detectionRecord.StartSector}: {sectorIV.ToHexString()}");
+        var iv = new byte[16];
+        Decrypter.GenerateSectorIV(detectionRecord.StartSector, iv);
+        Log.Debug($"Initialized {nameof(iv)} ({iv.Length * 8} bit) for sector {detectionRecord.StartSector}: {iv.ToHexString()}");
         await driveStream.ReadExactlyAsync(detectionSector, cancellationToken).ConfigureAwait(false);
         string? discKey = null;
         try
         {
             var validKeys = untestedKeys.AsParallel()
-                .Where(k => !cancellationToken.IsCancellationRequested && IsValidDiscKey(k, detectionSector, sectorIV))
+                .Where(k => !cancellationToken.IsCancellationRequested && IsValidDiscKey(k, detectionSector, iv))
                 .Distinct()
                 .ToList();
             await Task.Yield();
@@ -389,10 +385,6 @@ public partial class KeyFinder
 
     private bool IsValidDiscKey(in string discKeyId, in byte[] sector, in byte[] iv)
     {
-        lock (testedDiscKeysSync)
-            if (testedDiscKeys.Contains(discKeyId))
-                return false;
-        
         HashSet<DiscKeyInfo>? keys;
         lock (AllKnownDiscKeysSync)
             if (!AllKnownDiscKeys.TryGetValue(discKeyId, out keys))
@@ -402,17 +394,7 @@ public partial class KeyFinder
         if (key is null)
             return false;
 
-        var keyValueId = key.ToHexString();
-        lock (testedDiscKeysSync)
-            if (testedDiscKeys.Contains(keyValueId))
-                return false;
-
         var result = IsValidDiscKey(key, sector, iv);
-        lock (testedDiscKeysSync)
-        {
-            testedDiscKeys.Add(discKeyId);
-            testedDiscKeys.Add(keyValueId);
-        }
         return result;
     }
 

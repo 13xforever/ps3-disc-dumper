@@ -1,11 +1,11 @@
-﻿using System;
+﻿using System.Buffers.Binary;
 using System.Collections.Generic;
 
 namespace Ps3DiscDumper.Sfb;
 
 public class Sfb
 {
-    public static readonly int Magic = BitConverter.ToInt32(".SFB"u8);
+    public static readonly int Magic = BinaryPrimitives.ReadInt32LittleEndian(".SFB"u8);
     public short VersionMajor;
     public short VersionMinor;
     public required byte[] Unknown1; // 0x18

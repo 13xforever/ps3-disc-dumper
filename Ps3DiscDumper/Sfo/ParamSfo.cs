@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace Ps3DiscDumper.Sfo;
@@ -10,7 +10,7 @@ public class ParamSfo
 {
     private ParamSfo() { }
 
-    private static readonly int Magic = BitConverter.ToInt32("\0PSF"u8);
+    private static readonly int Magic = BinaryPrimitives.ReadInt32LittleEndian("\0PSF"u8);
     public byte MajorVersion { get; private init; }
     public byte MinorVersion { get; private init; }
     public short Reserved1 { get; private init; }

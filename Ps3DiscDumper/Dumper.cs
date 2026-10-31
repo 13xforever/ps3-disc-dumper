@@ -78,8 +78,8 @@ public sealed class Dumper : IDisposable
 
     public Dumper(DiscDetectionResult discInfo, KeyFinderResult discKeyInfo, CancellationTokenSource cts)
     {
-        if (discInfo.ProductCode is not { Length: >0 }
-            || discKeyInfo.DiscKeyType is KeyType.Unknown)
+        if (discInfo.ProductCode is not {Length: >0}
+            || discKeyInfo.AllMatchingKeys is not {Count: >0})
             throw new InvalidOperationException("Disc was not properly scanned or the decryption key is missing");
 
         this.DiscInfo = discInfo;
@@ -406,6 +406,5 @@ public sealed class Dumper : IDisposable
     public void Dispose()
     {
         ((IDisposable?)Decrypter)?.Dispose();
-        Cts.Dispose();
     }
 }

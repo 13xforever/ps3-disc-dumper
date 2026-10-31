@@ -1,30 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Collections.Specialized;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
-using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
-using DiscUtils.Iso9660;
 using IrdLibraryClient;
-using IrdLibraryClient.IrdFormat;
-using Ps3DiscDumper.DiscInfo;
-using Ps3DiscDumper.DiscKeyProviders;
 using Ps3DiscDumper.POCOs;
-using Ps3DiscDumper.Sfb;
-using Ps3DiscDumper.Sfo;
-using Ps3DiscDumper.Utils;
-using Ps3DiscDumper.Utils.MacOS;
-using WmiLight;
-using FileInfo = System.IO.FileInfo;
 
 namespace Ps3DiscDumper;
 
