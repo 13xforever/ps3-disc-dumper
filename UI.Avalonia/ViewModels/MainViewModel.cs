@@ -82,6 +82,7 @@ public sealed partial class MainViewModel(SettingsViewModel settings) : ViewMode
     internal Dumper? Dumper;
     internal CancellationTokenSource Cts = new();
     internal char? LastDetectedDrive = null;
+    internal string? LastSelectedPhysicalDevice = null;
     private readonly SemaphoreSlim scanLock = new(1, 1);
 
     partial void OnDiscInfoExpandedChanged(bool value)
@@ -188,6 +189,7 @@ public sealed partial class MainViewModel(SettingsViewModel settings) : ViewMode
                     discInfo,
                     Cts.Token
                 ).WaitAsync(Cts.Token).ConfigureAwait(false);
+                LastSelectedPhysicalDevice = discKeyInfo.SelectedPhysicalDevice;
             }
             catch (OperationCanceledException)
             {

@@ -129,13 +129,13 @@ public partial class MainWindow
                         {
                             CurrentPage: MainViewModel
                             {
-                                dumper: { SelectedPhysicalDevice: { Length: > 0 } spd } dumper
+                                LastSelectedPhysicalDevice: {Length: >0} spd
                             } vm
                         }
                         && spd == $"/dev/{opticalDriveList[0]}")
                     {
                         Log.Debug($"Received {operationValue} event with optical disc object, trying to reset the state… ({nameof(vm.DumpingInProgress)}: {vm.DumpingInProgress}, {nameof(vm.FoundDisc)}: {vm.FoundDisc}, {nameof(vm.DumperIsReady)}: {vm.DumperIsReady})");
-                        dumper.Cts.Cancel();
+                        vm.Cts.Cancel();
                         vm.ResetViewModelCommand.Execute(null);
                     }
                 }, DispatcherPriority.Background);
@@ -162,13 +162,13 @@ public partial class MainWindow
                     {
                         CurrentPage: MainViewModel
                         {
-                            dumper: { SelectedPhysicalDevice: { Length: > 0 } spd } dumper
+                            LastSelectedPhysicalDevice: {Length: >0} spd
                         } vm
                     }
                     && spd == $"/dev/{deviceName}")
                 {
                     Log.Debug($"Received InterfaceRemoved signal with optical disc object, trying to reset the state… ({nameof(vm.DumpingInProgress)}: {vm.DumpingInProgress}, {nameof(vm.FoundDisc)}: {vm.FoundDisc}, {nameof(vm.DumperIsReady)}: {vm.DumperIsReady})");
-                    dumper.Cts.Cancel();
+                    vm.Cts.Cancel();
                     vm.ResetViewModelCommand.Execute(null);
                 }
             }, DispatcherPriority.Background);

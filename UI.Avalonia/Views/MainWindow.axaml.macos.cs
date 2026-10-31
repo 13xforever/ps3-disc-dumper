@@ -148,14 +148,14 @@ public partial class MainWindow
                         {
                             CurrentPage: MainViewModel
                             {
-                                dumper: { SelectedPhysicalDevice: { Length: > 0 } spd } dumper
+                                LastSelectedPhysicalDevice: {Length:>0} spd
                             } vm
                         }
                     }
                     && spd == $"/dev/r{bsdName}")
                 {
                     Log.Debug("Cancelling dump operation");
-                    dumper.Cts.Cancel();
+                    vm.Cts.Cancel();
                     vm.ResetViewModelCommand.Execute(null);
                 }
             }, DispatcherPriority.Background);
