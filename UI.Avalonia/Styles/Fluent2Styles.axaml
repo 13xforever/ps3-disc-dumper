@@ -274,4 +274,12 @@
     <Style Selector="ProgressBar:horizontal /template/ Border#ProgressBarTrack">
         <Setter Property="CornerRadius" Value="{DynamicResource ProgressBarTrackCornerRadius}"/>
     </Style>
+    
+    <!-- Popup flyout fix for font color -->
+    <Style Selector="PopupRoot">
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
+    </Style>
+    <Style Selector="OverlayPopupHost">
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
+    </Style>
 </Styles>

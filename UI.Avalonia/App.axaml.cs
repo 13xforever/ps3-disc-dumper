@@ -124,7 +124,11 @@ public partial class App : Application
         if (SettingsProvider.Settings.PreferSystemAccent)
         {
             var systemAccentColor = pcv!.AccentColor1;
+#if LINUX
             theme.CustomAccentColor = systemAccentColor;
+#else
+            theme.CustomAccentColor = null;
+#endif
             Current.Resources["CaptionGlyphInactiveColor"] = ThemeConsts.InactiveSystemButtonForegroundColor(systemAccentColor);
         }
         else
