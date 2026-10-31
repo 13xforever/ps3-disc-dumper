@@ -8,7 +8,7 @@ using Ps3DiscDumper.Utils;
 
 namespace Ps3DiscDumper;
 
-public class Decrypter : Stream, IDisposable
+public sealed class Decrypter : Stream, IDisposable
 {
     private static readonly byte[] Secret = "380bcf0b53455b3c7817ab4fa3ba90ed".ToByteArray();
     private static readonly byte[] IV = "69474772af6fdab342743aefaa186287".ToByteArray();
@@ -46,33 +46,31 @@ public class Decrypter : Stream, IDisposable
         return transform.TransformFinalBlock(data1, 0, data1.Length);
     }
 
-    public static byte[] GetSectorIV(long sectorNumber)
+    public static void GenerateSectorIV(long sectorNumber, Span<byte> iv)
     {
-        var result = new byte[16];
+        if (iv.Length is not 16)
+            throw new ArgumentException($"The size of {nameof(iv)} must be 16 bytes");
+        
         for (var i = 15; i > 7; i--)
         {
-            result[i] = (byte)(sectorNumber & 0xFF);
+            iv[i] = (byte)(sectorNumber & 0xFF);
             sectorNumber >>= 8;
         }
-        return result;
     }
 
-    public static byte[] DecryptSector(byte[] decryptionKey, byte[] sector, byte[] sectorIV)
+    public static byte[] DecryptSector(byte[] decryptionKey, byte[] sector, byte[] iv)
     {
         using var aes = Aes.Create();
         aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.None;
-        using var aesTransform = aes.CreateDecryptor(decryptionKey, sectorIV);
+        using var aesTransform = aes.CreateDecryptor(decryptionKey, iv);
         return aesTransform.TransformFinalBlock(sector, 0, sector.Length);
     }
 
     public Decrypter(Stream fileStream, Stream discStream, byte[] decryptionKey, long startSector, int sectorSize, List<(int start, int end)> unprotectedSectorRanges)
     {
-        if (fileStream is null)
-            throw new ArgumentNullException(nameof(fileStream));
-
-        if (decryptionKey is null)
-            throw new ArgumentNullException(nameof(decryptionKey));
+        ArgumentNullException.ThrowIfNull(fileStream);
+        ArgumentNullException.ThrowIfNull(decryptionKey);
 
         if (decryptionKey.Length != 128 / 8 && decryptionKey.Length != 256 / 8)
             throw new ArgumentException($"Unsupported decryption key size of {decryptionKey.Length * 8} bits. Expected 128 or 256 bit key");
@@ -130,26 +128,27 @@ public class Decrypter : Stream, IDisposable
             return resultCount;
 
         int readCount;
+        var iv = new byte[16];
         do
         {
-            readCount = inputStream.ReadExact(tmpSector, 0, sectorSize);
+            readCount = inputStream.TryToReadExactly(tmpSector, 0, sectorSize);
             if (readCount < sectorSize)
                 Array.Clear(tmpSector, readCount, sectorSize - readCount);
             var decryptedSector = tmpSector;
             if (IsEncrypted(SectorPosition))
             {
                 WasEncrypted = true;
-                if (readCount % 16 != 0)
+                if (readCount % 16 is not 0)
                 {
                     Log.Debug($"Block has only {(readCount % 16) * 8} bits of data, reading raw sector...");
                     discStream.Seek(SectorPosition * sectorSize, SeekOrigin.Begin);
                     var newTmpSector = new byte[sectorSize];
                     discStream.ReadExactly(newTmpSector, 0, sectorSize);
-                    if (!newTmpSector.Take(readCount).SequenceEqual(tmpSector.Take(readCount)))
+                    if (!newTmpSector.AsSpan(0, readCount).SequenceEqual(tmpSector.AsSpan(0, readCount)))
                         Log.Warn($"Filesystem data and raw data do not match for sector 0x{SectorPosition:x8}");
                     tmpSector = newTmpSector;
                 }
-                using var aesTransform = aes.CreateDecryptor(decryptionKey, GetSectorIV(SectorPosition));
+                using var aesTransform = aes.CreateDecryptor(decryptionKey, iv);
                 decryptedSector = aesTransform.TransformFinalBlock(tmpSector, 0, sectorSize);
             }
             else
@@ -203,7 +202,7 @@ public class Decrypter : Stream, IDisposable
         return result;
     }
 
-    void IDisposable.Dispose() { md5?.Dispose(); }
+    void IDisposable.Dispose() { md5.Dispose(); }
 
     public override long Seek(long offset, SeekOrigin origin) => throw new NotImplementedException();
     public override void Flush() => throw new NotImplementedException();
