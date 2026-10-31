@@ -167,6 +167,20 @@ public sealed partial class MainViewModel(SettingsViewModel settings) : ViewMode
                 return;
             }
 
+            var outputDir = OutputDirFormatter.Format(discInfo, d =>
+            {
+                var items = new NameValueCollection
+                {
+                    [Patterns.ProductCode] = d.ProductCode,
+                    [Patterns.ProductCodeLetters] = d.ProductCode[..4],
+                    [Patterns.ProductCodeNumbers] = d.ProductCode[4..],
+                    [Patterns.Title] = d.Title,
+                    [Patterns.Region] = Dumper.RegionMapping[d.ProductCode[2..3]],
+                };
+                settings.TestItems = items;
+                return PatternFormatter.Format(SettingsProvider.Settings.DumpNameTemplate, items);
+            });
+            
             Success = null;
             ProductCode = discInfo.ProductCode;
             GameTitle = discInfo.Title;
@@ -228,19 +242,6 @@ public sealed partial class MainViewModel(SettingsViewModel settings) : ViewMode
             else
                 DiscKeyName = "No match found";
 
-            var outputDir = OutputDirFormatter.Format(discInfo, d =>
-            {
-                var items = new NameValueCollection
-                {
-                    [Patterns.ProductCode] = d.ProductCode,
-                    [Patterns.ProductCodeLetters] = d.ProductCode[..4],
-                    [Patterns.ProductCodeNumbers] = d.ProductCode[4..],
-                    [Patterns.Title] = d.Title,
-                    [Patterns.Region] = Dumper.RegionMapping[d.ProductCode[2..3]],
-                };
-                settings.TestItems = items;
-                return PatternFormatter.Format(SettingsProvider.Settings.DumpNameTemplate, items);
-            });
             var destination = Path.Combine(settings.OutputDir, outputDir);
             if (Directory.Exists(destination))
             {

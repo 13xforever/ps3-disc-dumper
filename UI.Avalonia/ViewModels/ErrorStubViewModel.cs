@@ -4,6 +4,8 @@ namespace UI.Avalonia.ViewModels;
 
 public partial class ErrorStubViewModel: ViewModelBase
 {
-    [ObservableProperty] private bool uacIsEnabled = false;
-    public string UacInfoLink => "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/";
+    [ObservableProperty]
+    public partial bool UacIsEnabled { get; set; } = false;
+
+    public static string UacInfoLink => "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/";
 }

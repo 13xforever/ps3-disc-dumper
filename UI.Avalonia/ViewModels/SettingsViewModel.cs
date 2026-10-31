@@ -22,15 +22,19 @@ public partial class SettingsViewModel: ViewModelBase
     public SettingsViewModel() => pageTitle = "Settings";
 
     [NotifyPropertyChangedFor(nameof(OutputDirPreview))]
-    [ObservableProperty] private string outputDir = SettingsProvider.Settings.OutputDir;
+    [ObservableProperty]
+    public partial string OutputDir { get; set; } = SettingsProvider.Settings.OutputDir;
     [NotifyPropertyChangedFor(nameof(IrdDirPreview))]
-    [ObservableProperty] private string irdDir = SettingsProvider.Settings.IrdDir;
+    [ObservableProperty]
+    public partial string IrdDir { get; set; } = SettingsProvider.Settings.IrdDir;
 
     public string OutputDirPreview => FormatPathPreview(OutputDir);
     public string IrdDirPreview => FormatPathPreview(IrdDir);
-    
-    [ObservableProperty] private string templatePreview = FormatPreview(SettingsProvider.Settings.OutputDir, SettingsProvider.Settings.DumpNameTemplate, testItems);
-    [ObservableProperty] private string dumpNameTemplate = SettingsProvider.Settings.DumpNameTemplate;
+
+    [ObservableProperty]
+    public partial string TemplatePreview { get; set; } = FormatPreview(SettingsProvider.Settings.OutputDir, SettingsProvider.Settings.DumpNameTemplate, testItems);
+    [ObservableProperty]
+    public partial string DumpNameTemplate { get; set; } = SettingsProvider.Settings.DumpNameTemplate;
     [NotifyPropertyChangedFor(nameof(TestProductCode))]
     [NotifyPropertyChangedFor(nameof(TestProductCodeLetters))]
     [NotifyPropertyChangedFor(nameof(TestProductCodeNumbers))]
@@ -45,17 +49,17 @@ public partial class SettingsViewModel: ViewModelBase
         [Patterns.Title] = "Under Night In-Birth Exe:Late",
         [Patterns.Region] = "EU",
     };
-    public string TestProductCode => testItems[Patterns.ProductCode]!;
-    public string TestProductCodeLetters => testItems[Patterns.ProductCodeLetters]!;
-    public string TestProductCodeNumbers => testItems[Patterns.ProductCodeNumbers]!;
-    public string TestTitle => testItems[Patterns.Title]!;
-    public string TestRegion => testItems[Patterns.Region]!;
+    public static string TestProductCode => testItems[Patterns.ProductCode]!;
+    public static string TestProductCodeLetters => testItems[Patterns.ProductCodeLetters]!;
+    public static string TestProductCodeNumbers => testItems[Patterns.ProductCodeNumbers]!;
+    public static string TestTitle => testItems[Patterns.Title]!;
+    public static string TestRegion => testItems[Patterns.Region]!;
+    public static bool LogAvailable => File.Exists(Log.LogPath); 
 
-    public bool LogAvailable => File.Exists(Log.LogPath); 
-    public string LogPath => Log.LogPath;
-    public string LogPathPreview => FormatPathPreview(Log.LogPath);
-    public string DumperVersion => Dumper.Version;
-    public string CurrentYear => DateTime.Now.Year.ToString();
+    public static string LogPath => Log.LogPath;
+    public static string LogPathPreview => FormatPathPreview(Log.LogPath);
+    public static string DumperVersion => Dumper.Version;
+    public static string CurrentYear => DateTime.Now.Year.ToString();
     public static string ProjectUrl => "https://github.com/13xforever/ps3-disc-dumper";
     public static string SubmitIssueUrl => $"{ProjectUrl}/issues/new/choose";
     public static string WikiUrlBase => $"{ProjectUrl}/wiki/";
@@ -149,7 +153,7 @@ public partial class SettingsViewModel: ViewModelBase
     }
 
     [RelayCommand]
-    private void OpenFolder(string value)
+    private static void OpenFolder(string value)
     {
         var folder = value;
         if (File.Exists(folder))

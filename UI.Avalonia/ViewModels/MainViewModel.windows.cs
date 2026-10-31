@@ -5,7 +5,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using TerraFX.Interop.Windows;
 using UI.Avalonia.Utils;
-using ITaskbarList3 = TerraFX.Interop.Windows.ITaskbarList3;
 
 namespace UI.Avalonia.ViewModels;
 
@@ -13,7 +12,7 @@ public unsafe partial class MainViewModel
 {
     private static readonly Shobj shobj = new();
     
-    private bool TryGetMainHandle(out HWND hwnd)
+    private static bool TryGetMainHandle(out HWND hwnd)
     {
         hwnd = default;
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime { MainWindow: Window w }

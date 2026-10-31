@@ -19,16 +19,21 @@ public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
     public MainWindowViewModel() => CurrentPage = mainPage = new(settingsPage);
 
     [NotifyPropertyChangedFor(nameof(InSettings))]
-    [ObservableProperty] private ViewModelBase currentPage;
+    [ObservableProperty]
+    public partial ViewModelBase CurrentPage { get; set; }
     public bool InSettings => CurrentPage is SettingsViewModel;
- 
-    [ObservableProperty] private GitHubReleaseInfo? updateInfo;
-    [ObservableProperty] private bool? updateIsPrerelease;
-    [ObservableProperty] private string formattedUpdateInfoHeader = "";
-    [ObservableProperty] private string formattedUpdateInfoBody = "";
-    [ObservableProperty] private string formattedUpdateInfoUrl = $"{SettingsViewModel.ProjectUrl}/releases/latest";
-    [ObservableProperty] private string formattedUpdateInfoVersion = "";
-    
+    [ObservableProperty]
+    public partial GitHubReleaseInfo? UpdateInfo { get; set; }
+    [ObservableProperty]
+    public partial bool? UpdateIsPrerelease { get; set; }
+    [ObservableProperty]
+    public partial string FormattedUpdateInfoHeader { get; set; } = "";
+    [ObservableProperty]
+    public partial string FormattedUpdateInfoBody { get; set; } = "";
+    [ObservableProperty]
+    public partial string FormattedUpdateInfoUrl { get; set; } = $"{SettingsViewModel.ProjectUrl}/releases/latest";
+    [ObservableProperty]
+    public partial string FormattedUpdateInfoVersion { get; set; } = "";
 
     [RelayCommand]
     private void ToggleSettingsPage()
