@@ -10,7 +10,7 @@ using Ps3DiscDumper.POCOs;
 
 namespace UI.Avalonia.ViewModels;
 
-public partial class MainWindowViewModel : ObservableObject, IDisposable
+public sealed partial class MainWindowViewModel : ObservableObject, IDisposable
 {
     private readonly SettingsViewModel settingsPage = new();
     private readonly MainViewModel mainPage;
@@ -64,15 +64,22 @@ public partial class MainWindowViewModel : ObservableObject, IDisposable
 
     internal async void CheckUpdatesAsync()
     {
-        var (ver, rel) = await Dumper.CheckUpdatesAsync().ConfigureAwait(false);
-        if (ver is null || rel is null)
-            return;
+        try
+        {
+            var (ver, rel) = await Updater.CheckUpdatesAsync().ConfigureAwait(false);
+            if (ver is null || rel is null)
+                return;
 
-        UpdateInfo = rel;
-        UpdateIsPrerelease = rel.Prerelease;
-        FormattedUpdateInfoHeader = rel.Name;
-        FormattedUpdateInfoVersion = $"Download v{rel.TagName.TrimStart('v')}";
-        FormattedUpdateInfoBody = rel.Body;
+            UpdateInfo = rel;
+            UpdateIsPrerelease = rel.Prerelease;
+            FormattedUpdateInfoHeader = rel.Name ?? "";
+            FormattedUpdateInfoVersion = $"Download v{rel.TagName.TrimStart('v')}";
+            FormattedUpdateInfoBody = rel.Body ?? "";
+        }
+        catch (Exception e)
+        {
+            Log.Warn(e, "Failed to check for updates");
+        }
     }
     
     public void Dispose()

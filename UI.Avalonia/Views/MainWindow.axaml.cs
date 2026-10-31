@@ -69,7 +69,7 @@ public partial class MainWindow : Window
             return;
         
         if (vm.CurrentPage is MainViewModel mvm)
-            mvm.dumper?.Cts.Cancel();
+            mvm.Cts.Cancel();
         
         vm.Dispose();
     }

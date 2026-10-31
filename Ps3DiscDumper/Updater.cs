@@ -67,7 +67,7 @@ public static partial class Updater
                     && (latestBetaVerPre is {Length: >0} && StringComparer.OrdinalIgnoreCase.Compare(latestBetaVerPre, curVerPre) > 0
                         || latestBetaVerStr is null or "")))
             {
-                Log.Warn($"Newer prerelease version available: v{latestBeta!.TagName.TrimStart('v')}\n\n{latestBeta?.Name}\n{"".PadRight(latestBeta?.Name.Length ?? 0, '-')}\n{latestBeta?.Body}\n{latestBeta?.HtmlUrl}\n");
+                Log.Warn($"Newer prerelease version available: v{latestBeta!.TagName.TrimStart('v')}\n\n{latestBeta?.Name}\n{"".PadRight(latestBeta?.Name?.Length ?? 0, '-')}\n{latestBeta?.Body}\n{latestBeta?.HtmlUrl}\n");
                 return (latestBetaVer, latestBeta);
             }
         }

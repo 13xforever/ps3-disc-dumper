@@ -364,19 +364,18 @@ public partial class KeyFinder
             Log.Debug($"\t{ki.KeyType}: {Path.GetFileName(ki.FullPath)}");
         cancellationToken.ThrowIfCancellationRequested();
 
-        HashSet<DiscKeyInfo>? allMatchingKeys;
+        HashSet<DiscKeyInfo> allMatchingKeys;
         lock (AllKnownDiscKeysSync)
-            AllKnownDiscKeys.TryGetValue(discKey, out allMatchingKeys);
-        allMatchingKeys ??= [];
+            allMatchingKeys = AllKnownDiscKeys[discKey];
         var discKeyInfo = allMatchingKeys.FirstOrDefault(
                 k => k.FullPath.Contains(discInfo.ProductCode, StringComparison.OrdinalIgnoreCase)
                                 && k.FullPath.EndsWith(".ird", StringComparison.OrdinalIgnoreCase)
             ) ?? allMatchingKeys.FirstOrDefault(
                 k => k.FullPath.EndsWith(".ird", StringComparison.OrdinalIgnoreCase)
             )
-            ?? allMatchingKeys.FirstOrDefault();
-        var discKeyFilename = Path.GetFileName(discKeyInfo?.FullPath);
-        var discKeyType = discKeyInfo?.KeyType ?? default;
+            ?? allMatchingKeys.First();
+        var discKeyFilename = Path.GetFileName(discKeyInfo.FullPath);
+        var discKeyType = discKeyInfo.KeyType;
         return new()
         {
             SelectedPhysicalDevice = selectedPhysicalDevice,

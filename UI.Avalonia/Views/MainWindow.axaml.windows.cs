@@ -65,12 +65,11 @@ public partial class MainWindow
             }, DispatcherPriority.Background);
         else if (msgType is DBT_DEVICEREMOVEPENDING or DBT_DEVICEREMOVECOMPLETE)
         {
-            var dumper = vm.dumper;
-            var driveId = dumper?.Drive.ToDriveId() ?? 0;
-            if ((vol.dbcv_unitmask & driveId) == 0)
+            var driveId = vm.Dumper?.DiscInfo.Drive.ToDriveId() ?? 0;
+            if ((vol.dbcv_unitmask & driveId) is 0)
                 return;
 
-            dumper?.Cts.Cancel();
+            vm.Cts.Cancel();
             Dispatcher.UIThread.Post(() => vm.ResetViewModelCommand.Execute(null));
         }
     }

@@ -16,7 +16,7 @@ using FileInfo = System.IO.FileInfo;
 
 namespace Ps3DiscDumper;
 
-public sealed class Dumper: IDisposable
+public sealed class Dumper : IDisposable
 {
     public static readonly string Version = Assembly.GetEntryAssembly()?
                                                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
@@ -39,13 +39,15 @@ public sealed class Dumper: IDisposable
     internal static readonly char[] MultilineSplit = ['\r', '\n'];
 
     private Decrypter? Decrypter { get; set; }
+    public readonly DiscDetectionResult DiscInfo;
+    public readonly KeyFinderResult DiscKeyInfo;
 
     public int CurrentFileNumber { get; private set; }
     public long TotalSectors { get; private set; }
     public long TotalFileSectors { get; private set; }
     public long ProcessedSectors { get; private set; }
     public List<(string filename, string error)> BrokenFiles { get; } = [];
-    public CancellationTokenSource Cts { get; } = new();
+    private CancellationTokenSource Cts { get; }
     public bool? ValidationStatus { get; private set; }
 
     public long CurrentSector
@@ -74,12 +76,19 @@ public sealed class Dumper: IDisposable
         Log.Info($"Running on {RuntimeInformation.OSDescription}");
     }
 
-    public async Task DumpAsync(string output, DiscDetectionResult discInfo, KeyFinderResult discKeyInfo)
+    public Dumper(DiscDetectionResult discInfo, KeyFinderResult discKeyInfo, CancellationTokenSource cts)
     {
-        if (discInfo.ProductCode is not { Length: > 0 }
+        if (discInfo.ProductCode is not { Length: >0 }
             || discKeyInfo.DiscKeyType is KeyType.Unknown)
             throw new InvalidOperationException("Disc was not properly scanned or the decryption key is missing");
-        
+
+        this.DiscInfo = discInfo;
+        this.DiscKeyInfo = discKeyInfo;
+        Cts = cts;
+    }
+
+    public async Task DumpAsync(string output, string? outputDirName = null)
+    {
         // check and create output folder
         var dumpPath = output;
         while (dumpPath is {Length: >0} && !Directory.Exists(dumpPath))
@@ -90,7 +99,7 @@ public sealed class Dumper: IDisposable
             else
                 dumpPath = parent;
         }
-        await using var driveStream = File.Open(discKeyInfo.SelectedPhysicalDevice, FileMode.Open, FileAccess.Read, FileShare.Read);
+        await using var driveStream = File.Open(DiscKeyInfo.SelectedPhysicalDevice, FileMode.Open, FileAccess.Read, FileShare.Read);
         using var discReader = new CDReader(driveStream, true, true);
         var (filesystemStructure, emptyDirStructure) = await GetFilesystemStructureAsync(
             driveStream, discReader, Cts.Token
@@ -109,7 +118,7 @@ public sealed class Dumper: IDisposable
                 ).ToList();
         }
         await Task.Yield();
-        var validators = await GetValidationInfoAsync(discInfo, discKeyInfo, Cts.Token).ConfigureAwait(false);
+        var validators = await GetValidationInfoAsync(DiscInfo, DiscKeyInfo, Cts.Token).ConfigureAwait(false);
         if (dumpPath is {Length: >0})
         {
             var fullOutputPath = Path.GetFullPath(output);
@@ -122,11 +131,11 @@ public sealed class Dumper: IDisposable
                 var spaceAvailable = drive.AvailableFreeSpace;
 #if DEBUG
                 var totalFileSize = filesystemStructure.Sum(f => f.SizeInBytes);
-                if (totalFileSize != discInfo.TotalFileSize)
-                    Log.Warn($"Somehow total file size is different between initial disc scan ({discInfo.TotalFileSize}) and before decryption ({totalFileSize})");
+                if (totalFileSize != DiscInfo.TotalFileSize)
+                    Log.Warn($"Somehow total file size is different between initial disc scan ({DiscInfo.TotalFileSize}) and before decryption ({totalFileSize})");
 #endif
                 TotalFileSectors = filesystemStructure.Sum(f => f.LengthInSectors);
-                var diff = discInfo.TotalFileSize + 100 * 1024 - spaceAvailable;
+                var diff = DiscInfo.TotalFileSize + 100 * 1024 - spaceAvailable;
                 if (diff > 0)
                     Log.Warn($"Target drive might require {diff.AsStorageUnit()} of additional free space");
             }
@@ -139,7 +148,7 @@ public sealed class Dumper: IDisposable
         foreach (var file in filesystemStructure)
             Log.Trace($"0x{file.StartSector:x8}: {file.TargetFileName} ({file.SizeInBytes}, {file.FileInfo.CreationTimeUtc:u})");
         await Task.Yield();
-        var outputDirName = OutputDirFormatter.Format(discInfo);
+        outputDirName ??= OutputDirFormatter.Format(DiscInfo);
         var outputPathBase = Path.Combine(output, outputDirName);
         Log.Debug($"Output path: {outputPathBase}");
         if (!Directory.Exists(outputPathBase))
@@ -147,12 +156,12 @@ public sealed class Dumper: IDisposable
 
 #if DEBUG
         var totalFileCount = filesystemStructure.Count;
-        if (totalFileCount != discInfo.TotalFileCount)
-            Log.Warn($"Somehow total file count is different between initial disc scan ({discInfo.TotalFileCount}) and  before decryption ({totalFileCount})");
+        if (totalFileCount != DiscInfo.TotalFileCount)
+            Log.Warn($"Somehow total file count is different between initial disc scan ({DiscInfo.TotalFileCount}) and  before decryption ({totalFileCount})");
 #endif
         TotalSectors = discReader.TotalClusters;
         ProcessedSectors = 0;
-        var matchingKey = discKeyInfo.AllMatchingKeys.First();
+        var matchingKey = DiscKeyInfo.AllMatchingKeys.First();
         Log.Debug("Using decryption key: " + matchingKey.KeyId);
         var decryptionKey = matchingKey.Key;
         var sectorSize = (int)discReader.ClusterSize;
@@ -196,13 +205,13 @@ public sealed class Dumper: IDisposable
                 var targetFilename = file.TargetFileName;
 
                 var trailingPeriod = targetFilename.EndsWith('.');
-                var inputFilePath = Path.Combine(discInfo.InputDevicePath, targetFilename);
+                var inputFilePath = Path.Combine(DiscInfo.InputDevicePath, targetFilename);
                 // BLES00932 Demon's Souls: trailing . is trimmed on both Windows and Linux
                 if (trailingPeriod && !File.Exists(inputFilePath))
                 {
                     Log.Warn($"Potential mastering error in {targetFilename}");
                     targetFilename = targetFilename.TrimEnd('.');
-                    inputFilePath = Path.Combine(discInfo.InputDevicePath, targetFilename);
+                    inputFilePath = Path.Combine(DiscInfo.InputDevicePath, targetFilename);
                 }
                 // BLJS92001 Tsugime Ranko: trailing . is replaced with #ABCD in Windows, but is kept as . on Linux
                 if (trailingPeriod && OperatingSystem.IsWindows() && !File.Exists(inputFilePath))
