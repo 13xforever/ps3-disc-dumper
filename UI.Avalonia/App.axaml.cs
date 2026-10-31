@@ -32,6 +32,8 @@ public partial class App : Application
         && w.ActualTransparencyLevel == WindowTransparencyLevel.Mica
     );
 
+    private static ResourceDictionary? accentColorsDictionary = null;
+
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
     public override void OnFrameworkInitializationCompleted()
@@ -124,19 +126,51 @@ public partial class App : Application
         if (SettingsProvider.Settings.PreferSystemAccent)
         {
             var systemAccentColor = pcv!.AccentColor1;
-#if LINUX
-            theme.CustomAccentColor = systemAccentColor;
+#if WINDOWS
+            ResetCustomAccentColor(theme);
 #else
-            theme.CustomAccentColor = null;
+            SetCustomAccentColor(systemAccentColor, theme);
 #endif
             Current.Resources["CaptionGlyphInactiveColor"] = ThemeConsts.InactiveSystemButtonForegroundColor(systemAccentColor);
         }
         else
         {
             var brandColor = Color.Parse(ThemeConsts.BrandColor);
-            theme.CustomAccentColor = brandColor;
+            SetCustomAccentColor(brandColor, theme);
             Current.Resources["CaptionGlyphInactiveColor"] = ThemeConsts.InactiveSystemButtonForegroundColor(brandColor);
         }
+    }
+
+    private static void SetCustomAccentColor(Color color, FluentAvaloniaTheme theme)
+    {
+        if (Current is null)
+            return;
+
+        var accentPalette = AccentColorGenerator.Get(color);
+        ResetCustomAccentColor(theme);
+        theme.CustomAccentColor = color;
+        accentColorsDictionary = new()
+        {
+            { "SystemAccentColor", color },
+            { "SystemAccentColorLight1", accentPalette.AccentColorLight1 },
+            { "SystemAccentColorLight2", accentPalette.AccentColorLight2 },
+            { "SystemAccentColorLight3", accentPalette.AccentColorLight3 },
+            { "SystemAccentColorDark1", accentPalette.AccentColorDark1 },
+            { "SystemAccentColorDark2", accentPalette.AccentColorDark2 },
+            { "SystemAccentColorDark3", accentPalette.AccentColorDark3 }
+        };
+        Current.Resources.MergedDictionaries.Add(accentColorsDictionary);
+    }
+
+    private static void ResetCustomAccentColor(FluentAvaloniaTheme theme)
+    {
+        theme.CustomAccentColor = null;
+        if (Current is null)
+            return;
+        
+        if (accentColorsDictionary is not null)
+            Current.Resources.MergedDictionaries.Remove(accentColorsDictionary);
+        accentColorsDictionary = null;
     }
 
     private static void SetSymbolFont(ViewModelBase vm)
