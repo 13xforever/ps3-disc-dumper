@@ -4,8 +4,7 @@ public static class NamingStyles
 {
     public static string CamelCase(string value)
     {
-        if (value == null)
-            throw new ArgumentNullException(nameof(value));
+        ArgumentNullException.ThrowIfNull(value);
 
         if (value.Length > 0)
         {

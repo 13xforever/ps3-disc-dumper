@@ -9,11 +9,8 @@ public class DecompressedContent : HttpContent
 
     public DecompressedContent(HttpContent content, ICompressor compressor)
     {
-        if (content == null)
-            throw new ArgumentNullException(nameof(content));
-
-        if (compressor == null)
-            throw new ArgumentNullException(nameof(compressor));
+        ArgumentNullException.ThrowIfNull(content);
+        ArgumentNullException.ThrowIfNull(compressor);
 
         this.content = content;
         this.compressor = compressor;
@@ -28,8 +25,7 @@ public class DecompressedContent : HttpContent
 
     protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
     {
-        if (stream == null)
-            throw new ArgumentNullException(nameof(stream));
+        ArgumentNullException.ThrowIfNull(stream);
 
         using (content)
         {

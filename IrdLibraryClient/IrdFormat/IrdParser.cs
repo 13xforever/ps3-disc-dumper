@@ -7,8 +7,7 @@ public static class IrdParser
 {
     public static Ird Parse(byte[] content)
     {
-        if (content == null)
-            throw new ArgumentNullException(nameof(content));
+        ArgumentNullException.ThrowIfNull(content);
 
         if (content.Length < 200)
             throw new ArgumentException("Data is too small to be a valid IRD structure", nameof(content));

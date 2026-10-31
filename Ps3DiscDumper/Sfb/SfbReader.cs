@@ -9,8 +9,8 @@ public static class SfbReader
 {
     public static Sfb Parse(byte[] content)
     {
-        if (content is null)
-            throw new ArgumentNullException(nameof(content));
+        ArgumentNullException.ThrowIfNull(content);
+        
         if (content.Length < 200)
             throw new ArgumentException("Data is too small to be a valid SFB structure", nameof(content));
         if (BitConverter.ToInt32(content.AsSpan(0, 4)) != Sfb.Magic)
