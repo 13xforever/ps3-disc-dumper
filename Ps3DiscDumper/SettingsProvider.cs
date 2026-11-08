@@ -91,12 +91,15 @@ public static partial class SettingsProvider
             var template = (string)settingsNode.Descendants("setting")
                 .FirstOrDefault(el => (string)el.Attribute("name") == "DumpNameTemplate")?
                 .Element("value");
-            var output = (string)settingsNode.Descendants("setting")
+                
+            var output = Environment.GetEnvironmentVariable("DUMPER_OUTPUT_PATH") ?? (string)settingsNode.Descendants("setting")
                 .FirstOrDefault(el => (string)el.Attribute("name") == "OutputDir")?
                 .Element("value");
-            var ird = (string)settingsNode.Descendants("setting")
+
+            var ird = Environment.GetEnvironmentVariable("DUMPER_OUTPUT_IRD_PATH") ?? (string)settingsNode.Descendants("setting")
                 .FirstOrDefault(el => (string)el.Attribute("name") == "IrdDir")?
                 .Element("value");
+
             var result = new Settings();
             if (template is { Length: > 0 })
                 result = result with { DumpNameTemplate = template };
